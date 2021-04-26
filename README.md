@@ -1,32 +1,25 @@
-# hmpps-template-kotlin
+# hmpps-audit-api
 
-This is a skeleton project from which to create new kotlin projects from.
+The Audit service listens for AuditEvent messages on its queue and stores the message details in a postgres database
 
-# Instructions
+### Building
 
-If this is a Digital Prison Services project then the project will be created as part of bootstrapping - 
-see https://github.com/ministryofjustice/dps-project-bootstrap.
+```./gradlew build```
 
-## Renaming from HMPPS Template Kotlin - github Actions
+### Running
 
-Once the new repository is deployed. Navigate to the repository in github, and select the `Actions` tab.
-Click the link to `Enable Actions on this repository`.
+`localstack` is used to emulate the AWS SQS service. When running the integration tests this will be started automatically. If you want the tests to use an already running version of `localstack` run the tests with the environment `AWS_PROVIDER=localstack`. This has the benefit of running the test quicker without the overhead of starting the `localstack` container.
 
-Find the Action workflow named: `rename-project-create-pr` and click `Run workflow`.  This workflow will will
-execute the `rename-project.bash` and create Pull Request for you to review.  Review the PR and merge.
+Any commands in `localstack/setup-sns.sh` will be run when `localstack` starts, so this should contain commands to create the appropriate queues.
 
-Note: ideally this workflow would run automatically however due to a recent change github Actions are not
-enabled by default on newly created repos. There is no way to enable Actions other then to click the button in the UI.
-If this situation changes we will update this project so that the workflow is triggered during the bootstrap project.
-Further reading: <https://github.community/t/workflow-isnt-enabled-in-repos-generated-from-template/136421>
+Running all services locally:
+```bash
+TMPDIR=/private$TMPDIR docker-compose up 
+```
+Queues and topics will automatically be created when the `localstack` container starts.
 
-## Manually renaming from HMPPS Template Kotlin
+Running all services except this application (hence allowing you to run this in the IDE)
 
-Run the `rename-project.bash` and create a PR.
-
-The `rename-project.bash` script takes a single argument - the name of the project and calculates from it:
-* The main class name (project name converted to pascal case) 
-* The project description (class name with spaces between the words)
-* The main package name (project name with hyphens removed)
-
-It then performs a search and replace and directory renames so the project is ready to be used.
+```bash
+TMPDIR=/private$TMPDIR docker-compose up --scale hmpps-audit-api=0 
+```

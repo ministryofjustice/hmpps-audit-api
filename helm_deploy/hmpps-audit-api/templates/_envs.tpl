@@ -58,4 +58,28 @@ env:
         name: sqs-audit-queue-dl-secret
         key: sqs_queue_name
 
+  - name: SPRING_DATASOURCE_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: hmpps-audit-rds-secret
+        key: database_username
+
+  - name: SPRING_DATASOURCE_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: hmpps-audit-rds-secret
+        key: database_password
+
+  - name: DATABASE_NAME
+    valueFrom:
+      secretKeyRef:
+        name: hmpps-audit-rds-secret
+        key: database_name
+
+  - name: DATABASE_ENDPOINT
+    valueFrom:
+      secretKeyRef:
+        name: hmpps-audit-rds-secret
+        key: rds_instance_endpoint
+
 {{- end -}}
