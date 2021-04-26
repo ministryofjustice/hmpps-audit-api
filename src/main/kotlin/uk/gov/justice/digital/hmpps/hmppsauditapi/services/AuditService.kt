@@ -22,12 +22,12 @@ class AuditService(private val telemetryClient: TelemetryClient, private val aud
 }
 
 private fun AuditEvent.asMap(): Map<String, String> {
-  var items = mutableMapOf("what" to this.what, "when" to this.`when`.toString())
-  items.addIfNotNull("operationId", this.operationId)
-  items.addIfNotNull("who", this.who)
-  items.addIfNotNull("service", this.service)
-  items.addIfNotNull("details", this.details)
-  return items
+  var items = mutableMapOf("what" to what, "when" to `when`.toString())
+  items.addIfNotNull("operationId", operationId)
+  items.addIfNotNull("who", who)
+  items.addIfNotNull("service", service)
+  items.addIfNotNull("details", details)
+  return items.toMap()
 }
 
 fun MutableMap<String, String>.addIfNotNull(key: String, value: String?) {
