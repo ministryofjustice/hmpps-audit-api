@@ -1,0 +1,12 @@
+graceful:
+  shutdown.enabled: false
+
+aws:
+  provider: localstack
+
+sqs:
+  endpoint.url: http://localhost:4566
+
+spring:
+  jpa:
+    show-sql: true

@@ -1,10 +1,12 @@
-version: "3"
+version: "3.1"
 services:
   hmpps-audit-api:
     build:
       context: .
     network_mode: "host"
     container_name: hmpps-audit-api
+    depends_on:
+      - audit-db
     ports:
       - "8081:8080"
     healthcheck:
@@ -12,6 +14,19 @@ services:
     environment:
       - SERVER_PORT=8080
       - SPRING_PROFILES_ACTIVE=dev
+
+  audit-db:
+    image: postgres
+    networks:
+      - hmpps
+    container_name: audit-db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin_password
+      - POSTGRES_DB=audit-db
 
   localstack:
     image: localstack/localstack:0.12.9.1
