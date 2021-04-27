@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 
 @Service
 class AuditService(private val telemetryClient: TelemetryClient, private val auditRepository: AuditRepository) {
@@ -18,6 +19,10 @@ class AuditService(private val telemetryClient: TelemetryClient, private val aud
     log.info("About to audit $auditEvent")
     telemetryClient.trackEvent("hmpps-audit", auditEvent.asMap())
     auditRepository.save(auditEvent)
+  }
+
+  fun findAll(): List<AuditDto> {
+    return auditRepository.findAll().map { AuditDto(it) }
   }
 }
 

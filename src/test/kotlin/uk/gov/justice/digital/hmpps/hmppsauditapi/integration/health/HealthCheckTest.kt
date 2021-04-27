@@ -76,4 +76,14 @@ class HealthCheckTest : IntegrationTestBase() {
       .expectBody()
       .jsonPath("status").isEqualTo("UP")
   }
+
+  @Test
+  fun `db reports ok`() {
+    webTestClient.get()
+      .uri("/health/db")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody()
+      .jsonPath("status").isEqualTo("UP")
+  }
 }
