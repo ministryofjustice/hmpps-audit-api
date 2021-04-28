@@ -3,10 +3,12 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 import com.microsoft.applicationinsights.TelemetryClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 
 @Service
 class AuditService(private val telemetryClient: TelemetryClient, private val auditRepository: AuditRepository) {
@@ -19,6 +21,8 @@ class AuditService(private val telemetryClient: TelemetryClient, private val aud
     telemetryClient.trackEvent("hmpps-audit", auditEvent.asMap())
     auditRepository.save(auditEvent)
   }
+
+  fun findAll(): List<AuditDto> = auditRepository.findAll(Sort.by(Sort.Direction.DESC, "when")).map { AuditDto(it) }
 }
 
 private fun AuditEvent.asMap(): Map<String, String> {

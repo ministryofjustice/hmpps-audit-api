@@ -19,6 +19,12 @@ spring:
     enabled: true
     locations: classpath:/db/migration/postgres,classpath:/db/migration/common
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${oauth.endpoint.url}/.well-known/jwks.json
+
   datasource:
     url: jdbc:postgresql://${DATABASE_ENDPOINT}/${DATABASE_NAME}?sslmode=verify-full
     continue-on-error: true
@@ -78,3 +84,6 @@ sqs:
   queue.name: hmpps_audit_queue
   dlq.name: hmpps_audit_dlq
   endpoint.region: ${aws.region}
+
+oauth:
+  token.url: ${oauth.endpoint.url}/oauth/token

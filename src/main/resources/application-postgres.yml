@@ -3,3 +3,6 @@ spring:
     url: jdbc:postgresql://localhost:5432/audit-db
     username: admin
     password: admin_password
+
+oauth:
+  endpoint.url: http://localhost:8090/auth
