@@ -16,13 +16,16 @@ dependencies {
 
   implementation("org.springframework:spring-jms")
 
-  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.11.1001"))
+  implementation("org.springdoc:springdoc-openapi-ui:1.5.8")
+  implementation("org.springdoc:springdoc-openapi-kotlin:1.5.8")
+
+  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.11.1007"))
   implementation("com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8")
   implementation("org.apache.commons:commons-lang3:3.12.0")
 
   runtimeOnly("com.h2database:h2:1.4.200")
-  runtimeOnly("org.flywaydb:flyway-core:7.8.1")
-  runtimeOnly("org.postgresql:postgresql:42.2.19")
+  runtimeOnly("org.flywaydb:flyway-core:7.8.2")
+  runtimeOnly("org.postgresql:postgresql:42.2.20")
 
   testImplementation("org.awaitility:awaitility-kotlin:4.0.3")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
