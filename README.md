@@ -1,5 +1,8 @@
 # hmpps-audit-api
 
+[![CircleCI](https://circleci.com/gh/ministryofjustice/hmpps-audit-api/tree/main.svg?style=svg)](https://circleci.com/gh/ministryofjustice/audit-api)
+[![API docs](https://img.shields.io/badge/API_docs_-view-85EA2D.svg?logo=swagger)](https://audit-api-dev.hmpps.service.justice.gov.uk/swagger-ui.html)
+
 The Audit service listens for AuditEvent messages on its queue and stores the message details in a postgres database
 
 ### Building
