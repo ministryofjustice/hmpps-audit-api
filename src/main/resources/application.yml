@@ -32,6 +32,8 @@ spring:
       pool-name: Audit-CP
       connectionTimeout: 1000
       validationTimeout:  500
+      data-source-properties:
+        stringtype: unspecified
 
     jackson:
     date-format: "yyyy-MM-dd HH:mm:ss"
