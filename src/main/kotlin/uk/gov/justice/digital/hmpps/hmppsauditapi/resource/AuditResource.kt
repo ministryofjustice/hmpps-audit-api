@@ -7,6 +7,9 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.Pageable
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,6 +20,9 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.A
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
 import java.time.Instant
 import java.util.UUID
+
+// This is a hack to get around the fact that springdocs responses cannot contain generics
+class AuditDtoPage : PageImpl<AuditDto>(mutableListOf<AuditDto>())
 
 @RestController
 @RequestMapping("/audit", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -42,7 +48,7 @@ class AuditResource(
       ),
       ApiResponse(
         responseCode = "401",
-        description = "Unauthorized to access this endpoint, requires a valid Oauth2 token",
+        description = "Unauthorized to access this endpoint, requires a valid OAuth2 token",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
       ),
       ApiResponse(
@@ -55,6 +61,32 @@ class AuditResource(
   fun findAll(): List<AuditDto> {
     return auditService.findAll()
   }
+
+  @PreAuthorize("hasRole('ROLE_AUDIT')")
+  @GetMapping("/paged")
+  @Operation(
+    summary = "Get page of audit events",
+    description = "Page of audit events",
+    security = [SecurityRequirement(name = "ROLE_AUDIT")],
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Paged Audit Events Returned",
+        content = [Content(mediaType = "application/json", array = ArraySchema(schema = Schema(implementation = AuditDtoPage::class)))]
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint, requires a valid OAuth2 token",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an authorisation with role ROLE_AUDIT",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      )
+    ]
+  )
+  fun findPage(pageable: Pageable = Pageable.unpaged()): Page<AuditDto> = auditService.findPage(pageable)
 }
 
 @JsonInclude(JsonInclude.Include.NON_NULL)

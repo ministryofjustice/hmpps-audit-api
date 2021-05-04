@@ -11,7 +11,6 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.helper.JwtAuthHelper
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 abstract class IntegrationTest {
-  @Suppress("unused")
   @Autowired
   lateinit var webTestClient: WebTestClient
 
