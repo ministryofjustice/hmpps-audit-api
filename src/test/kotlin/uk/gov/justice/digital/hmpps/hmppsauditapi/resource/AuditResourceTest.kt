@@ -17,12 +17,12 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.A
 import java.time.Instant
 import java.util.UUID
 
-@TestInstance(PER_CLASS)
 class AuditResourceTest : IntegrationTest() {
 
   @MockBean
   private lateinit var auditRepository: AuditRepository
 
+  @TestInstance(PER_CLASS)
   @Nested
   inner class SecureEndpoints {
     private fun secureEndpoints() =
