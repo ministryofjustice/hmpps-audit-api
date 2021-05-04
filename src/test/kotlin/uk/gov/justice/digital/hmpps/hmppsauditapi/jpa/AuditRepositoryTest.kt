@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.jpa
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
-import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -18,8 +18,8 @@ class AuditRepositoryTest {
   @Autowired
   lateinit var auditRepository: AuditRepository
 
-  @BeforeEach
-  fun setup() {
+  @AfterEach
+  fun `remove test audit events`() {
     auditRepository.deleteAll()
   }
 
