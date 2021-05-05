@@ -31,7 +31,7 @@ class HMPPSAuditListener(
     auditService.audit(auditEvent)
   }
 
-  @Entity
+  @Entity(name = "AuditEvent")
   @Table(name = "AuditEvent")
   data class AuditEvent(
     @Id

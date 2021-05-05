@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -10,7 +11,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.data.domain.PageImpl
-import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
@@ -54,7 +54,7 @@ class AuditResourceTest : IntegrationTest() {
     @MethodSource("secureEndpoints")
     internal fun `get - satisfies the correct role`(uri: String) {
 
-      whenever(auditRepository.findAll(any<Pageable>())).thenReturn(
+      whenever(auditRepository.findPage(any(), anyOrNull(), anyOrNull())).thenReturn(
         PageImpl(listOf())
       )
 

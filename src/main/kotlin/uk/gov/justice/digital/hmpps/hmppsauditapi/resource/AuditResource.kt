@@ -14,6 +14,7 @@ import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
@@ -39,12 +40,7 @@ class AuditResource(
       ApiResponse(
         responseCode = "200",
         description = "All Audit Events Returned",
-        content = [
-          Content(
-            mediaType = "application/json",
-            array = ArraySchema(schema = Schema(implementation = AuditDto::class))
-          )
-        ]
+        content = [Content(mediaType = "application/json", array = ArraySchema(schema = Schema(implementation = AuditDto::class)))]
       ),
       ApiResponse(
         responseCode = "401",
@@ -86,7 +82,11 @@ class AuditResource(
       )
     ]
   )
-  fun findPage(pageable: Pageable = Pageable.unpaged()): Page<AuditDto> = auditService.findPage(pageable)
+  fun findPage(
+    pageable: Pageable = Pageable.unpaged(),
+    @RequestParam who: String? = null,
+    @RequestParam what: String? = null,
+  ): Page<AuditDto> = auditService.findPage(pageable, who, what)
 }
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -104,3 +104,11 @@ data class AuditDto(
     auditEvent.service, auditEvent.details
   )
 }
+data class InsertAuditDto(
+  val what: String,
+  val `when`: Instant? = Instant.now(),
+  val operationId: String?,
+  val who: String?,
+  val service: String?,
+  val details: String?
+)

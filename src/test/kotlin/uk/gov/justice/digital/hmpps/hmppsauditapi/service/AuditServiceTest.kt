@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.service
 
 import com.microsoft.applicationinsights.TelemetryClient
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
@@ -147,11 +148,11 @@ class AuditServiceTest {
             )
           )
         )
-        whenever(auditRepository.findAll(any<Pageable>())).thenReturn(
+        whenever(auditRepository.findPage(any(), anyOrNull(), anyOrNull())).thenReturn(
           listOfAudits
         )
 
-        val audits = auditService.findPage()
+        val audits = auditService.findPage(Pageable.unpaged(), null, null)
         assertThat(audits).isEqualTo(
           PageImpl(
             listOf(
