@@ -27,7 +27,8 @@ class AuditService(private val telemetryClient: TelemetryClient, private val aud
 
   fun findAll(): List<AuditDto> = auditRepository.findAll(Sort.by(DESC, "when")).map { AuditDto(it) }
 
-  fun findPage(pageable: Pageable = Pageable.unpaged()): Page<AuditDto> = auditRepository.findAll(pageable).map { AuditDto(it) }
+  fun findPage(pageable: Pageable = Pageable.unpaged(), who: String?, what: String?): Page<AuditDto> =
+    auditRepository.findPage(pageable, who, what).map { AuditDto(it) }
 }
 
 private fun AuditEvent.asMap(): Map<String, String> {

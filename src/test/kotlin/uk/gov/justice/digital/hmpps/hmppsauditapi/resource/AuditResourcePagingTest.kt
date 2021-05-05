@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
@@ -130,5 +131,57 @@ class AuditResourcePagingTest : IntegrationTest() {
       .jsonPath("$.totalPages").value<Int> { Assertions.assertThat(it).isGreaterThan(1) }
       .jsonPath("$.last").isEqualTo(false)
       .jsonPath("$.content[0].who").isEqualTo("bobby.beans")
+  }
+
+  @Suppress("ClassName")
+  @Nested
+  inner class filteredAuditEvents {
+
+    @Test
+    fun `filter audit events by what`() {
+      webTestClient.get().uri("/audit/paged?page=0&size=3&what=OFFENDER_DELETED")
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$.content.length()").isEqualTo(2)
+        .jsonPath("$.size").isEqualTo(3)
+        .jsonPath("$.totalElements").value<Int> { Assertions.assertThat(it).isEqualTo(2) }
+        .jsonPath("$.totalPages").value<Int> { Assertions.assertThat(it).isEqualTo(1) }
+        .jsonPath("$.last").isEqualTo(true)
+        .jsonPath("$.content[0].operationId").isEqualTo("cadea6d876c62e2f5264c94c7b50875e")
+        .jsonPath("$.content[1].operationId").isEqualTo("dadea6d876c62e2f5264c94c7b50875e")
+    }
+
+    @Test
+    fun `filter audit events by who`() {
+      webTestClient.get().uri("/audit/paged?page=0&size=3&who=bobby.beans")
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$.content.length()").isEqualTo(2)
+        .jsonPath("$.size").isEqualTo(3)
+        .jsonPath("$.totalElements").value<Int> { Assertions.assertThat(it).isEqualTo(2) }
+        .jsonPath("$.totalPages").value<Int> { Assertions.assertThat(it).isEqualTo(1) }
+        .jsonPath("$.last").isEqualTo(true)
+        .jsonPath("$.content[0].operationId").isEqualTo("badea6d876c62e2f5264c94c7b50875e")
+        .jsonPath("$.content[1].operationId").isEqualTo("cadea6d876c62e2f5264c94c7b50875e")
+    }
+
+    @Test
+    fun `filter audit events by what and who`() {
+      webTestClient.get().uri("/audit/paged?page=0&size=3&what=OFFENDER_DELETED&who=bobby.beans")
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$.content.length()").isEqualTo(1)
+        .jsonPath("$.size").isEqualTo(3)
+        .jsonPath("$.totalElements").value<Int> { Assertions.assertThat(it).isEqualTo(1) }
+        .jsonPath("$.totalPages").value<Int> { Assertions.assertThat(it).isEqualTo(1) }
+        .jsonPath("$.last").isEqualTo(true)
+        .jsonPath("$.content[0].operationId").isEqualTo("cadea6d876c62e2f5264c94c7b50875e")
+    }
   }
 }
