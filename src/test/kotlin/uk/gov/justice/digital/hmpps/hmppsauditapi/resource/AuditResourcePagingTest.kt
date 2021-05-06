@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 
-import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
@@ -74,8 +73,8 @@ class AuditResourcePagingTest : IntegrationTest() {
       .expectBody()
       .jsonPath("$.content.length()").isEqualTo(4)
       .jsonPath("$.size").isEqualTo(4)
-      .jsonPath("$.totalElements").value<Int> { Assertions.assertThat(it).isEqualTo(4) }
-      .jsonPath("$.totalPages").value<Int> { Assertions.assertThat(it).isEqualTo(1) }
+      .jsonPath("$.totalElements").isEqualTo(4)
+      .jsonPath("$.totalPages").isEqualTo(1)
       .jsonPath("$.last").isEqualTo(true)
       .jsonPath("$.content[0].who").doesNotExist()
       .jsonPath("$.content[1].who").isEqualTo("bobby.beans")
@@ -92,8 +91,8 @@ class AuditResourcePagingTest : IntegrationTest() {
       .expectBody()
       .jsonPath("$.content.length()").isEqualTo(4)
       .jsonPath("$.size").isEqualTo(4)
-      .jsonPath("$.totalElements").value<Int> { Assertions.assertThat(it).isEqualTo(4) }
-      .jsonPath("$.totalPages").value<Int> { Assertions.assertThat(it).isEqualTo(1) }
+      .jsonPath("$.totalElements").isEqualTo(4)
+      .jsonPath("$.totalPages").isEqualTo(1)
       .jsonPath("$.last").isEqualTo(true)
       .jsonPath("$.content[0].who").isEqualTo("freddy.frog")
       .jsonPath("$.content[1].who").isEqualTo("bobby.beans")
@@ -110,8 +109,8 @@ class AuditResourcePagingTest : IntegrationTest() {
       .expectBody()
       .jsonPath("$.content.length()").isEqualTo(3)
       .jsonPath("$.size").isEqualTo(3)
-      .jsonPath("$.totalElements").value<Int> { Assertions.assertThat(it).isEqualTo(4) }
-      .jsonPath("$.totalPages").value<Int> { Assertions.assertThat(it).isEqualTo(2) }
+      .jsonPath("$.totalElements").isEqualTo(4)
+      .jsonPath("$.totalPages").isEqualTo(2)
       .jsonPath("$.last").isEqualTo(false)
       .jsonPath("$.content[0].who").doesNotExist()
       .jsonPath("$.content[1].who").isEqualTo("bobby.beans")
@@ -127,8 +126,8 @@ class AuditResourcePagingTest : IntegrationTest() {
       .expectBody()
       .jsonPath("$.content.length()").isEqualTo(1)
       .jsonPath("$.size").isEqualTo(1)
-      .jsonPath("$.totalElements").value<Int> { Assertions.assertThat(it).isEqualTo(4) }
-      .jsonPath("$.totalPages").value<Int> { Assertions.assertThat(it).isGreaterThan(1) }
+      .jsonPath("$.totalElements").isEqualTo(4)
+      .jsonPath("$.totalPages").isEqualTo(4)
       .jsonPath("$.last").isEqualTo(false)
       .jsonPath("$.content[0].who").isEqualTo("bobby.beans")
   }
@@ -146,8 +145,8 @@ class AuditResourcePagingTest : IntegrationTest() {
         .expectBody()
         .jsonPath("$.content.length()").isEqualTo(2)
         .jsonPath("$.size").isEqualTo(3)
-        .jsonPath("$.totalElements").value<Int> { Assertions.assertThat(it).isEqualTo(2) }
-        .jsonPath("$.totalPages").value<Int> { Assertions.assertThat(it).isEqualTo(1) }
+        .jsonPath("$.totalElements").isEqualTo(2)
+        .jsonPath("$.totalPages").isEqualTo(1)
         .jsonPath("$.last").isEqualTo(true)
         .jsonPath("$.content[0].operationId").isEqualTo("cadea6d876c62e2f5264c94c7b50875e")
         .jsonPath("$.content[1].operationId").isEqualTo("dadea6d876c62e2f5264c94c7b50875e")
@@ -162,8 +161,8 @@ class AuditResourcePagingTest : IntegrationTest() {
         .expectBody()
         .jsonPath("$.content.length()").isEqualTo(2)
         .jsonPath("$.size").isEqualTo(3)
-        .jsonPath("$.totalElements").value<Int> { Assertions.assertThat(it).isEqualTo(2) }
-        .jsonPath("$.totalPages").value<Int> { Assertions.assertThat(it).isEqualTo(1) }
+        .jsonPath("$.totalElements").isEqualTo(2)
+        .jsonPath("$.totalPages").isEqualTo(1)
         .jsonPath("$.last").isEqualTo(true)
         .jsonPath("$.content[0].operationId").isEqualTo("badea6d876c62e2f5264c94c7b50875e")
         .jsonPath("$.content[1].operationId").isEqualTo("cadea6d876c62e2f5264c94c7b50875e")
@@ -178,8 +177,8 @@ class AuditResourcePagingTest : IntegrationTest() {
         .expectBody()
         .jsonPath("$.content.length()").isEqualTo(1)
         .jsonPath("$.size").isEqualTo(3)
-        .jsonPath("$.totalElements").value<Int> { Assertions.assertThat(it).isEqualTo(1) }
-        .jsonPath("$.totalPages").value<Int> { Assertions.assertThat(it).isEqualTo(1) }
+        .jsonPath("$.totalElements").isEqualTo(1)
+        .jsonPath("$.totalPages").isEqualTo(1)
         .jsonPath("$.last").isEqualTo(true)
         .jsonPath("$.content[0].operationId").isEqualTo("cadea6d876c62e2f5264c94c7b50875e")
     }

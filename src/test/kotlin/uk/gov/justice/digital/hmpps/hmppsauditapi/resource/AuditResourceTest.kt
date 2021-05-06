@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Sort
+import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import java.time.Instant
@@ -24,7 +25,7 @@ class AuditResourceTest : IntegrationTest() {
 
   @TestInstance(PER_CLASS)
   @Nested
-  inner class SecureEndpoints {
+  inner class SecureGetEndpoints {
     private fun secureEndpoints() =
       listOf(
         "/audit",
@@ -52,7 +53,7 @@ class AuditResourceTest : IntegrationTest() {
 
     @ParameterizedTest
     @MethodSource("secureEndpoints")
-    internal fun `get - satisfies the correct role`(uri: String) {
+    internal fun `satisfies the correct role`(uri: String) {
 
       whenever(auditRepository.findPage(any(), anyOrNull(), anyOrNull())).thenReturn(
         PageImpl(listOf())
@@ -63,6 +64,46 @@ class AuditResourceTest : IntegrationTest() {
         .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
         .exchange()
         .expectStatus().isOk
+    }
+  }
+
+  @TestInstance(PER_CLASS)
+  @Nested
+  inner class SecurePostEndpoints {
+    private fun secureEndpoints() =
+      listOf(
+        "/audit",
+      )
+
+    @ParameterizedTest
+    @MethodSource("secureEndpoints")
+    internal fun `requires a valid authentication token`(uri: String) {
+      webTestClient.post()
+        .uri(uri)
+        .exchange()
+        .expectStatus().isUnauthorized
+    }
+
+    @ParameterizedTest
+    @MethodSource("secureEndpoints")
+    internal fun `requires the correct role`(uri: String) {
+      webTestClient.post()
+        .uri(uri)
+        .headers(setAuthorisation(roles = listOf()))
+        .body(BodyInserters.fromValue(AuditEvent(what = "what")))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @ParameterizedTest
+    @MethodSource("secureEndpoints")
+    internal fun `satisfies the correct role`(uri: String) {
+      webTestClient.post()
+        .uri(uri)
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
+        .body(BodyInserters.fromValue(AuditEvent(what = "what")))
+        .exchange()
+        .expectStatus().isCreated
     }
   }
 
