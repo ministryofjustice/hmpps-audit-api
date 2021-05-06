@@ -81,6 +81,14 @@ aws:
   provider: aws
   region: eu-west-2
 
+cloud:
+  aws:
+    stack:
+      auto: false
+    region:
+      auto: false
+      static: ${aws.region}
+
 sqs:
   provider: ${aws.provider}
   queue.name: hmpps_audit_queue
