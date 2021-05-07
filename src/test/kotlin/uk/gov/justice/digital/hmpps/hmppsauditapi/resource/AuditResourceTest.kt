@@ -5,7 +5,6 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.isNull
-import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.awaitility.kotlin.await
@@ -139,7 +138,7 @@ class AuditResourceTest : IntegrationTest() {
       await untilCallTo { auditEventMessageCount() } matches { it == 0 }
 
       verify(telemetryClient).trackEvent(eq("hmpps-audit"), any(), isNull())
-      verify(auditRepository, times(1)).save(ArgumentMatchers.any(AuditEvent::class.java))
+      verify(auditRepository).save(ArgumentMatchers.any(AuditEvent::class.java))
     }
 
     @Test
@@ -165,7 +164,7 @@ class AuditResourceTest : IntegrationTest() {
       await untilCallTo { auditEventMessageCount() } matches { it == 0 }
 
       verify(telemetryClient).trackEvent(eq("hmpps-audit"), any(), isNull())
-      verify(auditRepository, times(1)).save(auditEvent)
+      verify(auditRepository).save(auditEvent)
     }
   }
 
@@ -225,7 +224,7 @@ class AuditResourceTest : IntegrationTest() {
         .expectStatus().isOk
         .expectBody().json("audit_events".loadJson())
 
-      verify(auditRepository, times(1)).findAll(Sort.by(DESC, "when"))
+      verify(auditRepository).findAll(Sort.by(DESC, "when"))
     }
 
     private fun String.loadJson(): String {
