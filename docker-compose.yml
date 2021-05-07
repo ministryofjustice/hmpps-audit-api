@@ -29,7 +29,7 @@ services:
       - POSTGRES_DB=audit-db
 
   localstack:
-    image: localstack/localstack:0.12.9.1
+    image: localstack/localstack:0.12.10
     networks:
       - hmpps
     container_name: localstack
