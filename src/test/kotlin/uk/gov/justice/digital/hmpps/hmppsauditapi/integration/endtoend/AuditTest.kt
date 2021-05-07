@@ -1,5 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.integration.endtoend
-import com.amazonaws.services.sqs.AmazonSQS
+import com.amazonaws.services.sqs.AmazonSQSAsync
 import com.microsoft.applicationinsights.TelemetryClient
 import com.nhaarman.mockitokotlin2.check
 import com.nhaarman.mockitokotlin2.eq
@@ -26,7 +26,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
 class AuditTest {
   @Qualifier("awsSqsClient")
   @Autowired
-  internal lateinit var awsSqsClient: AmazonSQS
+  internal lateinit var awsSqsClient: AmazonSQSAsync
 
   @Value("\${sqs.queue.name}")
   lateinit var queueName: String

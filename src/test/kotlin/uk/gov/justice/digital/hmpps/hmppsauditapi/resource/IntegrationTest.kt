@@ -1,6 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 
+import com.amazonaws.services.sqs.AmazonSQSAsync
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
@@ -13,6 +15,12 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.helper.JwtAuthHelper
 abstract class IntegrationTest {
   @Autowired
   lateinit var webTestClient: WebTestClient
+
+  @Autowired
+  protected lateinit var awsSqsClient: AmazonSQSAsync
+
+  @Value("\${sqs.queue.name}")
+  protected lateinit var queueName: String
 
   @Autowired
   protected lateinit var jwtAuthHelper: JwtAuthHelper
