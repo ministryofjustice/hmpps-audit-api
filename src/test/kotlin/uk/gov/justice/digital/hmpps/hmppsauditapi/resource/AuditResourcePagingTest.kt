@@ -12,7 +12,7 @@ import java.time.Instant
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class AuditResourcePagingTest : IntegrationTest() {
+class AuditResourcePagingTest : NoQueueListenerIntegrationTest() {
 
   @Autowired
   private lateinit var auditRepository: AuditRepository
