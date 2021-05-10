@@ -1,5 +1,4 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.integration.endtoend
-import com.microsoft.applicationinsights.TelemetryClient
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.check
 import com.nhaarman.mockitokotlin2.eq
@@ -12,10 +11,8 @@ import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyInserters
-import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
@@ -23,11 +20,6 @@ import java.time.Instant
 import java.util.UUID
 
 class AuditTest : QueueListenerIntegrationTest() {
-  @MockBean
-  lateinit var telemetryClient: TelemetryClient
-
-  @MockBean
-  lateinit var auditRepository: AuditRepository
 
   @Test
   fun `will consume an audit event message`() {

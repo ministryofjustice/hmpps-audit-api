@@ -7,13 +7,9 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 
 internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
-
-  @Autowired
-  private lateinit var listener: HMPPSAuditListener
 
   @Test
   internal fun `will call service for an audit event`() {
