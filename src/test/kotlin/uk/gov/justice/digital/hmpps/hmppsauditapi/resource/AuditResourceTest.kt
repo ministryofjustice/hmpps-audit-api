@@ -1,8 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 
-import com.microsoft.applicationinsights.TelemetryClient
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.anyOrNull
+import com.nhaarman.mockitokotlin2.doNothing
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.jupiter.api.Nested
@@ -26,9 +26,6 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
 
   @MockBean
   private lateinit var auditRepository: AuditRepository
-
-  @MockBean
-  lateinit var telemetryClient: TelemetryClient
 
   @TestInstance(PER_CLASS)
   @Nested
@@ -111,6 +108,10 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
         .body(BodyInserters.fromValue(AuditEvent(what = "secureEndpointCheck")))
         .exchange()
         .expectStatus().isCreated
+
+      doNothing().whenever(auditService).sendAuditEvent(any())
+
+      verify(auditService).sendAuditEvent(any())
     }
   }
 
