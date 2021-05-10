@@ -1,10 +1,10 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.integration.endtoend
 import com.microsoft.applicationinsights.TelemetryClient
+import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.check
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.isNull
 import com.nhaarman.mockitokotlin2.mockingDetails
-import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
@@ -12,7 +12,6 @@ import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.any
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyInserters
@@ -61,7 +60,7 @@ class AuditTest : QueueListenerIntegrationTest() {
       },
       isNull()
     )
-    verify(auditRepository, times(1)).save(any(AuditEvent::class.java))
+    verify(auditRepository).save(any<AuditEvent>())
   }
 
   @Suppress("ClassName")
@@ -81,8 +80,8 @@ class AuditTest : QueueListenerIntegrationTest() {
 
       await untilCallTo { mockingDetails(auditRepository).invocations.size } matches { it == 1 }
 
-      verify(telemetryClient).trackEvent(eq("hmpps-audit"), com.nhaarman.mockitokotlin2.any(), isNull())
-      verify(auditRepository).save(any(AuditEvent::class.java))
+      verify(telemetryClient).trackEvent(eq("hmpps-audit"), any(), isNull())
+      verify(auditRepository).save(any<AuditEvent>())
     }
 
     @Test
@@ -107,7 +106,7 @@ class AuditTest : QueueListenerIntegrationTest() {
 
       await untilCallTo { mockingDetails(auditRepository).invocations.size } matches { it == 1 }
 
-      verify(telemetryClient).trackEvent(eq("hmpps-audit"), com.nhaarman.mockitokotlin2.any(), isNull())
+      verify(telemetryClient).trackEvent(eq("hmpps-audit"), any(), isNull())
       verify(auditRepository).save(auditEvent)
     }
   }
