@@ -5,13 +5,9 @@ import com.nhaarman.mockitokotlin2.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
-import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
 
 internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
-  @MockBean
-  private lateinit var auditService: AuditService
 
   @Autowired
   private lateinit var listener: HMPPSAuditListener
