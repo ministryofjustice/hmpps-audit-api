@@ -1,18 +1,15 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.listeners
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.check
-import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.doNothing
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
+import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 
-internal class HMPPSAuditListenerTest {
-  private val auditService: AuditService = mock()
-  private val listener: HMPPSAuditListener =
-    HMPPSAuditListener(auditService = auditService, ObjectMapper().registerModule(JavaTimeModule()))
+internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
 
   @Test
   internal fun `will call service for an audit event`() {
@@ -26,6 +23,8 @@ internal class HMPPSAuditListenerTest {
     }
   """
     listener.onAuditEvent(message)
+
+    doNothing().whenever(auditService).audit(any())
 
     verify(auditService).audit(
       check {

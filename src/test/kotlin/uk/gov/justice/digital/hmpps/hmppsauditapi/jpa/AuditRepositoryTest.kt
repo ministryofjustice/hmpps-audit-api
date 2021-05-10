@@ -6,17 +6,14 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
-import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.NoQueueListenerIntegrationTest
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test", "no-queue-listener")
-class AuditRepositoryTest {
+class AuditRepositoryTest : NoQueueListenerIntegrationTest() {
 
   @Autowired
   lateinit var auditRepository: AuditRepository
@@ -26,6 +23,7 @@ class AuditRepositoryTest {
     auditRepository.deleteAll()
   }
 
+  @Suppress("ClassName")
   @Nested
   inner class saveAuditEvents {
     @Test
