@@ -1,7 +1,10 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.listeners
 
+import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.check
+import com.nhaarman.mockitokotlin2.doNothing
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -24,6 +27,8 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
     }
   """
     listener.onAuditEvent(message)
+
+    doNothing().whenever(auditService).audit(any())
 
     verify(auditService).audit(
       check {
