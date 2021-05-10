@@ -1,12 +1,17 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
+import com.amazonaws.services.sqs.AmazonSQSAsync
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.microsoft.applicationinsights.TelemetryClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.Direction.DESC
+import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
@@ -14,7 +19,16 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.A
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 
 @Service
-class AuditService(private val telemetryClient: TelemetryClient, private val auditRepository: AuditRepository) {
+class AuditService(
+  private val awsSqsClient: AmazonSQSAsync,
+  @Value("\${sqs.queue.name}") private val queueName: String,
+  private val telemetryClient: TelemetryClient,
+  private val auditRepository: AuditRepository,
+  private val mapper: ObjectMapper
+) {
+  private val auditMessagingTemplate: QueueMessagingTemplate =
+    QueueMessagingTemplate(awsSqsClient)
+
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
@@ -32,11 +46,15 @@ class AuditService(private val telemetryClient: TelemetryClient, private val aud
 
   fun sendAuditEvent(auditEvent: AuditEvent) {
     log.debug("Audit {} ", auditEvent)
+    auditMessagingTemplate.send(
+      queueName,
+      MessageBuilder.withPayload(mapper.writeValueAsString(auditEvent)).build()
+    )
   }
 }
 
 private fun AuditEvent.asMap(): Map<String, String> {
-  var items = mutableMapOf("what" to what, "when" to `when`.toString())
+  val items = mutableMapOf("what" to what, "when" to `when`.toString())
   items.addIfNotNull("operationId", operationId)
   items.addIfNotNull("who", who)
   items.addIfNotNull("service", service)

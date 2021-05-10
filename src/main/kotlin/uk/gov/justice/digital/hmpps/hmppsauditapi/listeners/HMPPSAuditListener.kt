@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.listeners
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Profile
 import org.springframework.jms.annotation.JmsListener
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
@@ -15,6 +16,7 @@ import javax.persistence.Id
 import javax.persistence.Table
 
 @Service
+@Profile("!no-queue-listener")
 class HMPPSAuditListener(
   private val auditService: AuditService,
   private val mapper: ObjectMapper

@@ -13,9 +13,8 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
-  implementation("org.springframework.cloud:spring-cloud-aws-messaging:2.2.6.RELEASE")
-
   implementation("org.springframework:spring-jms")
+  implementation("org.springframework.cloud:spring-cloud-aws-messaging:2.2.6.RELEASE")
 
   implementation("org.springdoc:springdoc-openapi-ui:1.5.8")
   implementation("org.springdoc:springdoc-openapi-kotlin:1.5.8")
@@ -30,6 +29,7 @@ dependencies {
 
   testImplementation("org.awaitility:awaitility-kotlin:4.0.3")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
+  testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 }
 
 tasks {

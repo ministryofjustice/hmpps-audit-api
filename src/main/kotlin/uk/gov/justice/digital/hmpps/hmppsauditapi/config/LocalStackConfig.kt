@@ -2,25 +2,29 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.config
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider
 import com.amazonaws.auth.AnonymousAWSCredentials
-import com.amazonaws.client.builder.AwsClientBuilder
+import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
 import com.amazonaws.services.sqs.AmazonSQS
+import com.amazonaws.services.sqs.AmazonSQSAsync
+import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
 
 @Configuration
 class LocalStackConfig {
 
   @Bean("awsSqsClient")
+  @Primary
   @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
   fun awsSqsClientLocalStack(
     @Value("\${sqs.endpoint.url}") serviceEndpoint: String,
     @Value("\${sqs.endpoint.region}") region: String
-  ): AmazonSQS =
-    AmazonSQSClientBuilder.standard()
-      .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(serviceEndpoint, region))
+  ): AmazonSQSAsync =
+    AmazonSQSAsyncClientBuilder.standard()
+      .withEndpointConfiguration(EndpointConfiguration(serviceEndpoint, region))
       .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
       .build()
 
@@ -31,7 +35,7 @@ class LocalStackConfig {
     @Value("\${sqs.endpoint.region}") region: String
   ): AmazonSQS =
     AmazonSQSClientBuilder.standard()
-      .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(serviceEndpoint, region))
+      .withEndpointConfiguration(EndpointConfiguration(serviceEndpoint, region))
       .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
       .build()
 }

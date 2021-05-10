@@ -1,36 +1,29 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.integration.endtoend
-import com.amazonaws.services.sqs.AmazonSQS
 import com.microsoft.applicationinsights.TelemetryClient
 import com.nhaarman.mockitokotlin2.check
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.isNull
+import com.nhaarman.mockitokotlin2.mockingDetails
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.any
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.test.context.ActiveProfiles
+import org.springframework.http.MediaType
+import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
-import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
+import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
+import java.time.Instant
+import java.util.UUID
 
-@SpringBootTest
-@ActiveProfiles("test")
-class AuditTest {
-  @Qualifier("awsSqsClient")
-  @Autowired
-  internal lateinit var awsSqsClient: AmazonSQS
-
-  @Value("\${sqs.queue.name}")
-  lateinit var queueName: String
-
+class AuditTest : QueueListenerIntegrationTest() {
   @MockBean
   lateinit var telemetryClient: TelemetryClient
 
@@ -68,13 +61,54 @@ class AuditTest {
       },
       isNull()
     )
-    verify(auditRepository, times(1)).save(any(HMPPSAuditListener.AuditEvent::class.java))
+    verify(auditRepository, times(1)).save(any(AuditEvent::class.java))
   }
 
-  fun getNumberOfMessagesCurrentlyOnQueue(): Int? {
-    val queueAttributes = awsSqsClient.getQueueAttributes(queueName.queueUrl(), listOf("ApproximateNumberOfMessages"))
-    return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()
-  }
+  @Suppress("ClassName")
+  @Nested
+  open inner class insertAuditEntries {
+    @Test
+    fun `save basic audit entry`() {
+      webTestClient.post()
+        .uri("/audit")
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(BodyInserters.fromValue(AuditEvent(what = "basicAuditEvent")))
+        .exchange()
+        .expectStatus().isCreated
 
-  fun String.queueUrl(): String = awsSqsClient.getQueueUrl(this).queueUrl
+      AuditService.log.info(auditRepository.hashCode().toString())
+
+      await untilCallTo { mockingDetails(auditRepository).invocations.size } matches { it == 1 }
+
+      verify(telemetryClient).trackEvent(eq("hmpps-audit"), com.nhaarman.mockitokotlin2.any(), isNull())
+      verify(auditRepository).save(any(AuditEvent::class.java))
+    }
+
+    @Test
+    fun `save full audit entry`() {
+      val auditEvent = AuditEvent(
+        UUID.fromString("e5b4800c-dc4e-45f8-826c-877b1f3ce8de"),
+        "OFFENDER_DELETED",
+        Instant.parse("2021-04-01T15:15:30Z"),
+        "cadea6d876c62e2f5264c94c7b50875e",
+        "bobby.beans",
+        "offender-service",
+        "{\"offenderId\": \"97\"}"
+      )
+
+      webTestClient.post()
+        .uri("/audit")
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(BodyInserters.fromValue(auditEvent))
+        .exchange()
+        .expectStatus().isCreated
+
+      await untilCallTo { mockingDetails(auditRepository).invocations.size } matches { it == 1 }
+
+      verify(telemetryClient).trackEvent(eq("hmpps-audit"), com.nhaarman.mockitokotlin2.any(), isNull())
+      verify(auditRepository).save(auditEvent)
+    }
+  }
 }
