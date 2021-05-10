@@ -3,25 +3,18 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 import com.microsoft.applicationinsights.TelemetryClient
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.anyOrNull
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.isNull
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
-import org.awaitility.kotlin.await
-import org.awaitility.kotlin.matches
-import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import org.mockito.ArgumentMatchers
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.Direction.DESC
-import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
@@ -29,7 +22,7 @@ import java.time.Instant
 import java.util.UUID
 
 @Suppress("ClassName")
-class AuditResourceTest : IntegrationTest() {
+class AuditResourceTest : NoQueueListenerIntegrationTest() {
 
   @MockBean
   private lateinit var auditRepository: AuditRepository
@@ -118,62 +111,7 @@ class AuditResourceTest : IntegrationTest() {
         .body(BodyInserters.fromValue(AuditEvent(what = "secureEndpointCheck")))
         .exchange()
         .expectStatus().isCreated
-
-      await untilCallTo { auditEventMessageCount() } matches { it == 0 }
     }
-  }
-
-  @Nested
-  open inner class insertAuditEntries {
-    @Test
-    fun `save basic audit entry`() {
-      webTestClient.post()
-        .uri("/audit")
-        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(BodyInserters.fromValue(AuditEvent(what = "basicAuditEvent")))
-        .exchange()
-        .expectStatus().isCreated
-
-      await untilCallTo { auditEventMessageCount() } matches { it == 0 }
-
-      verify(telemetryClient).trackEvent(eq("hmpps-audit"), any(), isNull())
-      verify(auditRepository).save(ArgumentMatchers.any(AuditEvent::class.java))
-    }
-
-    @Test
-    fun `save full audit entry`() {
-      val auditEvent = AuditEvent(
-        UUID.fromString("e5b4800c-dc4e-45f8-826c-877b1f3ce8de"),
-        "OFFENDER_DELETED",
-        Instant.parse("2021-04-01T15:15:30Z"),
-        "cadea6d876c62e2f5264c94c7b50875e",
-        "bobby.beans",
-        "offender-service",
-        "{\"offenderId\": \"97\"}"
-      )
-
-      webTestClient.post()
-        .uri("/audit")
-        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(BodyInserters.fromValue(auditEvent))
-        .exchange()
-        .expectStatus().isCreated
-
-      await untilCallTo { auditEventMessageCount() } matches { it == 0 }
-
-      verify(telemetryClient).trackEvent(eq("hmpps-audit"), any(), isNull())
-      verify(auditRepository).save(auditEvent)
-    }
-  }
-
-  fun auditEventMessageCount(): Int? {
-    val queueAttributes = awsSqsClient.getQueueAttributes(
-      awsSqsClient.getQueueUrl(queueName).queueUrl,
-      listOf("ApproximateNumberOfMessages")
-    )
-    return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()
   }
 
   @Nested
