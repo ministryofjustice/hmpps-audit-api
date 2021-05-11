@@ -132,13 +132,21 @@ class AuditResource(
 }
 
 @JsonInclude(NON_NULL)
+@Schema(description = "Audit Event Information")
 data class AuditDto(
+  @Schema(description = "Audit Event Id", example = "0f21b9e0-d153-42c6-a9ab-d583fe590987")
   val id: UUID,
+  @Schema(description = "Detailed description of the Event", example = "COURT_REGISTER_BUILDING_UPDATE")
   val what: String,
+  @Schema(description = "When the Event occurred", example = "2021-04-01T15:15:30Z")
   val `when`: Instant,
+  @Schema(description = "The App Insights operation Id for the Event", example = "cadea6d876c62e2f5264c94c7b50875e")
   val operationId: String?,
+  @Schema(description = "Who initiated the Event", example = "fred.smith@myemail.com")
   val who: String?,
+  @Schema(description = "Which service the Event relates to", example = "court-register")
   val service: String?,
+  @Schema(description = "Additional information", example = "{\"courtId\":\"AAAMH1\",\"buildingId\":936,\"building\":{\"id\":936,\"courtId\":\"AAAMH1\",\"buildingName\":\"Main Court Name Changed\"}")
   val details: String?
 ) {
   constructor(auditEvent: AuditEvent) : this(
