@@ -62,7 +62,7 @@ class AuditTest : QueueListenerIntegrationTest() {
     fun `save basic audit entry`() {
       webTestClient.post()
         .uri("/audit")
-        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
         .contentType(MediaType.APPLICATION_JSON)
         .body(BodyInserters.fromValue(AuditEvent(what = "basicAuditEvent")))
         .exchange()
@@ -90,7 +90,7 @@ class AuditTest : QueueListenerIntegrationTest() {
 
       webTestClient.post()
         .uri("/audit")
-        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
         .contentType(MediaType.APPLICATION_JSON)
         .body(BodyInserters.fromValue(auditEvent))
         .exchange()
