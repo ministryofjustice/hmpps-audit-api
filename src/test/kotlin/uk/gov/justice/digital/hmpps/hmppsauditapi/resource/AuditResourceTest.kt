@@ -57,15 +57,34 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
 
     @ParameterizedTest
     @MethodSource("secureEndpoints")
-    internal fun `satisfies the correct role`(uri: String) {
+    internal fun `satisfies the correct role but no scope`(uri: String) {
+      webTestClient.get()
+        .uri(uri)
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
+        .exchange()
+        .expectStatus().isForbidden
+    }
 
+    @ParameterizedTest
+    @MethodSource("secureEndpoints")
+    internal fun `satisfies the correct role but wrong scope`(uri: String) {
+      webTestClient.get()
+        .uri(uri)
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @ParameterizedTest
+    @MethodSource("secureEndpoints")
+    internal fun `satisfies the correct role and scope`(uri: String) {
       whenever(auditRepository.findPage(any(), anyOrNull(), anyOrNull())).thenReturn(
         PageImpl(listOf())
       )
 
       webTestClient.get()
         .uri(uri)
-        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
         .exchange()
         .expectStatus().isOk
     }
@@ -101,10 +120,32 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
 
     @ParameterizedTest
     @MethodSource("secureEndpoints")
-    internal fun `satisfies the correct role`(uri: String) {
+    internal fun `satisfies the correct role but no scope`(uri: String) {
       webTestClient.post()
         .uri(uri)
         .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
+        .body(BodyInserters.fromValue(AuditEvent(what = "what")))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @ParameterizedTest
+    @MethodSource("secureEndpoints")
+    internal fun `satisfies the correct role but wrong scope`(uri: String) {
+      webTestClient.post()
+        .uri(uri)
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
+        .body(BodyInserters.fromValue(AuditEvent(what = "what")))
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @ParameterizedTest
+    @MethodSource("secureEndpoints")
+    internal fun `satisfies the correct role and scope`(uri: String) {
+      webTestClient.post()
+        .uri(uri)
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
         .body(BodyInserters.fromValue(AuditEvent(what = "secureEndpointCheck")))
         .exchange()
         .expectStatus().isCreated
@@ -158,7 +199,7 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
       )
 
       webTestClient.get().uri("/audit")
-        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
         .exchange()
         .expectStatus().isOk
         .expectBody().json("audit_events".loadJson())

@@ -35,7 +35,7 @@ class AuditDtoPage : PageImpl<AuditDto>(mutableListOf<AuditDto>())
 class AuditResource(
   private val auditService: AuditService,
 ) {
-  @PreAuthorize("hasRole('ROLE_AUDIT')")
+  @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_read')")
   @GetMapping("")
   @Operation(
     summary = "Get all audit events",
@@ -63,7 +63,7 @@ class AuditResource(
     return auditService.findAll()
   }
 
-  @PreAuthorize("hasRole('ROLE_AUDIT')")
+  @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_read')")
   @GetMapping("/paged")
   @Operation(
     summary = "Get page of audit events",
@@ -93,13 +93,13 @@ class AuditResource(
     @RequestParam what: String? = null,
   ): Page<AuditDto> = auditService.findPage(pageable, who, what)
 
-  @PreAuthorize("hasRole('ROLE_AUDIT')")
+  @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_write')")
   @PostMapping("")
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(
     summary = "Add a new audit event",
     description = "Adds a new Audit Event to the audit queue, role required is ROLE_AUDIT",
-    security = [SecurityRequirement(name = "ROLE_AUDIT")],
+    security = [SecurityRequirement(name = "ROLE_AUDIT", scopes = ["write"])],
     requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
       content = [Content(mediaType = "application/json")]
     ),

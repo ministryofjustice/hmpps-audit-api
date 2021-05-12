@@ -67,7 +67,7 @@ class AuditResourcePagingTest : NoQueueListenerIntegrationTest() {
   @Test
   fun `find full page of audit events`() {
     webTestClient.get().uri("/audit/paged?page=0&size=4&sort=who")
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
+      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
       .exchange()
       .expectStatus().isOk
       .expectBody()
@@ -85,7 +85,7 @@ class AuditResourcePagingTest : NoQueueListenerIntegrationTest() {
   @Test
   fun `find full page of descending ordered audit events`() {
     webTestClient.get().uri("/audit/paged?page=0&size=4&sort=who,desc")
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
+      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
       .exchange()
       .expectStatus().isOk
       .expectBody()
@@ -103,7 +103,7 @@ class AuditResourcePagingTest : NoQueueListenerIntegrationTest() {
   @Test
   fun `find first page of audit events`() {
     webTestClient.get().uri("/audit/paged?page=0&size=3&sort=who")
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
+      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
       .exchange()
       .expectStatus().isOk
       .expectBody()
@@ -120,7 +120,7 @@ class AuditResourcePagingTest : NoQueueListenerIntegrationTest() {
   @Test
   fun `find second page of audit events`() {
     webTestClient.get().uri("/audit/paged?page=2&size=1&sort=who")
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
+      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
       .exchange()
       .expectStatus().isOk
       .expectBody()
@@ -139,7 +139,7 @@ class AuditResourcePagingTest : NoQueueListenerIntegrationTest() {
     @Test
     fun `filter audit events by what`() {
       webTestClient.get().uri("/audit/paged?page=0&size=3&what=OFFENDER_DELETED")
-        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
         .exchange()
         .expectStatus().isOk
         .expectBody()
@@ -155,7 +155,7 @@ class AuditResourcePagingTest : NoQueueListenerIntegrationTest() {
     @Test
     fun `filter audit events by who`() {
       webTestClient.get().uri("/audit/paged?page=0&size=3&who=bobby.beans")
-        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
         .exchange()
         .expectStatus().isOk
         .expectBody()
@@ -171,7 +171,7 @@ class AuditResourcePagingTest : NoQueueListenerIntegrationTest() {
     @Test
     fun `filter audit events by what and who`() {
       webTestClient.get().uri("/audit/paged?page=0&size=3&what=OFFENDER_DELETED&who=bobby.beans")
-        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
         .exchange()
         .expectStatus().isOk
         .expectBody()
