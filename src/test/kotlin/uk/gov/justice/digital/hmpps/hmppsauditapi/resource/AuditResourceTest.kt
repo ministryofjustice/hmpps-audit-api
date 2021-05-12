@@ -148,7 +148,7 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
         .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
         .body(BodyInserters.fromValue(AuditEvent(what = "secureEndpointCheck")))
         .exchange()
-        .expectStatus().isCreated
+        .expectStatus().isAccepted
 
       doNothing().whenever(auditService).sendAuditEvent(any())
 

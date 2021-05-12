@@ -95,7 +95,7 @@ class AuditResource(
 
   @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_write')")
   @PostMapping("")
-  @ResponseStatus(HttpStatus.CREATED)
+  @ResponseStatus(HttpStatus.ACCEPTED)
   @Operation(
     summary = "Add a new audit event",
     description = "Adds a new Audit Event to the audit queue, role required is ROLE_AUDIT",
