@@ -15,7 +15,6 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
-import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
 import java.time.Instant
 import java.util.UUID
 
@@ -66,9 +65,7 @@ class AuditTest : QueueListenerIntegrationTest() {
         .contentType(MediaType.APPLICATION_JSON)
         .body(BodyInserters.fromValue(AuditEvent(what = "basicAuditEvent")))
         .exchange()
-        .expectStatus().isCreated
-
-      AuditService.log.info(auditRepository.hashCode().toString())
+        .expectStatus().isAccepted
 
       await untilCallTo { mockingDetails(auditRepository).invocations.size } matches { it == 1 }
 
@@ -94,7 +91,7 @@ class AuditTest : QueueListenerIntegrationTest() {
         .contentType(MediaType.APPLICATION_JSON)
         .body(BodyInserters.fromValue(auditEvent))
         .exchange()
-        .expectStatus().isCreated
+        .expectStatus().isAccepted
 
       await untilCallTo { mockingDetails(auditRepository).invocations.size } matches { it == 1 }
 
