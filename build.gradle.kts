@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.2.0-beta"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.2.0"
   kotlin("plugin.spring") version "1.5.0"
   kotlin("plugin.jpa") version "1.5.0"
 }
@@ -18,6 +18,7 @@ dependencies {
 
   implementation("org.springdoc:springdoc-openapi-ui:1.5.8")
   implementation("org.springdoc:springdoc-openapi-kotlin:1.5.8")
+  implementation("org.springdoc:springdoc-openapi-data-rest:1.5.8")
 
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.11.1013"))
   implementation("com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8")
