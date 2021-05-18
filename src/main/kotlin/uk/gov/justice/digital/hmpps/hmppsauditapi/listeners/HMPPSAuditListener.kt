@@ -49,7 +49,7 @@ class HMPPSAuditListener(
     @Schema(description = "When the Event occurred", example = "2021-04-01T15:15:30Z")
     val `when`: Instant = Instant.now(),
     @Schema(description = "The App Insights operation Id for the Event", example = "cadea6d876c62e2f5264c94c7b50875e")
-    val operationId: String? = null,
+    var operationId: String? = null,
     @Schema(description = "Who initiated the Event", example = "fred.smith@myemail.com")
     val who: String? = null,
     @Schema(description = "Which service the Event relates to", example = "court-register")

@@ -143,6 +143,8 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
     @ParameterizedTest
     @MethodSource("secureEndpoints")
     internal fun `satisfies the correct role and scope`(uri: String) {
+      doNothing().whenever(auditService).sendAuditEvent(any())
+
       webTestClient.post()
         .uri(uri)
         .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
@@ -150,9 +152,73 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
         .exchange()
         .expectStatus().isAccepted
 
+      verify(auditService).sendAuditEvent(any())
+    }
+  }
+
+  @Nested
+  inner class traceParentHeader {
+    @Test
+    internal fun `no traceparent header`() {
       doNothing().whenever(auditService).sendAuditEvent(any())
 
-      verify(auditService).sendAuditEvent(any())
+      val auditEvent = AuditEvent(what = "traceparent empty event")
+      webTestClient.post()
+        .uri("/audit")
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+        .body(BodyInserters.fromValue(auditEvent))
+        .exchange()
+        .expectStatus().isAccepted
+
+      verify(auditService).sendAuditEvent(auditEvent)
+    }
+
+    @Test
+    internal fun `invalid traceparent header`() {
+      doNothing().whenever(auditService).sendAuditEvent(any())
+
+      val auditEvent = AuditEvent(what = "traceparent invalid event")
+      webTestClient.post()
+        .uri("/audit")
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+        .header("traceparent", "3d6cb11f59448eb9d50a7f1e5237")
+        .body(BodyInserters.fromValue(auditEvent))
+        .exchange()
+        .expectStatus().isAccepted
+
+      verify(auditService).sendAuditEvent(auditEvent)
+    }
+
+    @Test
+    internal fun `valid traceparent header`() {
+      doNothing().whenever(auditService).sendAuditEvent(any())
+
+      val auditEvent = AuditEvent(what = "traceparent valid event", operationId = "8c3d6cb11f59448eb9d50a7f1e523748")
+      webTestClient.post()
+        .uri("/audit")
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+        .header("traceparent", "00-8c3d6cb11f59448eb9d50a7f1e523748-adf0569620934d76-01")
+        .body(BodyInserters.fromValue(auditEvent))
+        .exchange()
+        .expectStatus().isAccepted
+
+      verify(auditService).sendAuditEvent(auditEvent)
+    }
+
+    @Test
+    internal fun `operationId not overwritten by traceparent header`() {
+      doNothing().whenever(auditService).sendAuditEvent(any())
+
+      val auditEvent = AuditEvent(what = "traceparent", operationId = "123456789")
+      webTestClient.post()
+        .uri("/audit")
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+        .header("traceparent", "00-8c3d6cb11f59448eb9d50a7f1e523748-adf0569620934d76-01")
+        .body(BodyInserters.fromValue(auditEvent))
+        .exchange()
+        .expectStatus().isAccepted
+
+      verify(auditService).sendAuditEvent(auditEvent)
     }
   }
 
