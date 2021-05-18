@@ -128,8 +128,8 @@ class AuditResource(
     ]
   )
   fun insertAuditEvent(@RequestHeader(value = "traceparent", required = false) traceParent: String?, @RequestBody auditEvent: AuditEvent) {
-    auditEvent.operationId?.let { traceParent?.traceId() }
-    auditService.sendAuditEvent(auditEvent)
+    val eventWithOperationId = auditEvent.copy(operationId = auditEvent.operationId ?: traceParent?.traceId())
+    auditService.sendAuditEvent(eventWithOperationId)
   }
 
   private fun String.traceId(): String? {

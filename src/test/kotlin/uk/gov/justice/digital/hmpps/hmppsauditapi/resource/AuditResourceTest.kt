@@ -143,16 +143,17 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
     @ParameterizedTest
     @MethodSource("secureEndpoints")
     internal fun `satisfies the correct role and scope`(uri: String) {
-      doNothing().whenever(auditService).sendAuditEvent(any())
+      val auditEvent = AuditEvent(what = "secureEndpointCheck")
+      doNothing().whenever(auditService).sendAuditEvent(auditEvent)
 
       webTestClient.post()
         .uri(uri)
         .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
-        .body(BodyInserters.fromValue(AuditEvent(what = "secureEndpointCheck")))
+        .body(BodyInserters.fromValue(auditEvent))
         .exchange()
         .expectStatus().isAccepted
 
-      verify(auditService).sendAuditEvent(any())
+      verify(auditService).sendAuditEvent(auditEvent)
     }
   }
 
@@ -160,9 +161,9 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
   inner class traceParentHeader {
     @Test
     internal fun `no traceparent header`() {
-      doNothing().whenever(auditService).sendAuditEvent(any())
-
       val auditEvent = AuditEvent(what = "traceparent empty event")
+      doNothing().whenever(auditService).sendAuditEvent(auditEvent)
+
       webTestClient.post()
         .uri("/audit")
         .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
@@ -175,9 +176,9 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
 
     @Test
     internal fun `invalid traceparent header`() {
-      doNothing().whenever(auditService).sendAuditEvent(any())
-
       val auditEvent = AuditEvent(what = "traceparent invalid event")
+      doNothing().whenever(auditService).sendAuditEvent(auditEvent)
+
       webTestClient.post()
         .uri("/audit")
         .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
@@ -190,10 +191,10 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
     }
 
     @Test
-    internal fun `valid traceparent header`() {
-      doNothing().whenever(auditService).sendAuditEvent(any())
+    internal fun `valid traceparent header and operationId`() {
+      val auditEvent = AuditEvent(what = "traceparent valid event", operationId = "1234cb11f59448eb9d50a7f1e523748")
+      doNothing().whenever(auditService).sendAuditEvent(auditEvent)
 
-      val auditEvent = AuditEvent(what = "traceparent valid event", operationId = "8c3d6cb11f59448eb9d50a7f1e523748")
       webTestClient.post()
         .uri("/audit")
         .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
@@ -206,10 +207,29 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
     }
 
     @Test
+    internal fun `valid traceparent header and no operation id`() {
+      val auditEvent = AuditEvent(what = "traceparent valid event")
+      val eventWithOperationId = auditEvent.copy(operationId = "8c3d6cb11f59448eb9d50a7f1e523748")
+
+      doNothing().whenever(auditService).sendAuditEvent(eventWithOperationId)
+
+      webTestClient.post()
+        .uri("/audit")
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+        .header("traceparent", "00-8c3d6cb11f59448eb9d50a7f1e523748-adf0569620934d76-01")
+        .body(BodyInserters.fromValue(auditEvent))
+        .exchange()
+        .expectStatus().isAccepted
+
+      verify(auditService).sendAuditEvent(eventWithOperationId)
+    }
+
+    @Test
     internal fun `operationId not overwritten by traceparent header`() {
-      doNothing().whenever(auditService).sendAuditEvent(any())
 
       val auditEvent = AuditEvent(what = "traceparent", operationId = "123456789")
+      doNothing().whenever(auditService).sendAuditEvent(auditEvent)
+
       webTestClient.post()
         .uri("/audit")
         .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
@@ -260,7 +280,7 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
           "{\"offenderId\": \"98\"}"
         )
       )
-      whenever(auditRepository.findAll(any<Sort>())).thenReturn(
+      whenever(auditRepository.findAll(Sort.by(DESC, "when"))).thenReturn(
         listOfAudits
       )
 

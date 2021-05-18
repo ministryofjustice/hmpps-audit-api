@@ -3,8 +3,6 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.listeners
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.media.Schema
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.jms.annotation.JmsListener
 import org.springframework.stereotype.Service
@@ -24,13 +22,8 @@ class HMPPSAuditListener(
   private val mapper: ObjectMapper
 ) {
 
-  companion object {
-    val log: Logger = LoggerFactory.getLogger(this::class.java)
-  }
-
   @JmsListener(destination = "\${sqs.queue.name}")
   fun onAuditEvent(message: String) {
-    log.debug("Received message $message")
     val auditEvent: AuditEvent = mapper.readValue(message, AuditEvent::class.java)
     auditService.audit(auditEvent)
   }
@@ -49,7 +42,7 @@ class HMPPSAuditListener(
     @Schema(description = "When the Event occurred", example = "2021-04-01T15:15:30Z")
     val `when`: Instant = Instant.now(),
     @Schema(description = "The App Insights operation Id for the Event", example = "cadea6d876c62e2f5264c94c7b50875e")
-    var operationId: String? = null,
+    val operationId: String? = null,
     @Schema(description = "Who initiated the Event", example = "fred.smith@myemail.com")
     val who: String? = null,
     @Schema(description = "Which service the Event relates to", example = "court-register")
