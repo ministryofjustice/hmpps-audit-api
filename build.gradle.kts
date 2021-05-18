@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.2.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.2.1"
   kotlin("plugin.spring") version "1.5.0"
   kotlin("plugin.jpa") version "1.5.0"
 }
@@ -20,15 +20,15 @@ dependencies {
   implementation("org.springdoc:springdoc-openapi-kotlin:1.5.8")
   implementation("org.springdoc:springdoc-openapi-data-rest:1.5.8")
 
-  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.11.1013"))
+  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.11.1020"))
   implementation("com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8")
   implementation("org.apache.commons:commons-lang3:3.12.0")
 
   runtimeOnly("com.h2database:h2:1.4.200")
-  runtimeOnly("org.flywaydb:flyway-core:7.8.2")
+  runtimeOnly("org.flywaydb:flyway-core:7.9.0")
   runtimeOnly("org.postgresql:postgresql:42.2.20")
 
-  testImplementation("org.awaitility:awaitility-kotlin:4.0.3")
+  testImplementation("org.awaitility:awaitility-kotlin:4.1.0")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 }
