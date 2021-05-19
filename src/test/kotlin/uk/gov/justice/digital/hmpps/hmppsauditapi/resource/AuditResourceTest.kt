@@ -15,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.Direction.DESC
+import org.springframework.http.MediaType
 import org.springframework.messaging.support.GenericMessage
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
@@ -154,7 +155,7 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
         .expectStatus().isAccepted
 
       verify(auditService).sendAuditEvent(auditEvent)
-      verify(queueMessagingTemplate).send(eq("hmpps_audit_queue"), any())
+      verify(queueMessagingTemplate).send(eq("hmpps_audit_queue"), any<GenericMessage<String>>())
     }
   }
 
@@ -233,6 +234,112 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
         .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
         .header("traceparent", "00-8c3d6cb11f59448eb9d50a7f1e523748-adf0569620934d76-01")
         .body(BodyInserters.fromValue(auditEvent))
+        .exchange()
+        .expectStatus().isAccepted
+
+      verify(auditService).sendAuditEvent(auditEvent)
+      verify(queueMessagingTemplate).send(eq("hmpps_audit_queue"), any<GenericMessage<String>>())
+    }
+  }
+
+  @Nested
+  inner class detailsStoredAsJson {
+    @Test
+    internal fun `details is null`() {
+      val auditEvent = AuditEvent(what = "null details", `when` = Instant.parse("2021-02-01T15:15:30Z"))
+
+      webTestClient.post()
+        .uri("/audit")
+        .contentType(MediaType.APPLICATION_JSON)
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+        .body(
+          BodyInserters.fromValue(
+            """
+              {
+                "what": "null details",
+                "when": "2021-02-01T15:15:30Z"
+              }
+            """.trimIndent()
+          )
+        )
+        .exchange()
+        .expectStatus().isAccepted
+
+      verify(auditService).sendAuditEvent(auditEvent)
+      verify(queueMessagingTemplate).send(eq("hmpps_audit_queue"), any<GenericMessage<String>>())
+    }
+
+    @Test
+    internal fun `details is json`() {
+      val auditEvent = AuditEvent(what = "json details", `when` = Instant.parse("2021-03-01T15:15:30Z"), details = "{\"offenderId\": \"97\"}")
+
+      webTestClient.post()
+        .uri("/audit")
+        .contentType(MediaType.APPLICATION_JSON)
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+        .body(
+          BodyInserters.fromValue(
+            """
+              {
+                "what": "json details",
+                "when": "2021-03-01T15:15:30Z",
+                "details": "{\"offenderId\": \"97\"}"
+              }
+            """.trimIndent()
+          )
+        )
+        .exchange()
+        .expectStatus().isAccepted
+
+      verify(auditService).sendAuditEvent(auditEvent)
+      verify(queueMessagingTemplate).send(eq("hmpps_audit_queue"), any<GenericMessage<String>>())
+    }
+
+    @Test
+    internal fun `details is a string`() {
+      val auditEvent = AuditEvent(what = "string details", details = "{\"details\":\"a test\"}", `when` = Instant.parse("2021-04-01T15:15:30Z"))
+
+      webTestClient.post()
+        .uri("/audit")
+        .contentType(MediaType.APPLICATION_JSON)
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+        .body(
+          BodyInserters.fromValue(
+            """
+              {
+                "what": "string details",
+                "when": "2021-04-01T15:15:30Z",
+                "details": "a test"
+              }
+            """.trimIndent()
+          )
+        )
+        .exchange()
+        .expectStatus().isAccepted
+
+      verify(auditService).sendAuditEvent(auditEvent)
+      verify(queueMessagingTemplate).send(eq("hmpps_audit_queue"), any<GenericMessage<String>>())
+    }
+
+    @Test
+    internal fun `details is an empty(blank) string`() {
+      val auditEvent = AuditEvent(what = "string details", `when` = Instant.parse("2021-05-01T15:15:30Z"))
+
+      webTestClient.post()
+        .uri("/audit")
+        .contentType(MediaType.APPLICATION_JSON)
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+        .body(
+          BodyInserters.fromValue(
+            """
+              {
+                "what": "string details",
+                "when": "2021-05-01T15:15:30Z",
+                "details": "   "
+              }
+            """.trimIndent()
+          )
+        )
         .exchange()
         .expectStatus().isAccepted
 
