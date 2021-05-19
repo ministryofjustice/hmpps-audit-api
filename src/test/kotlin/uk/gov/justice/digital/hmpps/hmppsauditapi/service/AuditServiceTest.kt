@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.service
 
-import com.amazonaws.services.sqs.AmazonSQSAsync
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.microsoft.applicationinsights.TelemetryClient
 import com.nhaarman.mockitokotlin2.any
@@ -21,10 +20,9 @@ import java.time.Instant
 import java.util.UUID
 
 class AuditServiceTest {
-  private val awsSqsClient = mock<AmazonSQSAsync>()
   private val telemetryClient: TelemetryClient = mock()
   private val auditRepository: AuditRepository = mock()
-  private val auditService = AuditService(awsSqsClient, "hmpps-audit-queue", telemetryClient, auditRepository, jacksonObjectMapper())
+  private val auditService = AuditService("hmpps-audit-queue", telemetryClient, auditRepository, jacksonObjectMapper(), mock())
 
   @Nested
   @Suppress("ClassName")
