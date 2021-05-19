@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
+import java.io.IOException
 import java.time.Instant
 import java.util.UUID
 
@@ -128,13 +130,22 @@ class AuditResource(
     ]
   )
   fun insertAuditEvent(@RequestHeader(value = "traceparent", required = false) traceParent: String?, @RequestBody auditEvent: AuditEvent) {
-    val eventWithOperationId = auditEvent.copy(operationId = auditEvent.operationId ?: traceParent?.traceId())
-    auditService.sendAuditEvent(eventWithOperationId)
+    val cleansedAuditEvent = auditEvent.copy(operationId = auditEvent.operationId ?: traceParent?.traceId(), details = auditEvent.details?.jsonString())
+    auditService.sendAuditEvent(cleansedAuditEvent)
   }
 
   private fun String.traceId(): String? {
-    val traceParentElements = this.split("-")
+    val traceParentElements = split("-")
     return if (traceParentElements.size == 4) traceParentElements[1] else null
+  }
+
+  private fun String.jsonString(): String? {
+    return try {
+      jacksonObjectMapper().readTree(trim())
+      ifBlank { null }
+    } catch (e: IOException) {
+      "{\"details\":\"$this\"}"
+    }
   }
 }
 
