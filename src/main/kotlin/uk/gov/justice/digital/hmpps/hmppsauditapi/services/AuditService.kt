@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
-import com.amazonaws.services.sqs.AmazonSQSAsync
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.beans.factory.annotation.Value
@@ -18,14 +17,12 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 
 @Service
 class AuditService(
-  private val awsSqsClient: AmazonSQSAsync,
   @Value("\${sqs.queue.name}") private val queueName: String,
   private val telemetryClient: TelemetryClient,
   private val auditRepository: AuditRepository,
-  private val mapper: ObjectMapper
+  private val mapper: ObjectMapper,
+  private val auditMessagingTemplate: QueueMessagingTemplate
 ) {
-  private val auditMessagingTemplate: QueueMessagingTemplate =
-    QueueMessagingTemplate(awsSqsClient)
 
   fun audit(auditEvent: AuditEvent) {
     telemetryClient.trackEvent("hmpps-audit", auditEvent.asMap())
