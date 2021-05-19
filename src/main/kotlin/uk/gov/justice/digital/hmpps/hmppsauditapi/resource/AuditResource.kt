@@ -17,6 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -126,8 +127,14 @@ class AuditResource(
       )
     ]
   )
-  fun insertAuditEvent(@RequestBody auditEvent: AuditEvent) {
-    auditService.sendAuditEvent(auditEvent)
+  fun insertAuditEvent(@RequestHeader(value = "traceparent", required = false) traceParent: String?, @RequestBody auditEvent: AuditEvent) {
+    val eventWithOperationId = auditEvent.copy(operationId = auditEvent.operationId ?: traceParent?.traceId())
+    auditService.sendAuditEvent(eventWithOperationId)
+  }
+
+  private fun String.traceId(): String? {
+    val traceParentElements = this.split("-")
+    return if (traceParentElements.size == 4) traceParentElements[1] else null
   }
 }
 

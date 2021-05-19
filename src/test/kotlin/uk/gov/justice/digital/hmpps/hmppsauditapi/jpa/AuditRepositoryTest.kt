@@ -6,14 +6,15 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
-import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.NoQueueListenerIntegrationTest
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-class AuditRepositoryTest : NoQueueListenerIntegrationTest() {
+@DataJpaTest
+class AuditRepositoryTest {
 
   @Autowired
   lateinit var auditRepository: AuditRepository

@@ -3,8 +3,6 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 import com.amazonaws.services.sqs.AmazonSQSAsync
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.microsoft.applicationinsights.TelemetryClient
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate
 import org.springframework.data.domain.Page
@@ -29,12 +27,7 @@ class AuditService(
   private val auditMessagingTemplate: QueueMessagingTemplate =
     QueueMessagingTemplate(awsSqsClient)
 
-  companion object {
-    val log: Logger = LoggerFactory.getLogger(this::class.java)
-  }
-
   fun audit(auditEvent: AuditEvent) {
-    log.info("About to audit $auditEvent")
     telemetryClient.trackEvent("hmpps-audit", auditEvent.asMap())
     auditRepository.save(auditEvent)
   }
@@ -45,7 +38,6 @@ class AuditService(
     auditRepository.findPage(pageable, who, what).map { AuditDto(it) }
 
   fun sendAuditEvent(auditEvent: AuditEvent) {
-    log.debug("Audit {} ", auditEvent)
     auditMessagingTemplate.send(
       queueName,
       MessageBuilder.withPayload(mapper.writeValueAsString(auditEvent)).build()
