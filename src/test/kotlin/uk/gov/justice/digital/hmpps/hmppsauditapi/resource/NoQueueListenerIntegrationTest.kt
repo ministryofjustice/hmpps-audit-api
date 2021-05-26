@@ -1,6 +1,11 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 
+import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate
 import org.springframework.test.context.ActiveProfiles
 
 @ActiveProfiles(profiles = ["no-queue-listener"])
-abstract class NoQueueListenerIntegrationTest : IntegrationTest()
+abstract class NoQueueListenerIntegrationTest : IntegrationTest() {
+  @MockBean
+  protected lateinit var queueMessagingTemplate: QueueMessagingTemplate
+}
