@@ -11,6 +11,8 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
+import org.mockito.ArgumentMatchers.anyString
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Sort
@@ -18,6 +20,7 @@ import org.springframework.data.domain.Sort.Direction.DESC
 import org.springframework.http.MediaType
 import org.springframework.messaging.support.GenericMessage
 import org.springframework.web.reactive.function.BodyInserters
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.SqsConfigProperties
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import java.time.Instant
@@ -28,6 +31,9 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
 
   @MockBean
   private lateinit var auditRepository: AuditRepository
+
+  @Autowired
+  private lateinit var sqsConfigProperties: SqsConfigProperties
 
   @TestInstance(PER_CLASS)
   @Nested
@@ -155,7 +161,7 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
         .expectStatus().isAccepted
 
       verify(auditService).sendAuditEvent(auditEvent)
-      verify(queueMessagingTemplate).send(eq("hmpps_audit_queue"), any<GenericMessage<String>>())
+      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.queueName), any<GenericMessage<String>>())
     }
   }
 
@@ -173,7 +179,7 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
         .expectStatus().isAccepted
 
       verify(auditService).sendAuditEvent(auditEvent)
-      verify(queueMessagingTemplate).send(eq("hmpps_audit_queue"), any<GenericMessage<String>>())
+      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.queueName), any<GenericMessage<String>>())
     }
 
     @Test
@@ -189,7 +195,7 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
         .expectStatus().isAccepted
 
       verify(auditService).sendAuditEvent(auditEvent)
-      verify(queueMessagingTemplate).send(eq("hmpps_audit_queue"), any<GenericMessage<String>>())
+      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.queueName), any<GenericMessage<String>>())
     }
 
     @Test
@@ -205,7 +211,7 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
         .expectStatus().isAccepted
 
       verify(auditService).sendAuditEvent(auditEvent)
-      verify(queueMessagingTemplate).send(eq("hmpps_audit_queue"), any<GenericMessage<String>>())
+      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.queueName), any<GenericMessage<String>>())
     }
 
     @Test
@@ -222,7 +228,7 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
         .expectStatus().isAccepted
 
       verify(auditService).sendAuditEvent(eventWithOperationId)
-      verify(queueMessagingTemplate).send(eq("hmpps_audit_queue"), any<GenericMessage<String>>())
+      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.queueName), any<GenericMessage<String>>())
     }
 
     @Test
@@ -238,7 +244,7 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
         .expectStatus().isAccepted
 
       verify(auditService).sendAuditEvent(auditEvent)
-      verify(queueMessagingTemplate).send(eq("hmpps_audit_queue"), any<GenericMessage<String>>())
+      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.queueName), any<GenericMessage<String>>())
     }
   }
 
@@ -266,7 +272,7 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
         .expectStatus().isAccepted
 
       verify(auditService).sendAuditEvent(auditEvent)
-      verify(queueMessagingTemplate).send(eq("hmpps_audit_queue"), any<GenericMessage<String>>())
+      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.queueName), any<GenericMessage<String>>())
     }
 
     @Test
@@ -292,7 +298,7 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
         .expectStatus().isAccepted
 
       verify(auditService).sendAuditEvent(auditEvent)
-      verify(queueMessagingTemplate).send(eq("hmpps_audit_queue"), any<GenericMessage<String>>())
+      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.queueName), any<GenericMessage<String>>())
     }
 
     @Test
@@ -318,7 +324,7 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
         .expectStatus().isAccepted
 
       verify(auditService).sendAuditEvent(auditEvent)
-      verify(queueMessagingTemplate).send(eq("hmpps_audit_queue"), any<GenericMessage<String>>())
+      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.queueName), any<GenericMessage<String>>())
     }
 
     @Test
@@ -344,7 +350,7 @@ class AuditResourceTest : NoQueueListenerIntegrationTest() {
         .expectStatus().isAccepted
 
       verify(auditService).sendAuditEvent(auditEvent)
-      verify(queueMessagingTemplate).send(eq("hmpps_audit_queue"), any<GenericMessage<String>>())
+      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.queueName), any<GenericMessage<String>>())
     }
   }
 

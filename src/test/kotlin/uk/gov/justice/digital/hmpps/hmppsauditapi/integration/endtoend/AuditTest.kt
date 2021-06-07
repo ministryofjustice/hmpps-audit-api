@@ -35,7 +35,7 @@ class AuditTest : QueueListenerIntegrationTest() {
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
 
-    awsSqsClient.sendMessage(queueName.queueUrl(), message)
+    awsSqsClient.sendMessage(sqsConfigProperties.queueName.queueUrl(), message)
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
 

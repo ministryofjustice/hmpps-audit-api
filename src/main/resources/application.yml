@@ -91,9 +91,13 @@ cloud:
 
 sqs:
   provider: ${aws.provider}
-  queue.name: hmpps_audit_queue
-  dlq.name: hmpps_audit_dlq
-  endpoint.region: ${aws.region}
+  queueName: ${sqs.queue.name}
+  queueAccessKeyId: ${sqs.aws.access.key.id}
+  queueSecretAccessKey: ${sqs.aws.secret.access.key}
+  dlqName: ${sqs.dlq.name}
+  dlqAccessKeyId: ${sqs.aws.dlq.access.key.id}
+  dlqSecretAccessKey: ${sqs.dlq.secret.access.key}
+  region: ${aws.region}
 
 oauth:
   token.url: ${oauth.endpoint.url}/oauth/token
