@@ -57,6 +57,7 @@ workflows:
             branches:
               only:
                 - main
+                - mh-DT-1581-random-queue-names
           requires:
             - validate
             - build_docker
