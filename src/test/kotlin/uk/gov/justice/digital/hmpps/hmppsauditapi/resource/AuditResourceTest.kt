@@ -11,7 +11,6 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import org.mockito.ArgumentMatchers.anyString
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.data.domain.PageImpl
@@ -27,7 +26,7 @@ import java.time.Instant
 import java.util.UUID
 
 @Suppress("ClassName")
-class AuditResourceTest : NoQueueListenerIntegrationTest() {
+class AuditResourceTest : IntegrationTest() {
 
   @MockBean
   private lateinit var auditRepository: AuditRepository

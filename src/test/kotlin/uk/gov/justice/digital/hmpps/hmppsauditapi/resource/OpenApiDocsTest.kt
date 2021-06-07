@@ -5,7 +5,7 @@ import org.springframework.http.MediaType
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-class OpenApiDocsTest : NoQueueListenerIntegrationTest() {
+class OpenApiDocsTest : IntegrationTest() {
 
   @Test
   fun `open api docs are available`() {
