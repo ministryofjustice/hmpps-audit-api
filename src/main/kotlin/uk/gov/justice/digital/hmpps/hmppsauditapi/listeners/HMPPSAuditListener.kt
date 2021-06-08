@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.listeners
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.media.Schema
-import org.springframework.context.annotation.Profile
 import org.springframework.jms.annotation.JmsListener
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
