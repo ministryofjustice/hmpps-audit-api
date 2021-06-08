@@ -16,7 +16,6 @@ import javax.persistence.Id
 import javax.persistence.Table
 
 @Service
-@Profile("!no-queue-listener")
 class HMPPSAuditListener(
   private val auditService: AuditService,
   private val mapper: ObjectMapper
