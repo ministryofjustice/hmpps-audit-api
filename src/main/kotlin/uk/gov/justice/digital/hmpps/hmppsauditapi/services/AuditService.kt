@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.microsoft.applicationinsights.TelemetryClient
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -10,6 +9,7 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.Direction.DESC
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.SqsConfigProperties
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
@@ -17,7 +17,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 
 @Service
 class AuditService(
-  @Value("\${sqs.queue.name}") private val queueName: String,
+  private val sqsConfigProperties: SqsConfigProperties,
   private val telemetryClient: TelemetryClient,
   private val auditRepository: AuditRepository,
   private val mapper: ObjectMapper,
@@ -36,7 +36,7 @@ class AuditService(
 
   fun sendAuditEvent(auditEvent: AuditEvent) {
     auditMessagingTemplate.send(
-      queueName,
+      sqsConfigProperties.queueName,
       MessageBuilder.withPayload(mapper.writeValueAsString(auditEvent)).build()
     )
   }

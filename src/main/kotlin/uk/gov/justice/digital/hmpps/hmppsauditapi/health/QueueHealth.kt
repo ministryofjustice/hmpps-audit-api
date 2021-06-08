@@ -11,11 +11,11 @@ import com.amazonaws.services.sqs.model.QueueDoesNotExistException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.actuate.health.Health
 import org.springframework.boot.actuate.health.Health.Builder
 import org.springframework.boot.actuate.health.HealthIndicator
 import org.springframework.stereotype.Component
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.SqsConfigProperties
 import uk.gov.justice.digital.hmpps.hmppsauditapi.health.DlqStatus.NOT_ATTACHED
 import uk.gov.justice.digital.hmpps.hmppsauditapi.health.DlqStatus.NOT_AVAILABLE
 import uk.gov.justice.digital.hmpps.hmppsauditapi.health.DlqStatus.NOT_FOUND
@@ -97,6 +97,5 @@ class HmppsAuditQueueHealth
 constructor(
   @Qualifier("awsSqsClient") awsSqsClient: AmazonSQS,
   @Qualifier("awsSqsDlqClient") awsSqsDlqClient: AmazonSQS,
-  @Value("\${sqs.queue.name}") private val queueName: String,
-  @Value("\${sqs.dlq.name}") private val dlqName: String
-) : QueueHealth(awsSqsClient, awsSqsDlqClient, queueName, dlqName)
+  sqsConfigProperties: SqsConfigProperties,
+) : QueueHealth(awsSqsClient, awsSqsDlqClient, sqsConfigProperties.queueName, sqsConfigProperties.dlqName)

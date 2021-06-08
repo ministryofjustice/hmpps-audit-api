@@ -12,22 +12,23 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.springframework.boot.actuate.health.Status
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.SqsConfigProperties
 import uk.gov.justice.digital.hmpps.hmppsauditapi.health.QueueAttributes.MESSAGES_IN_FLIGHT
 import uk.gov.justice.digital.hmpps.hmppsauditapi.health.QueueAttributes.MESSAGES_ON_DLQ
 import uk.gov.justice.digital.hmpps.hmppsauditapi.health.QueueAttributes.MESSAGES_ON_QUEUE
 
 class QueueHealthTest {
 
-  private val someQueueName = "some queue name"
   private val someQueueUrl = "some queue url"
-  private val someDLQName = "some DLQ name"
   private val someDLQUrl = "some DLQ url"
+  private val sqsConfigProperties =
+    SqsConfigProperties(region = "eu-west-2", provider = "aws", queueName = someQueueUrl, dlqName = someDLQUrl)
   private val someMessagesOnQueueCount = 123
   private val someMessagesInFlightCount = 456
   private val someMessagesOnDLQCount = 789
   private val amazonSqs: AmazonSQS = mock()
   private val amazonSqsDLQ: AmazonSQS = mock()
-  private val queueHealth: QueueHealth = HmppsAuditQueueHealth(amazonSqs, amazonSqsDLQ, someQueueName, someDLQName)
+  private val queueHealth: QueueHealth = HmppsAuditQueueHealth(amazonSqs, amazonSqsDLQ, sqsConfigProperties)
 
   @Test
   fun `health - queue found - UP`() {
@@ -87,7 +88,7 @@ class QueueHealthTest {
 
   @Test
   fun `health - DLQ down - main queue health also DOWN`() {
-    whenever(amazonSqs.getQueueUrl(someQueueName)).thenReturn(someGetQueueUrlResult())
+    whenever(amazonSqs.getQueueUrl(sqsConfigProperties.queueName)).thenReturn(someGetQueueUrlResult())
     whenever(amazonSqs.getQueueAttributes(someGetQueueAttributesRequest())).thenReturn(
       someGetQueueAttributesResultWithoutDLQ()
     )
@@ -100,7 +101,7 @@ class QueueHealthTest {
 
   @Test
   fun `health - no RedrivePolicy attribute on main queue - DLQ NOT ATTACHED`() {
-    whenever(amazonSqs.getQueueUrl(someQueueName)).thenReturn(someGetQueueUrlResult())
+    whenever(amazonSqs.getQueueUrl(sqsConfigProperties.queueName)).thenReturn(someGetQueueUrlResult())
     whenever(amazonSqs.getQueueAttributes(someGetQueueAttributesRequest())).thenReturn(
       someGetQueueAttributesResultWithoutDLQ()
     )
@@ -112,11 +113,11 @@ class QueueHealthTest {
 
   @Test
   fun `health - DLQ not found - DLQ NOT FOUND`() {
-    whenever(amazonSqs.getQueueUrl(someQueueName)).thenReturn(someGetQueueUrlResult())
+    whenever(amazonSqs.getQueueUrl(sqsConfigProperties.queueName)).thenReturn(someGetQueueUrlResult())
     whenever(amazonSqs.getQueueAttributes(someGetQueueAttributesRequest())).thenReturn(
       someGetQueueAttributesResultWithDLQ()
     )
-    whenever(amazonSqsDLQ.getQueueUrl(someDLQName)).thenThrow(QueueDoesNotExistException::class.java)
+    whenever(amazonSqsDLQ.getQueueUrl(sqsConfigProperties.dlqName)).thenThrow(QueueDoesNotExistException::class.java)
 
     val health = queueHealth.health()
 
@@ -125,11 +126,11 @@ class QueueHealthTest {
 
   @Test
   fun `health - DLQ failed to get attributes - DLQ NOT AVAILABLE`() {
-    whenever(amazonSqs.getQueueUrl(someQueueName)).thenReturn(someGetQueueUrlResult())
+    whenever(amazonSqs.getQueueUrl(sqsConfigProperties.queueName)).thenReturn(someGetQueueUrlResult())
     whenever(amazonSqs.getQueueAttributes(someGetQueueAttributesRequest())).thenReturn(
       someGetQueueAttributesResultWithDLQ()
     )
-    whenever(amazonSqsDLQ.getQueueUrl(someDLQName)).thenReturn(someGetQueueUrlResultForDLQ())
+    whenever(amazonSqsDLQ.getQueueUrl(sqsConfigProperties.dlqName)).thenReturn(someGetQueueUrlResultForDLQ())
     whenever(amazonSqsDLQ.getQueueAttributes(someGetQueueAttributesRequestForDLQ())).thenThrow(RuntimeException::class.java)
 
     val health = queueHealth.health()
@@ -138,11 +139,11 @@ class QueueHealthTest {
   }
 
   private fun mockHealthyQueue() {
-    whenever(amazonSqs.getQueueUrl(someQueueName)).thenReturn(someGetQueueUrlResult())
+    whenever(amazonSqs.getQueueUrl(sqsConfigProperties.queueName)).thenReturn(someGetQueueUrlResult())
     whenever(amazonSqs.getQueueAttributes(someGetQueueAttributesRequest())).thenReturn(
       someGetQueueAttributesResultWithDLQ()
     )
-    whenever(amazonSqsDLQ.getQueueUrl(someDLQName)).thenReturn(someGetQueueUrlResultForDLQ())
+    whenever(amazonSqsDLQ.getQueueUrl(sqsConfigProperties.dlqName)).thenReturn(someGetQueueUrlResultForDLQ())
     whenever(amazonSqsDLQ.getQueueAttributes(someGetQueueAttributesRequestForDLQ())).thenReturn(
       someGetQueueAttributesResultForDLQ()
     )

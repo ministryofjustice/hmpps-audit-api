@@ -5,7 +5,9 @@ aws:
   provider: localstack
 
 sqs:
-  endpoint.url: http://localhost:4566
+  localstackUrl: http://localhost:4566
+  queueName: ${random.uuid}
+  dlqName: ${random.uuid}
 
 spring:
   jpa:

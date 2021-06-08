@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.listeners
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.media.Schema
-import org.springframework.context.annotation.Profile
 import org.springframework.jms.annotation.JmsListener
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
@@ -16,13 +15,12 @@ import javax.persistence.Id
 import javax.persistence.Table
 
 @Service
-@Profile("!no-queue-listener")
 class HMPPSAuditListener(
   private val auditService: AuditService,
   private val mapper: ObjectMapper
 ) {
 
-  @JmsListener(destination = "\${sqs.queue.name}")
+  @JmsListener(destination = "#{@'sqs-uk.gov.justice.digital.hmpps.hmppsauditapi.config.SqsConfigProperties'.queueName}")
   fun onAuditEvent(message: String) {
     val auditEvent: AuditEvent = mapper.readValue(message, AuditEvent::class.java)
     auditService.audit(auditEvent)

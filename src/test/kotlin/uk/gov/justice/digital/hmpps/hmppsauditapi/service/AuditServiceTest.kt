@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.SqsConfigProperties
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
@@ -22,7 +23,8 @@ import java.util.UUID
 class AuditServiceTest {
   private val telemetryClient: TelemetryClient = mock()
   private val auditRepository: AuditRepository = mock()
-  private val auditService = AuditService("hmpps-audit-queue", telemetryClient, auditRepository, jacksonObjectMapper(), mock())
+  private val sqsConfigProperties = SqsConfigProperties(region = "eu-west-2", provider = "aws", queueName = "hmpps-audit-queue", dlqName = "hmpps-audit-dlq")
+  private val auditService = AuditService(sqsConfigProperties, telemetryClient, auditRepository, jacksonObjectMapper(), mock())
 
   @Nested
   @Suppress("ClassName")
