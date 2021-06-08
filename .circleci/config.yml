@@ -46,7 +46,6 @@ workflows:
             branches:
               only:
                 - main
-                - mh-DT-1581-random-queue-names
       - hmpps/deploy_env:
           name: deploy_dev
           env: "dev"
@@ -55,7 +54,6 @@ workflows:
             branches:
               only:
                 - main
-                - mh-DT-1581-random-queue-names
           requires:
             - validate
             - build_docker
