@@ -44,7 +44,14 @@ class SqsConfig {
   @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "aws")
   fun awsSqsDlqClient(sqsConfigProperties: SqsConfigProperties): AmazonSQS =
     AmazonSQSClientBuilder.standard()
-      .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials(sqsConfigProperties.dlqSecretAccessKey, sqsConfigProperties.dlqSecretAccessKey)))
+      .withCredentials(
+        AWSStaticCredentialsProvider(
+          BasicAWSCredentials(
+            sqsConfigProperties.dlqAccessKeyId,
+            sqsConfigProperties.dlqSecretAccessKey
+          )
+        )
+      )
       .withRegion(sqsConfigProperties.region)
       .build()
 
