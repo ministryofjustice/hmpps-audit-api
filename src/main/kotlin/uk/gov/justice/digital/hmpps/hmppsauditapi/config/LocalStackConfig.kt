@@ -37,7 +37,7 @@ class LocalStackConfig {
       .also { sqsClient -> createMainQueue(sqsClient, dlqSqsClient, sqsConfigProperties) }
       .also { logger.info("Created sqs client for queue ${sqsConfigProperties.queueName}") }
       .also {
-        hmppsQueueService.addHmppsQueue(
+        hmppsQueueService.registerHmppsQueue(
           HmppsQueue(
             it,
             sqsConfigProperties.queueName,

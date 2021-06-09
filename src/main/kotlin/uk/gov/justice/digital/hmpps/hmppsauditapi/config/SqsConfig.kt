@@ -53,7 +53,7 @@ class SqsConfig {
       .withRegion(sqsConfigProperties.region)
       .build()
       .also {
-        hmppsQueueService.addHmppsQueue(
+        hmppsQueueService.registerHmppsQueue(
           HmppsQueue(
             it,
             sqsConfigProperties.queueName,
