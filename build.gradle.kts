@@ -15,6 +15,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework:spring-jms")
   implementation("org.springframework.cloud:spring-cloud-aws-messaging:2.2.6.RELEASE")
+  implementation("uk.gov.justice.service.hmpps:hmpps-spring-boot-sqs:0.2.1")
 
   implementation("org.springdoc:springdoc-openapi-ui:1.5.8")
   implementation("org.springdoc:springdoc-openapi-kotlin:1.5.8")

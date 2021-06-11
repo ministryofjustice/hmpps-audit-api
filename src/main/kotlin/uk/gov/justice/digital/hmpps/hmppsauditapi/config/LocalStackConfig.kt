@@ -15,6 +15,8 @@ import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
+import uk.gov.justice.hmpps.sqs.HmppsQueue
+import uk.gov.justice.hmpps.sqs.HmppsQueueService
 
 @Configuration
 class LocalStackConfig {
@@ -26,10 +28,24 @@ class LocalStackConfig {
   @Bean("awsSqsClient")
   @Primary
   @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
-  fun sqsClient(sqsConfigProperties: SqsConfigProperties, dlqSqsClient: AmazonSQS): AmazonSQSAsync =
+  fun sqsClient(
+    sqsConfigProperties: SqsConfigProperties,
+    dlqSqsClient: AmazonSQS,
+    hmppsQueueService: HmppsQueueService
+  ): AmazonSQSAsync =
     amazonSQSAsync(sqsConfigProperties.localstackUrl, sqsConfigProperties.region)
       .also { sqsClient -> createMainQueue(sqsClient, dlqSqsClient, sqsConfigProperties) }
       .also { logger.info("Created sqs client for queue ${sqsConfigProperties.queueName}") }
+      .also {
+        hmppsQueueService.registerHmppsQueue(
+          HmppsQueue(
+            it,
+            sqsConfigProperties.queueName,
+            dlqSqsClient,
+            sqsConfigProperties.dlqName
+          )
+        )
+      }
 
   @Bean("awsSqsDlqClient")
   @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
