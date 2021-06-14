@@ -32,10 +32,20 @@ class PurgeQueueTest : QueueListenerIntegrationTest() {
     }
 
     @Test
+    fun `should fail if using default rather than custom role`() {
+      webTestClient.put()
+        .uri("/queue-admin/purge-queue/${sqsConfigProperties.dlqName}")
+        .headers(setAuthorisation(roles = listOf("ROLE_QUEUE_ADMIN"), scopes = listOf("write")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus().isForbidden
+    }
+
+    @Test
     fun `should fail it dlq does not exist`() {
       webTestClient.put()
         .uri("/queue-admin/purge-queue/UNKNOWN_DLQ")
-        .headers(setAuthorisation(roles = listOf("ROLE_QUEUE_ADMIN"), scopes = listOf("write")))
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT_API_QUEUE_ADMIN"), scopes = listOf("write")))
         .contentType(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus().isNotFound

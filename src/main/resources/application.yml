@@ -89,7 +89,7 @@ cloud:
       auto: false
       static: ${aws.region}
 
-sqs:
+hmpps.sqs:
   provider: ${aws.provider}
   queueName: ${sqs.queue.name}
   queueAccessKeyId: ${sqs.aws.access.key.id}
@@ -98,6 +98,7 @@ sqs:
   dlqAccessKeyId: ${sqs.aws.dlq.access.key.id}
   dlqSecretAccessKey: ${sqs.aws.dlq.secret.access.key}
   region: ${aws.region}
+  queueAdminRole: ROLE_AUDIT_API_QUEUE_ADMIN
 
 oauth:
   token.url: ${oauth.endpoint.url}/oauth/token

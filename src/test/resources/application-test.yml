@@ -8,7 +8,7 @@ management.endpoint:
 aws:
   provider: localstack
 
-sqs:
+hmpps.sqs:
   localstackUrl: http://localhost:4566
   queueName: ${random.uuid}
   dlqName: ${random.uuid}

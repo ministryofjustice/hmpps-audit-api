@@ -27,7 +27,7 @@ class LocalStackConfig {
 
   @Bean("awsSqsClient")
   @Primary
-  @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
+  @ConditionalOnProperty(name = ["hmpps.sqs.provider"], havingValue = "localstack")
   fun sqsClient(
     sqsConfigProperties: SqsConfigProperties,
     dlqSqsClient: AmazonSQS,
@@ -48,7 +48,7 @@ class LocalStackConfig {
       }
 
   @Bean("awsSqsDlqClient")
-  @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
+  @ConditionalOnProperty(name = ["hmpps.sqs.provider"], havingValue = "localstack")
   fun sqsDlqClient(sqsConfigProperties: SqsConfigProperties): AmazonSQS =
     amazonSQS(sqsConfigProperties.localstackUrl, sqsConfigProperties.region)
       .also { dlqSqsClient -> dlqSqsClient.createQueue(sqsConfigProperties.dlqName) }
@@ -85,6 +85,6 @@ class LocalStackConfig {
       }
 
   @Bean("queueMessagingTemplate")
-  @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
+  @ConditionalOnProperty(name = ["hmpps.sqs.provider"], havingValue = "localstack")
   fun queueMessagingTemplate(amazonSQSAsync: AmazonSQSAsync?): QueueMessagingTemplate? = QueueMessagingTemplate(amazonSQSAsync)
 }

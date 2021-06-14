@@ -106,7 +106,6 @@ class RetryDlqTest : QueueListenerIntegrationTest() {
 
       webTestClient.put()
         .uri("/queue-admin/retry-all-dlqs")
-        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT_API_QUEUE_ADMIN"), scopes = listOf("write")))
         .contentType(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus().isOk
