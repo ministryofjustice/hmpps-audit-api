@@ -12,7 +12,6 @@ import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Primary
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 
@@ -34,7 +33,6 @@ data class SqsConfigProperties(
 class SqsConfig {
 
   @Bean
-  @Primary
   @ConditionalOnProperty(name = ["hmpps.sqs.provider"], havingValue = "aws")
   fun awsSqsClient(
     sqsConfigProperties: SqsConfigProperties,
