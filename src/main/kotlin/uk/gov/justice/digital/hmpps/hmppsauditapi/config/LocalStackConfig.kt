@@ -14,7 +14,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Primary
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 
@@ -26,29 +25,28 @@ class LocalStackConfig {
   }
 
   @Bean("awsSqsClient")
-  @Primary
-  @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
+  @ConditionalOnProperty(name = ["hmpps.sqs.provider"], havingValue = "localstack")
   fun sqsClient(
     sqsConfigProperties: SqsConfigProperties,
-    dlqSqsClient: AmazonSQS,
+    awsSqsDlqClient: AmazonSQS,
     hmppsQueueService: HmppsQueueService
   ): AmazonSQSAsync =
     amazonSQSAsync(sqsConfigProperties.localstackUrl, sqsConfigProperties.region)
-      .also { sqsClient -> createMainQueue(sqsClient, dlqSqsClient, sqsConfigProperties) }
+      .also { sqsClient -> createMainQueue(sqsClient, awsSqsDlqClient, sqsConfigProperties) }
       .also { logger.info("Created sqs client for queue ${sqsConfigProperties.queueName}") }
       .also {
         hmppsQueueService.registerHmppsQueue(
           HmppsQueue(
             it,
             sqsConfigProperties.queueName,
-            dlqSqsClient,
+            awsSqsDlqClient,
             sqsConfigProperties.dlqName
           )
         )
       }
 
   @Bean("awsSqsDlqClient")
-  @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
+  @ConditionalOnProperty(name = ["hmpps.sqs.provider"], havingValue = "localstack")
   fun sqsDlqClient(sqsConfigProperties: SqsConfigProperties): AmazonSQS =
     amazonSQS(sqsConfigProperties.localstackUrl, sqsConfigProperties.region)
       .also { dlqSqsClient -> dlqSqsClient.createQueue(sqsConfigProperties.dlqName) }
@@ -85,6 +83,6 @@ class LocalStackConfig {
       }
 
   @Bean("queueMessagingTemplate")
-  @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
+  @ConditionalOnProperty(name = ["hmpps.sqs.provider"], havingValue = "localstack")
   fun queueMessagingTemplate(amazonSQSAsync: AmazonSQSAsync?): QueueMessagingTemplate? = QueueMessagingTemplate(amazonSQSAsync)
 }
