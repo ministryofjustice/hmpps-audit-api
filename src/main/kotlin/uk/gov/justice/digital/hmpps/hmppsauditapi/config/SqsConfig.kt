@@ -12,7 +12,6 @@ import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 
 @ConstructorBinding
@@ -51,14 +50,7 @@ class SqsConfig {
       .withRegion(sqsConfigProperties.region)
       .build()
       .also {
-        hmppsQueueService.registerHmppsQueue(
-          HmppsQueue(
-            it,
-            sqsConfigProperties.queueName,
-            awsSqsDlqClient,
-            sqsConfigProperties.dlqName
-          )
-        )
+        with(sqsConfigProperties) { hmppsQueueService.registerHmppsQueue(it, queueName, awsSqsDlqClient, dlqName) }
       }
 
   @Bean
@@ -78,5 +70,6 @@ class SqsConfig {
 
   @Bean
   @ConditionalOnProperty(name = ["hmpps.sqs.provider"], havingValue = "aws")
-  fun queueMessagingTemplate(amazonSQSAsync: AmazonSQSAsync?): QueueMessagingTemplate? = QueueMessagingTemplate(amazonSQSAsync)
+  fun queueMessagingTemplate(amazonSQSAsync: AmazonSQSAsync?): QueueMessagingTemplate? =
+    QueueMessagingTemplate(amazonSQSAsync)
 }

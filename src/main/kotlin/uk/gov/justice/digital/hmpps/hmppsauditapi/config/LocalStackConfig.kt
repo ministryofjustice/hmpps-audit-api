@@ -14,7 +14,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 
 @Configuration
@@ -35,14 +34,7 @@ class LocalStackConfig {
       .also { sqsClient -> createMainQueue(sqsClient, awsSqsDlqClient, sqsConfigProperties) }
       .also { logger.info("Created sqs client for queue ${sqsConfigProperties.queueName}") }
       .also {
-        hmppsQueueService.registerHmppsQueue(
-          HmppsQueue(
-            it,
-            sqsConfigProperties.queueName,
-            awsSqsDlqClient,
-            sqsConfigProperties.dlqName
-          )
-        )
+        with(sqsConfigProperties) { hmppsQueueService.registerHmppsQueue(it, queueName, awsSqsDlqClient, dlqName) }
       }
 
   @Bean("awsSqsDlqClient")
