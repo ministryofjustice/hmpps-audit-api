@@ -10,6 +10,7 @@ import org.springframework.data.domain.Sort.Direction.DESC
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.SqsConfigProperties
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.mainQueue
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
@@ -36,7 +37,7 @@ class AuditService(
 
   fun sendAuditEvent(auditEvent: AuditEvent) {
     auditMessagingTemplate.send(
-      sqsConfigProperties.queueName,
+      sqsConfigProperties.mainQueue().queueName,
       MessageBuilder.withPayload(mapper.writeValueAsString(auditEvent)).build()
     )
   }

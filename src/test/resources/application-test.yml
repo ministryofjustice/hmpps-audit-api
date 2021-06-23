@@ -10,8 +10,10 @@ aws:
 
 hmpps.sqs:
   localstackUrl: http://localhost:4566
-  queueName: ${random.uuid}
-  dlqName: ${random.uuid}
+  queues:
+    main:
+      queueName: ${random.uuid}
+      dlqName: ${random.uuid}
 
 spring:
   datasource:
