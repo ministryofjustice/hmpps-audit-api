@@ -20,6 +20,7 @@ import org.springframework.http.MediaType
 import org.springframework.messaging.support.GenericMessage
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.SqsConfigProperties
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.mainQueue
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import java.time.Instant
@@ -160,7 +161,7 @@ class AuditResourceTest : IntegrationTest() {
         .expectStatus().isAccepted
 
       verify(auditService).sendAuditEvent(auditEvent)
-      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.queueName), any<GenericMessage<String>>())
+      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.mainQueue().queueName), any<GenericMessage<String>>())
     }
   }
 
@@ -178,7 +179,7 @@ class AuditResourceTest : IntegrationTest() {
         .expectStatus().isAccepted
 
       verify(auditService).sendAuditEvent(auditEvent)
-      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.queueName), any<GenericMessage<String>>())
+      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.mainQueue().queueName), any<GenericMessage<String>>())
     }
 
     @Test
@@ -194,7 +195,7 @@ class AuditResourceTest : IntegrationTest() {
         .expectStatus().isAccepted
 
       verify(auditService).sendAuditEvent(auditEvent)
-      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.queueName), any<GenericMessage<String>>())
+      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.mainQueue().queueName), any<GenericMessage<String>>())
     }
 
     @Test
@@ -210,7 +211,7 @@ class AuditResourceTest : IntegrationTest() {
         .expectStatus().isAccepted
 
       verify(auditService).sendAuditEvent(auditEvent)
-      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.queueName), any<GenericMessage<String>>())
+      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.mainQueue().queueName), any<GenericMessage<String>>())
     }
 
     @Test
@@ -227,7 +228,7 @@ class AuditResourceTest : IntegrationTest() {
         .expectStatus().isAccepted
 
       verify(auditService).sendAuditEvent(eventWithOperationId)
-      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.queueName), any<GenericMessage<String>>())
+      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.mainQueue().queueName), any<GenericMessage<String>>())
     }
 
     @Test
@@ -243,7 +244,7 @@ class AuditResourceTest : IntegrationTest() {
         .expectStatus().isAccepted
 
       verify(auditService).sendAuditEvent(auditEvent)
-      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.queueName), any<GenericMessage<String>>())
+      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.mainQueue().queueName), any<GenericMessage<String>>())
     }
   }
 
@@ -271,7 +272,7 @@ class AuditResourceTest : IntegrationTest() {
         .expectStatus().isAccepted
 
       verify(auditService).sendAuditEvent(auditEvent)
-      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.queueName), any<GenericMessage<String>>())
+      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.mainQueue().queueName), any<GenericMessage<String>>())
     }
 
     @Test
@@ -297,7 +298,7 @@ class AuditResourceTest : IntegrationTest() {
         .expectStatus().isAccepted
 
       verify(auditService).sendAuditEvent(auditEvent)
-      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.queueName), any<GenericMessage<String>>())
+      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.mainQueue().queueName), any<GenericMessage<String>>())
     }
 
     @Test
@@ -323,7 +324,7 @@ class AuditResourceTest : IntegrationTest() {
         .expectStatus().isAccepted
 
       verify(auditService).sendAuditEvent(auditEvent)
-      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.queueName), any<GenericMessage<String>>())
+      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.mainQueue().queueName), any<GenericMessage<String>>())
     }
 
     @Test
@@ -349,7 +350,7 @@ class AuditResourceTest : IntegrationTest() {
         .expectStatus().isAccepted
 
       verify(auditService).sendAuditEvent(auditEvent)
-      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.queueName), any<GenericMessage<String>>())
+      verify(queueMessagingTemplate).send(eq(sqsConfigProperties.mainQueue().queueName), any<GenericMessage<String>>())
     }
   }
 

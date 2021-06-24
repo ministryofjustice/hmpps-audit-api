@@ -20,13 +20,22 @@ data class SqsConfigProperties(
   val region: String,
   val provider: String,
   val localstackUrl: String = "",
-  val queueName: String,
-  val queueAccessKeyId: String = "",
-  val queueSecretAccessKey: String = "",
-  val dlqName: String,
-  val dlqAccessKeyId: String = "",
-  val dlqSecretAccessKey: String = "",
-)
+  val queues: Map<String, QueueConfig>,
+) {
+  data class QueueConfig(
+    val queueName: String,
+    val queueAccessKeyId: String = "",
+    val queueSecretAccessKey: String = "",
+    val dlqName: String,
+    val dlqAccessKeyId: String = "",
+    val dlqSecretAccessKey: String = "",
+  )
+}
+
+fun SqsConfigProperties.mainQueue() =
+  queues["main"] ?: throw MissingQueueException("main queue has not been loaded from configuration properties")
+
+class MissingQueueException(message: String) : RuntimeException(message)
 
 @Configuration
 class SqsConfig {
@@ -42,15 +51,23 @@ class SqsConfig {
       .withCredentials(
         AWSStaticCredentialsProvider(
           BasicAWSCredentials(
-            sqsConfigProperties.queueAccessKeyId,
-            sqsConfigProperties.queueSecretAccessKey
+            sqsConfigProperties.mainQueue().queueAccessKeyId,
+            sqsConfigProperties.mainQueue().queueSecretAccessKey
           )
         )
       )
       .withRegion(sqsConfigProperties.region)
       .build()
       .also {
-        with(sqsConfigProperties) { hmppsQueueService.registerHmppsQueue(it, queueName, awsSqsDlqClient, dlqName) }
+        with(sqsConfigProperties.mainQueue()) {
+          hmppsQueueService.registerHmppsQueue(
+            "main",
+            it,
+            queueName,
+            awsSqsDlqClient,
+            dlqName
+          )
+        }
       }
 
   @Bean
@@ -60,8 +77,8 @@ class SqsConfig {
       .withCredentials(
         AWSStaticCredentialsProvider(
           BasicAWSCredentials(
-            sqsConfigProperties.dlqAccessKeyId,
-            sqsConfigProperties.dlqSecretAccessKey
+            sqsConfigProperties.mainQueue().dlqAccessKeyId,
+            sqsConfigProperties.mainQueue().dlqSecretAccessKey
           )
         )
       )

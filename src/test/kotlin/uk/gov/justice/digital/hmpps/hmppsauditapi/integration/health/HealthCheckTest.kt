@@ -2,12 +2,18 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.integration.health
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.SqsConfigProperties
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.mainQueue
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.IntegrationTest
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.function.Consumer
 
 class HealthCheckTest : IntegrationTest() {
+
+  @Autowired
+  private lateinit var sqsConfigProperties: SqsConfigProperties
 
   @Test
   fun `Health page reports ok`() {
@@ -26,10 +32,12 @@ class HealthCheckTest : IntegrationTest() {
       .exchange()
       .expectStatus().isOk
       .expectBody()
-      .jsonPath("components.hmppsAuditQueueHealth.details.MessagesOnQueue").isEqualTo(0)
-      .jsonPath("components.hmppsAuditQueueHealth.details.MessagesInFlight").isEqualTo(0)
-      .jsonPath("components.hmppsAuditQueueHealth.details.MessagesOnDLQ").isEqualTo(0)
-      .jsonPath("components.hmppsAuditQueueHealth.details.dlqStatus").isEqualTo("UP")
+      .jsonPath("components.main-health.details.queueName").isEqualTo(sqsConfigProperties.mainQueue().queueName)
+      .jsonPath("components.main-health.details.messagesOnQueue").isEqualTo(0)
+      .jsonPath("components.main-health.details.messagesInFlight").isEqualTo(0)
+      .jsonPath("components.main-health.details.messagesOnDlq").isEqualTo(0)
+      .jsonPath("components.main-health.details.dlqStatus").isEqualTo("UP")
+      .jsonPath("components.main-health.details.dlqName").isEqualTo(sqsConfigProperties.mainQueue().dlqName)
   }
 
   @Test

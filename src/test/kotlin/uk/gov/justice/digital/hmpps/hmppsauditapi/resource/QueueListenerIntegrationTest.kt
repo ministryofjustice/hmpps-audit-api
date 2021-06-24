@@ -6,6 +6,7 @@ import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.SqsConfigProperties
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.mainQueue
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
 
@@ -31,13 +32,19 @@ abstract class QueueListenerIntegrationTest : IntegrationTest() {
 
   fun getNumberOfMessagesCurrentlyOnQueue(): Int? {
     val queueAttributes =
-      awsSqsClient.getQueueAttributes(sqsConfigProperties.queueName.queueUrl(), listOf("ApproximateNumberOfMessages"))
+      awsSqsClient.getQueueAttributes(
+        sqsConfigProperties.mainQueue().queueName.queueUrl(),
+        listOf("ApproximateNumberOfMessages")
+      )
     return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()
   }
 
   fun getNumberOfMessagesCurrentlyOnDlq(): Int? {
     val queueAttributes =
-      awsSqsDlqClient.getQueueAttributes(sqsConfigProperties.dlqName.queueUrl(), listOf("ApproximateNumberOfMessages"))
+      awsSqsDlqClient.getQueueAttributes(
+        sqsConfigProperties.mainQueue().dlqName.queueUrl(),
+        listOf("ApproximateNumberOfMessages")
+      )
     return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()
   }
 
