@@ -8,7 +8,6 @@ import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
-import uk.gov.justice.digital.hmpps.hmppsauditapi.config.mainQueue
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 
@@ -19,7 +18,7 @@ class RetryDlqTest : QueueListenerIntegrationTest() {
     @Test
     fun `should fail if no token`() {
       webTestClient.put()
-        .uri("/queue-admin/retry-dlq/${sqsConfigProperties.mainQueue().dlqName}")
+        .uri("/queue-admin/retry-dlq/${auditQueueConfig.dlqName}")
         .contentType(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus().isUnauthorized
@@ -28,7 +27,7 @@ class RetryDlqTest : QueueListenerIntegrationTest() {
     @Test
     fun `should fail if wrong role`() {
       webTestClient.put()
-        .uri("/queue-admin/retry-dlq/${sqsConfigProperties.mainQueue().dlqName}")
+        .uri("/queue-admin/retry-dlq/${auditQueueConfig.dlqName}")
         .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
         .contentType(MediaType.APPLICATION_JSON)
         .exchange()
@@ -38,7 +37,7 @@ class RetryDlqTest : QueueListenerIntegrationTest() {
     @Test
     fun `should fail if using default rather than custom role`() {
       webTestClient.put()
-        .uri("/queue-admin/retry-dlq/${sqsConfigProperties.mainQueue().dlqName}")
+        .uri("/queue-admin/retry-dlq/${auditQueueConfig.dlqName}")
         .headers(setAuthorisation(roles = listOf("ROLE_QUEUE_ADMIN")))
         .contentType(MediaType.APPLICATION_JSON)
         .exchange()
@@ -69,11 +68,11 @@ class RetryDlqTest : QueueListenerIntegrationTest() {
   """
       await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
       await untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 0 }
-      awsSqsDlqClient.sendMessage(sqsConfigProperties.mainQueue().dlqName.queueUrl(), message)
+      awsSqsDlqClient.sendMessage(awsSqsDlqUrl, message)
       await untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 1 }
 
       webTestClient.put()
-        .uri("/queue-admin/retry-dlq/${sqsConfigProperties.mainQueue().dlqName}")
+        .uri("/queue-admin/retry-dlq/${auditQueueConfig.dlqName}")
         .headers(setAuthorisation(roles = listOf("ROLE_AUDIT_API_QUEUE_ADMIN"), scopes = listOf("write")))
         .contentType(MediaType.APPLICATION_JSON)
         .exchange()
@@ -102,7 +101,7 @@ class RetryDlqTest : QueueListenerIntegrationTest() {
   """
       await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
       await untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 0 }
-      awsSqsDlqClient.sendMessage(sqsConfigProperties.mainQueue().dlqName.queueUrl(), message)
+      awsSqsDlqClient.sendMessage(awsSqsDlqUrl, message)
       await untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 1 }
 
       webTestClient.put()

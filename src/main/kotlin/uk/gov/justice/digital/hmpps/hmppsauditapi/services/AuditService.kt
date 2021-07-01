@@ -2,27 +2,23 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.microsoft.applicationinsights.TelemetryClient
-import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.Direction.DESC
-import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.hmppsauditapi.config.SqsConfigProperties
-import uk.gov.justice.digital.hmpps.hmppsauditapi.config.mainQueue
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
+import uk.gov.justice.hmpps.sqs.HmppsQueueService
 
 @Service
 class AuditService(
-  private val sqsConfigProperties: SqsConfigProperties,
   private val telemetryClient: TelemetryClient,
   private val auditRepository: AuditRepository,
   private val mapper: ObjectMapper,
-  private val auditMessagingTemplate: QueueMessagingTemplate
+  private val hmppsQueueService: HmppsQueueService,
 ) {
 
   fun audit(auditEvent: AuditEvent) {
@@ -36,10 +32,11 @@ class AuditService(
     auditRepository.findPage(pageable, who, what).map { AuditDto(it) }
 
   fun sendAuditEvent(auditEvent: AuditEvent) {
-    auditMessagingTemplate.send(
-      sqsConfigProperties.mainQueue().queueName,
-      MessageBuilder.withPayload(mapper.writeValueAsString(auditEvent)).build()
-    )
+    val hmppsQueue =
+      hmppsQueueService.findByQueueId("auditQueue") ?: throw IllegalStateException("Unable to find auditQueue")
+    with(hmppsQueue) {
+      sqsClient.sendMessage(queueUrl, mapper.writeValueAsString(auditEvent))
+    }
   }
 }
 

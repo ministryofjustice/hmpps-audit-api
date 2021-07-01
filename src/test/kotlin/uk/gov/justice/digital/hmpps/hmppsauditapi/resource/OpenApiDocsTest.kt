@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
+import uk.gov.justice.digital.hmpps.hmppsauditapi.IntegrationTest
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 

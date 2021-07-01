@@ -1,12 +1,9 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 
-import com.amazonaws.services.sqs.AmazonSQS
-import com.amazonaws.services.sqs.AmazonSQSAsync
 import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
-import uk.gov.justice.digital.hmpps.hmppsauditapi.config.SqsConfigProperties
-import uk.gov.justice.digital.hmpps.hmppsauditapi.config.mainQueue
+import uk.gov.justice.digital.hmpps.hmppsauditapi.IntegrationTest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
 
@@ -21,19 +18,10 @@ abstract class QueueListenerIntegrationTest : IntegrationTest() {
   @Autowired
   protected lateinit var listener: HMPPSAuditListener
 
-  @Autowired
-  protected lateinit var awsSqsClient: AmazonSQSAsync
-
-  @Autowired
-  protected lateinit var awsSqsDlqClient: AmazonSQS
-
-  @Autowired
-  protected lateinit var sqsConfigProperties: SqsConfigProperties
-
   fun getNumberOfMessagesCurrentlyOnQueue(): Int? {
     val queueAttributes =
       awsSqsClient.getQueueAttributes(
-        sqsConfigProperties.mainQueue().queueName.queueUrl(),
+        awsSqsUrl,
         listOf("ApproximateNumberOfMessages")
       )
     return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()
@@ -42,7 +30,7 @@ abstract class QueueListenerIntegrationTest : IntegrationTest() {
   fun getNumberOfMessagesCurrentlyOnDlq(): Int? {
     val queueAttributes =
       awsSqsDlqClient.getQueueAttributes(
-        sqsConfigProperties.mainQueue().dlqName.queueUrl(),
+        awsSqsDlqUrl,
         listOf("ApproximateNumberOfMessages")
       )
     return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()

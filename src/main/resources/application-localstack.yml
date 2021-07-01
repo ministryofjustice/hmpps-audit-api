@@ -5,11 +5,12 @@ aws:
   provider: localstack
 
 hmpps.sqs:
-  localstackUrl: http://localhost:4566
+  provider: localstack
   queues:
-    main:
-      queueName: ${random.uuid}
-      dlqName: ${random.uuid}
+    auditQueue:
+      queueName: mainQueue
+      asyncQueueClient: true
+      dlqName: mainDlq
 
 spring:
   jpa:
