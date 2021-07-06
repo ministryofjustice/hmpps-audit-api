@@ -27,7 +27,7 @@ class AuditServiceTest {
   private val hmppsQueueProperties = HmppsQueueProperties(
     region = "eu-west-2",
     provider = "aws",
-    queues = mapOf("auditQueue" to QueueConfig(queueName = "hmpps-audit-queue", dlqName = "hmpps-audit-dlq"))
+    queues = mapOf("auditqueue" to QueueConfig(queueName = "hmpps-audit-queue", dlqName = "hmpps-audit-dlq"))
   )
   private val auditService =
     AuditService(telemetryClient, auditRepository, jacksonObjectMapper(), mock())

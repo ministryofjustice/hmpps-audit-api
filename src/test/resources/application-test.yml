@@ -11,7 +11,7 @@ aws:
 hmpps.sqs:
   provider: localstack
   queues:
-    auditQueue:
+    auditqueue:
       queueName: ${random.uuid}
       asyncQueueClient: true
       dlqName: ${random.uuid}

@@ -20,7 +20,7 @@ class HMPPSAuditListener(
   private val mapper: ObjectMapper
 ) {
 
-  @JmsListener(destination = "auditQueue", containerFactory = "hmppsQueueContainerFactoryProxy")
+  @JmsListener(destination = "auditqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
   fun onAuditEvent(message: String) {
     val auditEvent: AuditEvent = mapper.readValue(message, AuditEvent::class.java)
     auditService.audit(auditEvent)

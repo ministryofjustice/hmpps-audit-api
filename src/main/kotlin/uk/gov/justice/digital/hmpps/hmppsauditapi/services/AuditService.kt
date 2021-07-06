@@ -33,7 +33,7 @@ class AuditService(
 
   fun sendAuditEvent(auditEvent: AuditEvent) {
     val hmppsQueue =
-      hmppsQueueService.findByQueueId("auditQueue") ?: throw IllegalStateException("Unable to find auditQueue")
+      hmppsQueueService.findByQueueId("auditqueue") ?: throw IllegalStateException("Unable to find auditqueue")
     with(hmppsQueue) {
       sqsClient.sendMessage(queueUrl, mapper.writeValueAsString(auditEvent))
     }

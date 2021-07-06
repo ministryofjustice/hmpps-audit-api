@@ -92,7 +92,7 @@ cloud:
 hmpps.sqs:
   queueAdminRole: ROLE_AUDIT_API_QUEUE_ADMIN
   queues:
-    auditQueue:
+    auditqueue:
       asyncQueueClient: true
 
 oauth:

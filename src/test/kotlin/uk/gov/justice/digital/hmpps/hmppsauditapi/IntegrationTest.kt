@@ -44,7 +44,7 @@ abstract class IntegrationTest {
   protected lateinit var hmppsQueueService: HmppsQueueService
 
   protected val auditQueueConfig by lazy {
-    hmppsQueueService.findByQueueId("auditQueue") ?: throw MissingQueueException("HmppsQueue auditQueue not found")
+    hmppsQueueService.findByQueueId("auditqueue") ?: throw MissingQueueException("HmppsQueue auditqueue not found")
   }
 
   class MissingQueueException(message: String) : RuntimeException(message)
@@ -53,20 +53,20 @@ abstract class IntegrationTest {
   protected val awsSqsUrl: String by lazy { auditQueueConfig.queueUrl }
   protected val awsSqsDlqUrl: String by lazy { auditQueueConfig.dlqUrl }
 
-  @SpyBean(name = "auditQueue-sqs-client")
+  @SpyBean(name = "auditqueue-sqs-client")
   protected lateinit var awsSqsClient: AmazonSQS
 
   @TestConfiguration
   class SqsConfig(private val hmppsQueueFactory: HmppsQueueFactory) {
 
-    @Bean("auditQueue-sqs-client")
+    @Bean("auditqueue-sqs-client")
     fun auditQueueSqsClient(
       hmppsQueueProperties: HmppsQueueProperties,
-      @Qualifier("auditQueue-sqs-dlq-client") auditQueueSqsDlqClient: AmazonSQS
+      @Qualifier("auditqueue-sqs-dlq-client") auditQueueSqsDlqClient: AmazonSQS
     ): AmazonSQS =
       with(hmppsQueueProperties) {
-        val config = queues["auditQueue"]
-          ?: throw uk.gov.justice.hmpps.sqs.MissingQueueException("HmppsQueueProperties config for auditQueue not found")
+        val config = queues["auditqueue"]
+          ?: throw uk.gov.justice.hmpps.sqs.MissingQueueException("HmppsQueueProperties config for auditqueue not found")
         hmppsQueueFactory.localStackSqsClient(
           config.queueName,
           config.dlqName,

@@ -7,7 +7,7 @@ aws:
 hmpps.sqs:
   provider: localstack
   queues:
-    auditQueue:
+    auditqueue:
       queueName: mainQueue
       asyncQueueClient: true
       dlqName: mainDlq
