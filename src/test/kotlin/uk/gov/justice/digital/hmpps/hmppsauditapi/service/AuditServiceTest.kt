@@ -16,19 +16,12 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
-import uk.gov.justice.hmpps.sqs.HmppsQueueProperties
-import uk.gov.justice.hmpps.sqs.HmppsQueueProperties.QueueConfig
 import java.time.Instant
 import java.util.UUID
 
 class AuditServiceTest {
   private val telemetryClient: TelemetryClient = mock()
   private val auditRepository: AuditRepository = mock()
-  private val hmppsQueueProperties = HmppsQueueProperties(
-    region = "eu-west-2",
-    provider = "aws",
-    queues = mapOf("auditqueue" to QueueConfig(queueName = "hmpps-audit-queue", dlqName = "hmpps-audit-dlq"))
-  )
   private val auditService =
     AuditService(telemetryClient, auditRepository, jacksonObjectMapper(), mock())
 
