@@ -28,13 +28,13 @@ env:
   - name: APPLICATIONINSIGHTS_CONFIGURATION_FILE
     value: "{{ .Values.env.APPLICATIONINSIGHTS_CONFIGURATION_FILE }}"
 
-  - name: HMPPS_SQS_QUEUES_AUDITQUEUE_ACCESS_KEY_ID
+  - name: HMPPS_SQS_QUEUES_AUDITQUEUE_QUEUE_ACCESS_KEY_ID
     valueFrom:
       secretKeyRef:
         name: sqs-audit-queue-secret
         key: access_key_id
 
-  - name: HMPPS_SQS_QUEUES_AUDITQUEUE_SECRET_ACCESS_KEY
+  - name: HMPPS_SQS_QUEUES_AUDITQUEUE_QUEUE_SECRET_ACCESS_KEY
     valueFrom:
       secretKeyRef:
         name: sqs-audit-queue-secret
