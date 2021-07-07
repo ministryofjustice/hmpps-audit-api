@@ -14,8 +14,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework:spring-jms")
-  implementation("org.springframework.cloud:spring-cloud-aws-messaging:2.2.6.RELEASE")
-  implementation("uk.gov.justice.service.hmpps:hmpps-spring-boot-sqs:0.4.0")
+  implementation("uk.gov.justice.service.hmpps:hmpps-spring-boot-sqs:0.6.0")
 
   implementation("org.springdoc:springdoc-openapi-ui:1.5.8")
   implementation("org.springdoc:springdoc-openapi-kotlin:1.5.8")
@@ -32,6 +31,7 @@ dependencies {
   testImplementation("org.awaitility:awaitility-kotlin:4.1.0")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+  testImplementation("org.mockito:mockito-inline:3.10.0")
 }
 
 tasks {

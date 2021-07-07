@@ -28,37 +28,37 @@ env:
   - name: APPLICATIONINSIGHTS_CONFIGURATION_FILE
     value: "{{ .Values.env.APPLICATIONINSIGHTS_CONFIGURATION_FILE }}"
 
-  - name: SQS_AWS_ACCESS_KEY_ID
+  - name: HMPPS_SQS_QUEUES_AUDITQUEUE_QUEUE_ACCESS_KEY_ID
     valueFrom:
       secretKeyRef:
         name: sqs-audit-queue-secret
         key: access_key_id
 
-  - name: SQS_AWS_SECRET_ACCESS_KEY
+  - name: HMPPS_SQS_QUEUES_AUDITQUEUE_QUEUE_SECRET_ACCESS_KEY
     valueFrom:
       secretKeyRef:
         name: sqs-audit-queue-secret
         key: secret_access_key
 
-  - name: SQS_QUEUE_NAME
+  - name: HMPPS_SQS_QUEUES_AUDITQUEUE_QUEUE_NAME
     valueFrom:
       secretKeyRef:
         name: sqs-audit-queue-secret
         key: sqs_queue_name
 
-  - name: SQS_AWS_DLQ_ACCESS_KEY_ID
+  - name: HMPPS_SQS_QUEUES_AUDITQUEUE_DLQ_ACCESS_KEY_ID
     valueFrom:
       secretKeyRef:
         name: sqs-audit-queue-dl-secret
         key: access_key_id
 
-  - name: SQS_AWS_DLQ_SECRET_ACCESS_KEY
+  - name: HMPPS_SQS_QUEUES_AUDITQUEUE_DLQ_SECRET_ACCESS_KEY
     valueFrom:
       secretKeyRef:
         name: sqs-audit-queue-dl-secret
         key: secret_access_key
 
-  - name: SQS_DLQ_NAME
+  - name: HMPPS_SQS_QUEUES_AUDITQUEUE_DLQ_NAME
     valueFrom:
       secretKeyRef:
         name: sqs-audit-queue-dl-secret

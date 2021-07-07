@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
-import uk.gov.justice.digital.hmpps.hmppsauditapi.config.SqsConfigProperties
-import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.IntegrationTest
+import uk.gov.justice.digital.hmpps.hmppsauditapi.IntegrationTest
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueHealth
+import uk.gov.justice.hmpps.sqs.HmppsSqsProperties
 
 @Import(QueueHealthCheckNegativeTest.TestConfig::class)
 class QueueHealthCheckNegativeTest : IntegrationTest() {
@@ -19,12 +19,12 @@ class QueueHealthCheckNegativeTest : IntegrationTest() {
   @TestConfiguration
   class TestConfig {
     @Bean
-    fun badQueueHealth(sqsConfigProperties: SqsConfigProperties): HmppsQueueHealth {
+    fun badQueueHealth(hmppsSqsProperties: HmppsSqsProperties): HmppsQueueHealth {
       val sqsClient = AmazonSQSClientBuilder.standard()
         .withEndpointConfiguration(
           AwsClientBuilder.EndpointConfiguration(
-            sqsConfigProperties.localstackUrl,
-            sqsConfigProperties.region
+            hmppsSqsProperties.localstackUrl,
+            hmppsSqsProperties.region
           )
         )
         .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
