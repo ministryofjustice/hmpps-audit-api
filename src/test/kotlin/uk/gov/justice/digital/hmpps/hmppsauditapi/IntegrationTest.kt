@@ -67,7 +67,7 @@ abstract class IntegrationTest {
       with(hmppsSqsProperties) {
         val config = queues["auditqueue"]
           ?: throw uk.gov.justice.hmpps.sqs.MissingQueueException("HmppsSqsProperties config for auditqueue not found")
-        hmppsQueueFactory.createSqsClient(config, hmppsSqsProperties, auditQueueSqsDlqClient)
+        hmppsQueueFactory.createSqsClient("auditqueue", config, hmppsSqsProperties, auditQueueSqsDlqClient)
       }
   }
 }
