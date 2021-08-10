@@ -64,7 +64,7 @@ class PurgeQueueTest : QueueListenerIntegrationTest() {
     }
   """
       await untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 0 }
-      awsSqsDlqClient.sendMessage(auditQueueConfig.dlqName.queueUrl(), message)
+      awsSqsDlqClient.sendMessage(auditQueueConfig.dlqName!!.queueUrl(), message)
       await untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 1 }
 
       webTestClient.put()

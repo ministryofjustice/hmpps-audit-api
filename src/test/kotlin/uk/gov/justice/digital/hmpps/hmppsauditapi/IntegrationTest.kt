@@ -49,9 +49,9 @@ abstract class IntegrationTest {
 
   class MissingQueueException(message: String) : RuntimeException(message)
 
-  protected val awsSqsDlqClient: AmazonSQS by lazy { auditQueueConfig.sqsDlqClient }
-  protected val awsSqsUrl: String by lazy { auditQueueConfig.queueUrl }
-  protected val awsSqsDlqUrl: String by lazy { auditQueueConfig.dlqUrl }
+  protected val awsSqsDlqClient by lazy { auditQueueConfig.sqsDlqClient as AmazonSQS }
+  protected val awsSqsUrl by lazy { auditQueueConfig.queueUrl }
+  protected val awsSqsDlqUrl by lazy { auditQueueConfig.dlqUrl as String }
 
   @SpyBean(name = "auditqueue-sqs-client")
   protected lateinit var awsSqsClient: AmazonSQS

@@ -31,7 +31,7 @@ class HealthCheckTest : IntegrationTest() {
       .jsonPath("components.auditqueue-health.details.messagesInFlight").isEqualTo(0)
       .jsonPath("components.auditqueue-health.details.messagesOnDlq").isEqualTo(0)
       .jsonPath("components.auditqueue-health.details.dlqStatus").isEqualTo("UP")
-      .jsonPath("components.auditqueue-health.details.dlqName").isEqualTo(auditQueueConfig.dlqName)
+      .jsonPath("components.auditqueue-health.details.dlqName").isEqualTo(auditQueueConfig.dlqName!!)
   }
 
   @Test
