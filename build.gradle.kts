@@ -13,7 +13,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:0.8.2-beta")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:0.8.2")
 
   implementation("org.springdoc:springdoc-openapi-ui:1.5.8")
   implementation("org.springdoc:springdoc-openapi-kotlin:1.5.8")
