@@ -17,11 +17,11 @@ generic-service:
       nginx.ingress.kubernetes.io/custom-http-errors: "418"
       nginx.ingress.kubernetes.io/configuration-snippet: |
         server_tokens off;
-        location /prometheus {
+        location /queue-admin/retry-all-dlqs {
           deny all;
           return 401;
         }
-    tlsSecretName: hmpps-audit-api-cert
+    tlsSecretName: audit-api-cert
     path: /
 
   # Environment variables to load into the deployment
@@ -29,7 +29,6 @@ generic-service:
     JAVA_OPTS: "-Xmx512m"
     SERVER_PORT: "8080"
     APPLICATIONINSIGHTS_CONNECTION_STRING: "InstrumentationKey=$(APPINSIGHTS_INSTRUMENTATIONKEY)"
-    APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
 
   # Pre-existing kubernetes secrets to load as environment variables in the deployment.
   # namespace_secrets:
