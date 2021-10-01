@@ -25,6 +25,8 @@ dependencies {
   runtimeOnly("org.flywaydb:flyway-core:7.15.0")
   runtimeOnly("org.postgresql:postgresql:42.2.23")
 
+  agentDeps("com.microsoft.azure:applicationinsights-agent:3.2.0-BETA.4")
+
   testImplementation("org.awaitility:awaitility-kotlin:4.1.0")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
