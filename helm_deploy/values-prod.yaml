@@ -1,28 +1,15 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 4
-
-image:
-  repository: quay.io/hmpps/hmpps-audit-api
-  tag: latest
-  port: 8080
-
-ingress:
-  enabled: true
-  hosts:
-    - host: audit-api.hmpps.service.justice.gov.uk
-      cert_secret: audit-api-cert
-  path: /
+# Environment specific values, override helm_deploy/hnpps-audit-api/values.yaml
+generic-service:
+  replicaCount: 4
+  ingress:
+    host: audit-api.prison.service.justice.gov.uk
 
 env:
-  JAVA_OPTS: "-Xmx512m"
   OAUTH_ENDPOINT_URL: "https://sign-in.hmpps.service.justice.gov.uk/auth"
   APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
-
-# determine which slack channel alerts are sent to, via the correct Alert Manager receiver
-generic-prometheus-alerts:
-  alertSeverity: digital-prison-service
 
 # CloudPlatform AlertManager receiver to route promethues alerts to slack
 generic-prometheus-alerts:

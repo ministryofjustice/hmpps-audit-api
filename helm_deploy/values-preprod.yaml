@@ -1,22 +1,12 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 4
-
-image:
-  repository: quay.io/hmpps/hmpps-audit-api
-  tag: latest
-  port: 8080
-
-ingress:
-  enabled: true
-  hosts:
-    - host: audit-api-preprod.hmpps.service.justice.gov.uk
-      cert_secret: audit-api-cert
-  path: /
+generic-service:
+  replicaCount: 4
+  ingress:
+    host: audit-api-preprod.service.justice.gov.uk
 
 env:
-  JAVA_OPTS: "-Xmx512m"
   OAUTH_ENDPOINT_URL: "https://sign-in-preprod.hmpps.service.justice.gov.uk/auth"
   APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
 
