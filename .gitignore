@@ -6,6 +6,8 @@
 .idea/
 .gradle/
 build/
+helm_deploy/*/Chart.lock
+helm_deploy/*/charts/
 
 # CMake
 cmake-build-debug/

@@ -1,5 +1,66 @@
 ---
 # Values here are the same across all environments
+generic-service:
+  nameOverride: hmpps-audit-api
+
+  replicaCount: 4
+
+  image:
+    repository: quay.io/hmpps/hmpps-audit-api
+    tag: app_version    # override at deployment time
+    port: 8080
+
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: "nginx"
+      nginx.ingress.kubernetes.io/custom-http-errors: "418"
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        server_tokens off;
+        location /prometheus {
+          deny all;
+          return 401;
+        }
+    tlsSecretName: hmpps-audit-api-cert
+    path: /
+
+  # Environment variables to load into the deployment
+  env:
+    JAVA_OPTS: "-Xmx512m"
+    SERVER_PORT: "8080"
+    APPLICATIONINSIGHTS_CONNECTION_STRING: "InstrumentationKey=$(APPINSIGHTS_INSTRUMENTATIONKEY)"
+    APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
+
+  # Pre-existing kubernetes secrets to load as environment variables in the deployment.
+  # namespace_secrets:
+  #   [name of kubernetes secret]:
+  #     [name of environment variable as seen by app]: [key of kubernetes secret to load]
+
+  namespace_secrets:
+    hmpps-audit-api:
+      APPINSIGHTS_INSTRUMENTATIONKEY: "APPINSIGHTS_INSTRUMENTATIONKEY"
+    dps-rds-instance-output:
+      DATABASE_USERNAME: "database_username"
+      DATABASE_PASSWORD: "database_password"
+      DATABASE_NAME: "database_name"
+      DATABASE_ENDPOINT: "rds_instance_endpoint"
+    sqs-audit-queue-secret:
+      HMPPS_SQS_QUEUES_AUDITQUEUE_QUEUE_NAME: "sqs_queue_name"
+      HMPPS_SQS_QUEUES_AUDITQUEUE_QUEUE_ACCESS_KEY_ID: "access_key_id"
+      HMPPS_SQS_QUEUES_AUDITQUEUE_QUEUE_SECRET_ACCESS_KEY: "secret_access_key"
+    sqs-audit-queue-dl-secret:
+      HMPPS_SQS_QUEUES_AUDITQUEUE_DLQ_NAME: "sqs_queue_name"
+      HMPPS_SQS_QUEUES_AUDITQUEUE_DLQ_ACCESS_KEY_ID: "access_key_id"
+      HMPPS_SQS_QUEUES_AUDITQUEUE_DLQ_SECRET_ACCESS_KEY: "secret_access_key"
+
+  allowlist:
+    office: "217.33.148.210/32"
+    health-kick: "35.177.252.195/32"
+    mojvpn: "81.134.202.29/32"
+    cloudplatform-live1-1: "35.178.209.113/32"
+    cloudplatform-live1-2: "3.8.51.207/32"
+    cloudplatform-live1-3: "35.177.252.54/32"
+
 
 generic-prometheus-alerts:
   targetApplication: hmpps-audit-api
