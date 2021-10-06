@@ -4,7 +4,7 @@
 generic-service:
   replicaCount: 4
   ingress:
-    host: audit-api-preprod.service.justice.gov.uk
+    host: audit-api-preprod.hmpps.service.justice.gov.uk
 
   env:
     OAUTH_ENDPOINT_URL: "https://sign-in-preprod.hmpps.service.justice.gov.uk/auth"
