@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.3.9"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.3.10-beta"
   kotlin("plugin.spring") version "1.5.31"
   kotlin("plugin.jpa") version "1.5.31"
 }
@@ -24,8 +24,6 @@ dependencies {
   runtimeOnly("com.h2database:h2:1.4.200")
   runtimeOnly("org.flywaydb:flyway-core:7.15.0")
   runtimeOnly("org.postgresql:postgresql:42.2.23")
-
-  agentDeps("com.microsoft.azure:applicationinsights-agent:3.2.0-BETA.4")
 
   testImplementation("org.awaitility:awaitility-kotlin:4.1.0")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
