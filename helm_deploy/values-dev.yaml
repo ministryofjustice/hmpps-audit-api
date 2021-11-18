@@ -6,6 +6,7 @@ generic-service:
   replicaCount: 2
   ingress:
     host: audit-api-dev.hmpps.service.justice.gov.uk
+    contextColour: green
 
   env:
     OAUTH_ENDPOINT_URL: "https://sign-in-dev.hmpps.service.justice.gov.uk/auth"
