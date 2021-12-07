@@ -1,10 +1,10 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.integration.endtoend
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.check
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.isNull
-import com.nhaarman.mockitokotlin2.mockingDetails
-import com.nhaarman.mockitokotlin2.verify
+import org.mockito.kotlin.any
+import org.mockito.kotlin.check
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
+import org.mockito.kotlin.mockingDetails
+import org.mockito.kotlin.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
