@@ -1,7 +1,7 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.3.13"
-  kotlin("plugin.spring") version "1.5.31"
-  kotlin("plugin.jpa") version "1.5.31"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.0.0-beta"
+  kotlin("plugin.spring") version "1.6.0"
+  kotlin("plugin.jpa") version "1.6.0"
 }
 
 configurations {
@@ -13,23 +13,22 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.0.2")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.0.3")
 
-  implementation("org.springdoc:springdoc-openapi-ui:1.5.10")
-  implementation("org.springdoc:springdoc-openapi-kotlin:1.5.10")
-  implementation("org.springdoc:springdoc-openapi-data-rest:1.5.10")
+  implementation("org.springdoc:springdoc-openapi-ui:1.5.13")
+  implementation("org.springdoc:springdoc-openapi-kotlin:1.5.13")
+  implementation("org.springdoc:springdoc-openapi-data-rest:1.5.13")
 
   implementation("org.apache.commons:commons-lang3:3.12.0")
 
   runtimeOnly("com.h2database:h2:1.4.200")
-  runtimeOnly("org.flywaydb:flyway-core:7.15.0")
-  runtimeOnly("org.postgresql:postgresql:42.2.23")
+  runtimeOnly("org.flywaydb:flyway-core:8.2.1")
+  runtimeOnly("org.postgresql:postgresql:42.3.1")
 
-  testImplementation("org.awaitility:awaitility-kotlin:4.1.0")
+  testImplementation("org.awaitility:awaitility-kotlin:4.1.1")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
-  testImplementation("org.mockito:mockito-inline:3.12.4")
-  testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
+  testImplementation("org.mockito:mockito-inline:4.1.0")
 }
 
 java {
