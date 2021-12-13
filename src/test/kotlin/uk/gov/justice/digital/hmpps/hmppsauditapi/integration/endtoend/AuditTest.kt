@@ -45,9 +45,9 @@ class AuditTest : QueueListenerIntegrationTest() {
         assertThat(it["what"]).isEqualTo("OFFENDER_DELETED")
         assertThat(it["when"]).isEqualTo("2021-01-25T12:30:00Z")
         assertThat(it["operationId"]).isEqualTo("badea6d876c62e2f5264c94c7b50875e")
-        assertThat(it["who"]).isEqualTo("bobby.beans")
+        assertThat(it.containsKey("who")).isEqualTo(false)
         assertThat(it["service"]).isEqualTo("offender-service")
-        assertThat(it["details"]).isEqualTo("{ \"offenderId\": \"99\"}")
+        assertThat(it.containsKey("details")).isEqualTo(false)
       },
       isNull()
     )
