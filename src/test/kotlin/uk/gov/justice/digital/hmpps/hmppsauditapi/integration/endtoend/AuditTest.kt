@@ -47,7 +47,7 @@ class AuditTest : QueueListenerIntegrationTest() {
         assertThat(it["operationId"]).isEqualTo("badea6d876c62e2f5264c94c7b50875e")
         assertThat(it["who"]).isEqualTo("bobby.beans")
         assertThat(it["service"]).isEqualTo("offender-service")
-        assertThat(it["details"]).isEqualTo("{ \"offenderId\": \"99\"}")
+        assertThat(it.containsKey("details")).isEqualTo(false)
       },
       isNull()
     )

@@ -42,10 +42,9 @@ class AuditService(
 
 private fun AuditEvent.asMap(): Map<String, String> {
   val items = mutableMapOf("what" to what, "when" to `when`.toString())
-  items.addIfNotNull("operationId", operationId)
   items.addIfNotNull("who", who)
+  items.addIfNotNull("operationId", operationId)
   items.addIfNotNull("service", service)
-  items.addIfNotNull("details", details)
   return items.toMap()
 }
 
