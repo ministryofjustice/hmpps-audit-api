@@ -14,9 +14,9 @@ interface AuditRepository : PagingAndSortingRepository<AuditEvent, UUID> {
     """
     select 
         ae from AuditEvent ae 
-    where 
-         (coalesce(:what) is null or ae.what=:what)
-     and (coalesce(:who) is null or ae.who=:who)
+    where
+         (:what is null or ae.what=:what)
+     and (:who is null or ae.who=:who)
     """
   )
   fun findPage(pageable: Pageable, who: String?, what: String?): Page<AuditEvent>
