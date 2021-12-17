@@ -15,14 +15,14 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.0.3")
 
-  implementation("org.springdoc:springdoc-openapi-ui:1.5.13")
-  implementation("org.springdoc:springdoc-openapi-kotlin:1.5.13")
-  implementation("org.springdoc:springdoc-openapi-data-rest:1.5.13")
+  implementation("org.springdoc:springdoc-openapi-ui:1.6.1")
+  implementation("org.springdoc:springdoc-openapi-kotlin:1.6.1")
+  implementation("org.springdoc:springdoc-openapi-data-rest:1.6.1")
 
   implementation("org.apache.commons:commons-lang3:3.12.0")
 
-  runtimeOnly("com.h2database:h2:1.4.200")
-  runtimeOnly("org.flywaydb:flyway-core:8.2.1")
+  runtimeOnly("com.h2database:h2:2.0.202")
+  runtimeOnly("org.flywaydb:flyway-core:8.2.2")
   runtimeOnly("org.postgresql:postgresql:42.3.1")
 
   testImplementation("org.awaitility:awaitility-kotlin:4.1.1")
