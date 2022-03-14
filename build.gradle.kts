@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.0.5-beta"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.1.0"
   kotlin("plugin.spring") version "1.6.10"
   kotlin("plugin.jpa") version "1.6.10"
 }
@@ -22,13 +22,13 @@ dependencies {
   implementation("org.apache.commons:commons-lang3:3.12.0")
 
   runtimeOnly("com.h2database:h2:2.1.210")
-  runtimeOnly("org.flywaydb:flyway-core:8.5.1")
+  runtimeOnly("org.flywaydb:flyway-core:8.5.2")
   runtimeOnly("org.postgresql:postgresql:42.3.3")
 
-  testImplementation("org.awaitility:awaitility-kotlin:4.1.1")
+  testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
-  testImplementation("org.mockito:mockito-inline:4.3.1")
+  testImplementation("org.mockito:mockito-inline:4.4.0")
 }
 
 java {
