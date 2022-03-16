@@ -55,6 +55,8 @@ generic-service:
       HMPPS_SQS_QUEUES_AUDITQUEUE_DLQ_SECRET_ACCESS_KEY: "secret_access_key"
 
   allowlist:
+    petty-france-wifi: "213.121.161.112/28"
+    global-protect: "35.176.93.186/32"
     office: "217.33.148.210/32"
     health-kick: "35.177.252.195/32"
     mojvpn: "81.134.202.29/32"
