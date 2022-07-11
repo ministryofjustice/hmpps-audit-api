@@ -96,39 +96,11 @@ class AuditResource(
     @RequestParam what: String? = null,
   ): Page<AuditDto> = auditService.findPage(pageable, who, what)
 
+  @Deprecated("Audit events should be sent via audit queue")
   @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_write')")
   @PostMapping("")
   @ResponseStatus(HttpStatus.ACCEPTED)
-  @Operation(
-    summary = "Add a new audit event",
-    description = "Adds a new Audit Event to the audit queue, role required is ROLE_AUDIT",
-    security = [SecurityRequirement(name = "ROLE_AUDIT", scopes = ["write"])],
-    requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
-      content = [Content(mediaType = "application/json")]
-    ),
-    responses = [
-      ApiResponse(
-        responseCode = "201",
-        description = "Audit Event Added to audit event queue",
-        content = [Content(mediaType = "application/json")]
-      ),
-      ApiResponse(
-        responseCode = "400",
-        description = "Invalid request to add an audit event",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-      ),
-      ApiResponse(
-        responseCode = "401",
-        description = "Unauthorized to access this endpoint, requires a valid OAuth2 token",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-      ),
-      ApiResponse(
-        responseCode = "403",
-        description = "Forbidden, requires an authorisation with role ROLE_AUDIT",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-      )
-    ]
-  )
+  @Operation(hidden = true)
   fun insertAuditEvent(@RequestHeader(value = "traceparent", required = false) traceParent: String?, @RequestBody auditEvent: AuditEvent) {
     val cleansedAuditEvent = auditEvent.copy(operationId = auditEvent.operationId ?: traceParent?.traceId(), details = auditEvent.details?.jsonString())
     auditService.sendAuditEvent(cleansedAuditEvent)
