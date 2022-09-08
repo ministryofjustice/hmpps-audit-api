@@ -22,7 +22,7 @@ dependencies {
   implementation("org.apache.commons:commons-lang3:3.12.0")
 
   runtimeOnly("com.h2database:h2:2.1.214")
-  runtimeOnly("org.flywaydb:flyway-core:9.2.3")
+  runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("org.postgresql:postgresql:42.5.0")
 
   testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
