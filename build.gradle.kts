@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.5.6"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.5.7-beta"
   kotlin("plugin.spring") version "1.7.20"
   kotlin("plugin.jpa") version "1.7.20"
 }
@@ -13,11 +13,11 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.11")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.12")
 
-  implementation("org.springdoc:springdoc-openapi-ui:1.6.11")
-  implementation("org.springdoc:springdoc-openapi-kotlin:1.6.11")
-  implementation("org.springdoc:springdoc-openapi-data-rest:1.6.11")
+  implementation("org.springdoc:springdoc-openapi-ui:1.6.12")
+  implementation("org.springdoc:springdoc-openapi-kotlin:1.6.12")
+  implementation("org.springdoc:springdoc-openapi-data-rest:1.6.12")
 
   implementation("org.apache.commons:commons-lang3:3.12.0")
 
@@ -28,7 +28,7 @@ dependencies {
   testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
-  testImplementation("org.mockito:mockito-inline:4.8.0")
+  testImplementation("org.mockito:mockito-inline:4.8.1")
 }
 
 java {
