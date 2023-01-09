@@ -10,8 +10,10 @@ import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditFilterDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
+import java.time.Instant
 
 @Service
 class AuditService(
@@ -30,6 +32,17 @@ class AuditService(
 
   fun findPage(pageable: Pageable = Pageable.unpaged(), who: String?, what: String?): Page<AuditDto> =
     auditRepository.findPage(pageable, who, what).map { AuditDto(it) }
+
+  fun findFilteredEvents(
+    pageable: Pageable = Pageable.unpaged(),
+    auditFilterDto: AuditFilterDto
+  ): Page<AuditDto> {
+    val startDate = if (auditFilterDto.startDateTime != null) Instant.parse(auditFilterDto.startDateTime) else null
+    val endDate = if (auditFilterDto.endDateTime != null) Instant.parse(auditFilterDto.endDateTime) else null
+
+    return auditRepository.findFilteredResults(pageable, startDate, endDate, auditFilterDto.service, auditFilterDto.what, auditFilterDto.who)
+      .map { AuditDto(it) }
+  }
 
   fun sendAuditEvent(auditEvent: AuditEvent) {
     val hmppsQueue =

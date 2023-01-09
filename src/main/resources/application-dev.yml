@@ -1,8 +1,9 @@
 server:
   shutdown: immediate
+  port: 8081
 
 oauth:
-  endpoint.url: http://localhost:8090/auth
+  endpoint.url: http://localhost:8080/auth
 
 spring:
   datasource:

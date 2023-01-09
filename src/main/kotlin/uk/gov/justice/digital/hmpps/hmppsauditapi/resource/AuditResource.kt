@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditFilterDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
 import java.io.IOException
 import java.time.Instant
@@ -48,7 +49,12 @@ class AuditResource(
       ApiResponse(
         responseCode = "200",
         description = "All Audit Events Returned",
-        content = [Content(mediaType = "application/json", array = ArraySchema(schema = Schema(implementation = AuditDto::class)))]
+        content = [
+          Content(
+            mediaType = "application/json",
+            array = ArraySchema(schema = Schema(implementation = AuditDto::class))
+          )
+        ]
       ),
       ApiResponse(
         responseCode = "401",
@@ -67,6 +73,51 @@ class AuditResource(
   }
 
   @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_read')")
+  @PostMapping("/filtered")
+  @Operation(
+    summary = "Get pages audit events",
+    description = "Get pages audit events, role required is ROLE_AUDIT",
+    security = [SecurityRequirement(name = "ROLE_AUDIT")],
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Filtered Audit Events Returned",
+        content = [
+          Content(
+            mediaType = "application/json",
+            array = ArraySchema(schema = Schema(implementation = AuditDto::class))
+          )
+        ]
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Bad request, search criteria must be valid when supplied",
+        content = [
+          Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))
+        ]
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint, requires a valid OAuth2 token",
+        content = [
+          Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))
+        ]
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an authorisation with role ROLE_AUDIT",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+      )
+    ]
+  )
+  fun findFilteredAudits(
+    pageable: Pageable = Pageable.unpaged(),
+    @RequestBody auditFilterDto: AuditFilterDto
+  ): Page<AuditDto> {
+    return auditService.findFilteredEvents(pageable, auditFilterDto)
+  }
+
+  @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_read')")
   @GetMapping("/paged")
   @Operation(
     summary = "Get page of audit events",
@@ -76,7 +127,12 @@ class AuditResource(
       ApiResponse(
         responseCode = "200",
         description = "Paged Audit Events Returned",
-        content = [Content(mediaType = "application/json", array = ArraySchema(schema = Schema(implementation = AuditDtoPage::class)))]
+        content = [
+          Content(
+            mediaType = "application/json",
+            array = ArraySchema(schema = Schema(implementation = AuditDtoPage::class))
+          )
+        ]
       ),
       ApiResponse(
         responseCode = "401",
@@ -101,8 +157,14 @@ class AuditResource(
   @PostMapping("")
   @ResponseStatus(HttpStatus.ACCEPTED)
   @Operation(hidden = true)
-  fun insertAuditEvent(@RequestHeader(value = "traceparent", required = false) traceParent: String?, @RequestBody auditEvent: AuditEvent) {
-    val cleansedAuditEvent = auditEvent.copy(operationId = auditEvent.operationId ?: traceParent?.traceId(), details = auditEvent.details?.jsonString())
+  fun insertAuditEvent(
+    @RequestHeader(value = "traceparent", required = false) traceParent: String?,
+    @RequestBody auditEvent: AuditEvent
+  ) {
+    val cleansedAuditEvent = auditEvent.copy(
+      operationId = auditEvent.operationId ?: traceParent?.traceId(),
+      details = auditEvent.details?.jsonString()
+    )
     auditService.sendAuditEvent(cleansedAuditEvent)
   }
 
@@ -136,7 +198,10 @@ data class AuditDto(
   val who: String?,
   @Schema(description = "Which service the Event relates to", example = "court-register")
   val service: String?,
-  @Schema(description = "Additional information", example = "{\"courtId\":\"AAAMH1\",\"buildingId\":936,\"building\":{\"id\":936,\"courtId\":\"AAAMH1\",\"buildingName\":\"Main Court Name Changed\"}")
+  @Schema(
+    description = "Additional information",
+    example = "{\"courtId\":\"AAAMH1\",\"buildingId\":936,\"building\":{\"id\":936,\"courtId\":\"AAAMH1\",\"buildingName\":\"Main Court Name Changed\"}"
+  )
   val details: String?
 ) {
   constructor(auditEvent: AuditEvent) : this(
