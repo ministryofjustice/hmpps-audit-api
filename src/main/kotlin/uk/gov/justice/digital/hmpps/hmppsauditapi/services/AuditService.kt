@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.microsoft.applicationinsights.TelemetryClient
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -17,11 +18,15 @@ import java.time.Instant
 
 @Service
 class AuditService(
+
   private val telemetryClient: TelemetryClient,
   private val auditRepository: AuditRepository,
   private val mapper: ObjectMapper,
   private val hmppsQueueService: HmppsQueueService,
 ) {
+  private companion object {
+    private val log = LoggerFactory.getLogger(this::class.java)
+  }
 
   fun audit(auditEvent: AuditEvent) {
     telemetryClient.trackEvent("hmpps-audit", auditEvent.asMap())
@@ -30,17 +35,26 @@ class AuditService(
 
   fun findAll(): List<AuditDto> = auditRepository.findAll(Sort.by(DESC, "when")).map { AuditDto(it) }
 
-  fun findPage(pageable: Pageable = Pageable.unpaged(), who: String?, what: String?): Page<AuditDto> =
-    auditRepository.findPage(pageable, who, what).map { AuditDto(it) }
-
-  fun findFilteredEvents(
+  fun findPage(
     pageable: Pageable = Pageable.unpaged(),
     auditFilterDto: AuditFilterDto
   ): Page<AuditDto> {
-    val startDate = if (auditFilterDto.startDateTime != null) Instant.parse(auditFilterDto.startDateTime) else null
-    val endDate = if (auditFilterDto.endDateTime != null) Instant.parse(auditFilterDto.endDateTime) else null
+    val startDateAndTime =
+      if (auditFilterDto.startDateTime != null) Instant.parse(auditFilterDto.startDateTime) else null
+    val endDateAndTime = if (auditFilterDto.endDateTime != null) Instant.parse(auditFilterDto.endDateTime) else null
+    log.debug(
+      "Searching audit events by startDate {} endDate {} service {} what {} who {}", startDateAndTime,
+      endDateAndTime, auditFilterDto.service, auditFilterDto.what, auditFilterDto.who
+    )
 
-    return auditRepository.findFilteredResults(pageable, startDate, endDate, auditFilterDto.service, auditFilterDto.what, auditFilterDto.who)
+    return auditRepository.findPage(
+      pageable,
+      startDateAndTime,
+      endDateAndTime,
+      auditFilterDto.service,
+      auditFilterDto.what,
+      auditFilterDto.who
+    )
       .map { AuditDto(it) }
   }
 

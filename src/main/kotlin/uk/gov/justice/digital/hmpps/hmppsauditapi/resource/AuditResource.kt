@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
@@ -20,7 +21,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.ErrorResponse
@@ -39,6 +39,10 @@ class AuditDtoPage : PageImpl<AuditDto>(mutableListOf<AuditDto>())
 class AuditResource(
   private val auditService: AuditService,
 ) {
+  companion object {
+    private val log = LoggerFactory.getLogger(this::class.java)
+  }
+
   @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_read')")
   @GetMapping("")
   @Operation(
@@ -73,7 +77,7 @@ class AuditResource(
   }
 
   @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_read')")
-  @PostMapping("/filtered")
+  @PostMapping("/paged")
   @Operation(
     summary = "Get pages audit events",
     description = "Get pages audit events, role required is ROLE_AUDIT",
@@ -110,47 +114,13 @@ class AuditResource(
       )
     ]
   )
-  fun findFilteredAudits(
+  fun findPage(
     pageable: Pageable = Pageable.unpaged(),
     @RequestBody auditFilterDto: AuditFilterDto
   ): Page<AuditDto> {
-    return auditService.findFilteredEvents(pageable, auditFilterDto)
+    log.info("About to start search for audit events")
+    return auditService.findPage(pageable, auditFilterDto)
   }
-
-  @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_read')")
-  @GetMapping("/paged")
-  @Operation(
-    summary = "Get page of audit events",
-    description = "Page of audit events",
-    security = [SecurityRequirement(name = "ROLE_AUDIT")],
-    responses = [
-      ApiResponse(
-        responseCode = "200",
-        description = "Paged Audit Events Returned",
-        content = [
-          Content(
-            mediaType = "application/json",
-            array = ArraySchema(schema = Schema(implementation = AuditDtoPage::class))
-          )
-        ]
-      ),
-      ApiResponse(
-        responseCode = "401",
-        description = "Unauthorized to access this endpoint, requires a valid OAuth2 token",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-      ),
-      ApiResponse(
-        responseCode = "403",
-        description = "Forbidden, requires an authorisation with role ROLE_AUDIT",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-      )
-    ]
-  )
-  fun findPage(
-    pageable: Pageable = Pageable.unpaged(),
-    @RequestParam who: String? = null,
-    @RequestParam what: String? = null,
-  ): Page<AuditDto> = auditService.findPage(pageable, who, what)
 
   @Deprecated("Audit events should be sent via audit queue")
   @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_write')")

@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
-import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import java.time.Instant
@@ -79,209 +78,6 @@ class AuditRepositoryTest {
 
   @Suppress("ClassName")
   @Nested
-  inner class pagedAuditEvents {
-    @Test
-    internal fun `find paged audit events`() {
-      auditRepository.save(
-        AuditEvent(
-          what = "An Event",
-          `when` = Instant.now(),
-          operationId = "123456789",
-          who = "John Smith",
-        )
-      )
-      auditRepository.save(
-        AuditEvent(
-          what = "Another Event",
-          `when` = Instant.now(),
-          operationId = "345678",
-          who = "Fred Smith",
-        )
-      )
-      auditRepository.save(
-        AuditEvent(
-          what = "Another Event By John",
-          `when` = Instant.now(),
-          operationId = "234567",
-          who = "John Smith",
-        )
-      )
-
-      assertThat(auditRepository.count()).isEqualTo(3)
-      val firstPage = auditRepository.findPage(PageRequest.of(0, 2), null, null)
-      assertThat(firstPage.numberOfElements).isEqualTo(2)
-
-      val secondPage = auditRepository.findPage(PageRequest.of(1, 2), null, null)
-      assertThat(secondPage.numberOfElements).isEqualTo(1)
-    }
-  }
-
-  @Suppress("ClassName")
-  @Nested
-  inner class filteredAuditEvents {
-    @Test
-    internal fun `filter audit events by who`() {
-      auditRepository.save(
-        AuditEvent(
-          what = "An Event",
-          `when` = Instant.now(),
-          operationId = "123456789",
-          who = "John Smith",
-        )
-      )
-      auditRepository.save(
-        AuditEvent(
-          what = "Another Event",
-          `when` = Instant.now(),
-          operationId = "345678",
-          who = "Fred Smith",
-        )
-      )
-      auditRepository.save(
-        AuditEvent(
-          what = "Another Event By John",
-          `when` = Instant.now(),
-          operationId = "234567",
-          who = "John Smith",
-        )
-      )
-
-      assertThat(auditRepository.count()).isEqualTo(3)
-      val auditEvents = auditRepository.findPage(Pageable.unpaged(), "John Smith", null)
-      assertThat(auditEvents.totalElements).isEqualTo(2)
-    }
-
-    @Test
-    internal fun `filter audit events by who when no match`() {
-      auditRepository.save(
-        AuditEvent(
-          what = "An Event",
-          `when` = Instant.now(),
-          operationId = "123456789",
-          who = "John Smith",
-        )
-      )
-      auditRepository.save(
-        AuditEvent(
-          what = "Another Event",
-          `when` = Instant.now(),
-          operationId = "345678",
-          who = "Fred Smith",
-        )
-      )
-      auditRepository.save(
-        AuditEvent(
-          what = "Another Event By John",
-          `when` = Instant.now(),
-          operationId = "234567",
-          who = "John Smith",
-        )
-      )
-
-      assertThat(auditRepository.count()).isEqualTo(3)
-      val auditEvents = auditRepository.findPage(Pageable.unpaged(), "No match", null)
-      assertThat(auditEvents.totalElements).isEqualTo(0)
-    }
-
-    @Test
-    internal fun `filter audit events by what`() {
-      auditRepository.save(
-        AuditEvent(
-          what = "An Event",
-          `when` = Instant.now(),
-          operationId = "123456789",
-          who = "John Smith",
-        )
-      )
-      auditRepository.save(
-        AuditEvent(
-          what = "Another Event",
-          `when` = Instant.now(),
-          operationId = "345678",
-          who = "Fred Smith",
-        )
-      )
-      auditRepository.save(
-        AuditEvent(
-          what = "Another Event By John",
-          `when` = Instant.now(),
-          operationId = "234567",
-          who = "John Smith",
-        )
-      )
-
-      assertThat(auditRepository.count()).isEqualTo(3)
-      val auditEvents = auditRepository.findPage(Pageable.unpaged(), what = "Another Event", who = null)
-      assertThat(auditEvents.totalElements).isEqualTo(1)
-    }
-
-    @Test
-    internal fun `filter audit events by what when no match`() {
-      auditRepository.save(
-        AuditEvent(
-          what = "An Event",
-          `when` = Instant.now(),
-          operationId = "123456789",
-          who = "John Smith",
-        )
-      )
-      auditRepository.save(
-        AuditEvent(
-          what = "Another Event",
-          `when` = Instant.now(),
-          operationId = "345678",
-          who = "Fred Smith",
-        )
-      )
-      auditRepository.save(
-        AuditEvent(
-          what = "Another Event By John",
-          `when` = Instant.now(),
-          operationId = "234567",
-          who = "John Smith",
-        )
-      )
-
-      assertThat(auditRepository.count()).isEqualTo(3)
-      val auditEvents = auditRepository.findPage(Pageable.unpaged(), null, "No match")
-      assertThat(auditEvents.totalElements).isEqualTo(0)
-    }
-
-    @Test
-    internal fun `filter audit events by what and who`() {
-      auditRepository.save(
-        AuditEvent(
-          what = "An Event",
-          `when` = Instant.now(),
-          operationId = "123456789",
-          who = "John Smith",
-        )
-      )
-      auditRepository.save(
-        AuditEvent(
-          what = "Another Event",
-          `when` = Instant.now(),
-          operationId = "345678",
-          who = "Fred Smith",
-        )
-      )
-      auditRepository.save(
-        AuditEvent(
-          what = "Another Event By John",
-          `when` = Instant.now(),
-          operationId = "234567",
-          who = "John Smith",
-        )
-      )
-
-      assertThat(auditRepository.count()).isEqualTo(3)
-      val auditEvents = auditRepository.findPage(Pageable.unpaged(), "John Smith", "Another Event By John")
-      assertThat(auditEvents.totalElements).isEqualTo(1)
-    }
-  }
-
-  @Suppress("ClassName")
-  @Nested
   inner class filteredPageAuditEvents {
     @Test
     internal fun `filter audit events by date range, service, what and who`() {
@@ -314,7 +110,7 @@ class AuditRepositoryTest {
       )
 
       assertThat(auditRepository.count()).isEqualTo(3)
-      val auditEvents = auditRepository.findFilteredResults(
+      val auditEvents = auditRepository.findPage(
         Pageable.unpaged(),
         Instant.now().minus(1, ChronoUnit.DAYS),
         Instant.now().plus(1, ChronoUnit.DAYS),
@@ -356,7 +152,7 @@ class AuditRepositoryTest {
       )
 
       assertThat(auditRepository.count()).isEqualTo(3)
-      val auditEvents = auditRepository.findFilteredResults(
+      val auditEvents = auditRepository.findPage(
         Pageable.unpaged(),
         null,
         null,
@@ -398,7 +194,7 @@ class AuditRepositoryTest {
       )
 
       assertThat(auditRepository.count()).isEqualTo(3)
-      val auditEvents = auditRepository.findFilteredResults(
+      val auditEvents = auditRepository.findPage(
         Pageable.unpaged(),
         null,
         null,
@@ -440,7 +236,7 @@ class AuditRepositoryTest {
       )
 
       assertThat(auditRepository.count()).isEqualTo(3)
-      val auditEvents = auditRepository.findFilteredResults(
+      val auditEvents = auditRepository.findPage(
         Pageable.unpaged(),
         Instant.now().minus(4, ChronoUnit.DAYS),
         Instant.now().minus(2, ChronoUnit.DAYS),

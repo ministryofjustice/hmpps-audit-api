@@ -151,11 +151,13 @@ class AuditServiceTest {
             )
           )
         )
-        whenever(auditRepository.findPage(any(), anyOrNull(), anyOrNull())).thenReturn(
+        whenever(auditRepository.findPage(any(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())).thenReturn(
           listOfAudits
         )
 
-        val audits = auditService.findPage(Pageable.unpaged(), null, null)
+        val auditFilterDto = AuditFilterDto("2021-04-04T17:17:30Z", "2023-01-03T17:17:30Z", "offender-service", "Another Event", "Hola T")
+
+        val audits = auditService.findPage(Pageable.unpaged(), auditFilterDto)
         assertThat(audits).isEqualTo(
           PageImpl(
             listOf(
@@ -240,13 +242,13 @@ class AuditServiceTest {
           )
         )
       )
-      whenever(auditRepository.findFilteredResults(any(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())).thenReturn(
+      whenever(auditRepository.findPage(any(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())).thenReturn(
         listOfAudits
       )
 
       val auditFilterDto = AuditFilterDto("2021-04-04T17:17:30Z", "2023-01-03T17:17:30Z", "offender-service", "Another Event", "Hola T")
 
-      val audits = auditService.findFilteredEvents(Pageable.unpaged(), auditFilterDto)
+      val audits = auditService.findPage(Pageable.unpaged(), auditFilterDto)
       assertThat(audits).isEqualTo(
         PageImpl(
           listOf(

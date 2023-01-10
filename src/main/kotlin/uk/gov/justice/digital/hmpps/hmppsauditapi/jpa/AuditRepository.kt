@@ -11,16 +11,6 @@ import java.util.UUID
 
 @Repository
 interface AuditRepository : PagingAndSortingRepository<AuditEvent, UUID> {
-  @Query(
-    """
-    select 
-        ae from AuditEvent ae 
-    where
-         (:what is null or ae.what=:what)
-     and (:who is null or ae.who=:who)
-    """
-  )
-  fun findPage(pageable: Pageable, who: String?, what: String?): Page<AuditEvent>
 
   @Query(
     """
@@ -33,5 +23,12 @@ interface AuditRepository : PagingAndSortingRepository<AuditEvent, UUID> {
      and (cast(:who as string) is null or ae.who like concat('%',:who,'%'))
     """
   )
-  fun findFilteredResults(pageable: Pageable, startDate: Instant?, endDate: Instant?, service: String?, what: String?, who: String?): Page<AuditEvent>
+  fun findPage(
+    pageable: Pageable,
+    startDate: Instant?,
+    endDate: Instant?,
+    service: String?,
+    what: String?,
+    who: String?
+  ): Page<AuditEvent>
 }
