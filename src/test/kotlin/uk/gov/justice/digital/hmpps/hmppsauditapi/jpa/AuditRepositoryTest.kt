@@ -206,7 +206,7 @@ class AuditRepositoryTest {
     }
 
     @Test
-    internal fun `filter audit events by date range,no results expected`() {
+    internal fun `filter audit events by start date`() {
       auditRepository.save(
         AuditEvent(
           what = "An Event",
@@ -219,7 +219,7 @@ class AuditRepositoryTest {
       auditRepository.save(
         AuditEvent(
           what = "Another Event",
-          `when` = Instant.now(),
+          `when` = Instant.now().minus(1, ChronoUnit.DAYS),
           operationId = "345678",
           service = "Service-B",
           who = "Fred Smith",
@@ -228,7 +228,50 @@ class AuditRepositoryTest {
       auditRepository.save(
         AuditEvent(
           what = "Another Event By John",
+          `when` = Instant.now().minus(2, ChronoUnit.DAYS),
+          operationId = "234567",
+          service = "Service-C",
+          who = "John Smith",
+        )
+      )
+
+      assertThat(auditRepository.count()).isEqualTo(3)
+
+      val auditEvents = auditRepository.findPage(
+        Pageable.unpaged(),
+        Instant.now().minus(3, ChronoUnit.DAYS),
+        null,
+        null,
+        null,
+        who = null,
+      )
+      assertThat(auditEvents.size).isEqualTo(3)
+    }
+
+    @Test
+    internal fun `filter audit events by end date`() {
+      auditRepository.save(
+        AuditEvent(
+          what = "An Event",
           `when` = Instant.now(),
+          operationId = "123456789",
+          service = "Service-A",
+          who = "John Smith",
+        )
+      )
+      auditRepository.save(
+        AuditEvent(
+          what = "Another Event",
+          `when` = Instant.now().minus(1, ChronoUnit.DAYS),
+          operationId = "345678",
+          service = "Service-B",
+          who = "Fred Smith",
+        )
+      )
+      auditRepository.save(
+        AuditEvent(
+          what = "Another Event By John",
+          `when` = Instant.now().minus(2, ChronoUnit.DAYS),
           operationId = "234567",
           service = "Service-C",
           who = "John Smith",
@@ -238,13 +281,56 @@ class AuditRepositoryTest {
       assertThat(auditRepository.count()).isEqualTo(3)
       val auditEvents = auditRepository.findPage(
         Pageable.unpaged(),
-        Instant.now().minus(4, ChronoUnit.DAYS),
-        Instant.now().minus(2, ChronoUnit.DAYS),
+        null,
+        Instant.now().minus(1, ChronoUnit.DAYS),
         null,
         null,
         who = null,
       )
-      assertThat(auditEvents.size).isEqualTo(0)
+      assertThat(auditEvents.size).isEqualTo(2)
+    }
+
+    @Test
+    internal fun `filter audit events by date range`() {
+      auditRepository.save(
+        AuditEvent(
+          what = "An Event",
+          `when` = Instant.now(),
+          operationId = "123456789",
+          service = "Service-A",
+          who = "John Smith",
+        )
+      )
+      auditRepository.save(
+        AuditEvent(
+          what = "Another Event",
+          `when` = Instant.now().minus(1, ChronoUnit.DAYS),
+          operationId = "345678",
+          service = "Service-B",
+          who = "Fred Smith",
+        )
+      )
+      auditRepository.save(
+        AuditEvent(
+          what = "Another Event By John",
+          `when` = Instant.now().minus(2, ChronoUnit.DAYS),
+          operationId = "234567",
+          service = "Service-C",
+          who = "John Smith",
+        )
+      )
+
+      assertThat(auditRepository.count()).isEqualTo(3)
+
+      val auditEvents = auditRepository.findPage(
+        Pageable.unpaged(),
+        Instant.now().minus(3, ChronoUnit.DAYS),
+        Instant.now(),
+        null,
+        null,
+        who = null,
+      )
+      assertThat(auditEvents.size).isEqualTo(3)
     }
   }
 }

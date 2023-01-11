@@ -1,27 +1,22 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.model
 
 import io.swagger.v3.oas.annotations.media.Schema
-import javax.validation.constraints.Pattern
+import java.time.Instant
 import javax.validation.constraints.Size
-
 data class AuditFilterDto(
   @Schema(
     required = false,
     description = "The start date and time to filter the audit events",
     example = "2020-07-01T15:15:30Z"
   )
-  @field:Size(min = 20, max = 20)
-  @field:Pattern(regexp = "(?i)^\\d\\d\\d\\d\\-\\d\\d\\-\\d\\d\\w\\d\\d:\\d\\d:\\d\\d\\w\$")
-  val startDateTime: String? = null,
+  val startDateTime: Instant? = null,
 
   @Schema(
     required = false,
     description = "The end date and time to filter the audit events",
     example = "2020-07-01T15:15:30Z"
   )
-  @field:Size(min = 20, max = 20)
-  @field:Pattern(regexp = "(?i)^\\d\\d\\d\\d\\-\\d\\d\\-\\d\\d\\w\\d\\d:\\d\\d:\\d\\d\\w\$")
-  val endDateTime: String? = null,
+  val endDateTime: Instant? = null,
 
   @Schema(required = false, description = "The service which the audit events relates to", example = "offender-service")
   @field:Size(min = 2, max = 200)

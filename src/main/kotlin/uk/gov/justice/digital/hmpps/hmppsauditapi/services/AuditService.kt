@@ -14,7 +14,6 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.A
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditFilterDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
-import java.time.Instant
 
 @Service
 class AuditService(
@@ -39,18 +38,14 @@ class AuditService(
     pageable: Pageable = Pageable.unpaged(),
     auditFilterDto: AuditFilterDto
   ): Page<AuditDto> {
-    val startDateAndTime =
-      if (auditFilterDto.startDateTime != null) Instant.parse(auditFilterDto.startDateTime) else null
-    val endDateAndTime = if (auditFilterDto.endDateTime != null) Instant.parse(auditFilterDto.endDateTime) else null
     log.debug(
-      "Searching audit events by startDate {} endDate {} service {} what {} who {}", startDateAndTime,
-      endDateAndTime, auditFilterDto.service, auditFilterDto.what, auditFilterDto.who
+      "Searching audit events by startDate {} endDate {} service {} what {} who {}", auditFilterDto.startDateTime,
+      auditFilterDto.endDateTime, auditFilterDto.service, auditFilterDto.what, auditFilterDto.who
     )
-
     return auditRepository.findPage(
       pageable,
-      startDateAndTime,
-      endDateAndTime,
+      auditFilterDto.startDateTime,
+      auditFilterDto.endDateTime,
       auditFilterDto.service,
       auditFilterDto.what,
       auditFilterDto.who
