@@ -18,9 +18,9 @@ interface AuditRepository : PagingAndSortingRepository<AuditEvent, UUID> {
         ae from AuditEvent ae 
     where
         ((cast(:startDate as string) is null or cast(:endDate as string) is null) or (ae.when between :startDate and :endDate) )
-     and (cast(:service as string) is null or ae.service like concat('%',:service,'%'))
-     and (cast(:what as string) is null or ae.what like concat('%',:what,'%'))
-     and (cast(:who as string) is null or ae.who like concat('%',:who,'%'))
+     and (cast(:service as string) is null or ae.service =:service)
+     and (cast(:what as string) is null or ae.what =:what)
+     and (cast(:who as string) is null or ae.who =:who)
     """
   )
   fun findPage(
