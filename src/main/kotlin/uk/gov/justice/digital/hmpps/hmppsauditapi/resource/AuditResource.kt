@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
-import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
@@ -40,10 +39,6 @@ class AuditDtoPage : PageImpl<AuditDto>(mutableListOf<AuditDto>())
 class AuditResource(
   private val auditService: AuditService,
 ) {
-  companion object {
-    private val log = LoggerFactory.getLogger(this::class.java)
-  }
-
   @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_read')")
   @GetMapping("")
   @Operation(
@@ -119,7 +114,6 @@ class AuditResource(
     pageable: Pageable = Pageable.unpaged(),
     @RequestBody @Valid auditFilterDto: AuditFilterDto
   ): Page<AuditDto> {
-    log.info("About to start search for audit events")
     return auditService.findPage(pageable, auditFilterDto)
   }
 

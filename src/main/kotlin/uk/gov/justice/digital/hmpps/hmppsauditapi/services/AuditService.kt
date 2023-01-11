@@ -38,7 +38,7 @@ class AuditService(
     pageable: Pageable = Pageable.unpaged(),
     auditFilterDto: AuditFilterDto
   ): Page<AuditDto> {
-    log.debug(
+    log.info(
       "Searching audit events by startDate {} endDate {} service {} what {} who {}", auditFilterDto.startDateTime,
       auditFilterDto.endDateTime, auditFilterDto.service, auditFilterDto.what, auditFilterDto.who
     )
