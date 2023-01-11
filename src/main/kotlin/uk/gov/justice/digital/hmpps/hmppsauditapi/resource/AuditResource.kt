@@ -30,6 +30,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
 import java.io.IOException
 import java.time.Instant
 import java.util.UUID
+import javax.validation.Valid
 
 // This is a hack to get around the fact that springdocs responses cannot contain generics
 class AuditDtoPage : PageImpl<AuditDto>(mutableListOf<AuditDto>())
@@ -116,7 +117,7 @@ class AuditResource(
   )
   fun findPage(
     pageable: Pageable = Pageable.unpaged(),
-    @RequestBody auditFilterDto: AuditFilterDto
+    @RequestBody @Valid auditFilterDto: AuditFilterDto
   ): Page<AuditDto> {
     log.info("About to start search for audit events")
     return auditService.findPage(pageable, auditFilterDto)
