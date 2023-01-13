@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
@@ -19,7 +20,6 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
 import java.time.Instant
 import java.util.UUID
-import org.mockito.kotlin.verify
 
 class AuditServiceTest {
   private val telemetryClient: TelemetryClient = mock()
@@ -278,7 +278,7 @@ class AuditServiceTest {
         )
       )
 
-      verify(auditRepository).findPage(pageDetails, startDate, endDate, "offender-service","Another Event", "Hola T")
+      verify(auditRepository).findPage(pageDetails, startDate, endDate, "offender-service", "Another Event", "Hola T")
     }
   }
 }
