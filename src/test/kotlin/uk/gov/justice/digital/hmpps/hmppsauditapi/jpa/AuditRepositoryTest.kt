@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.jpa
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -10,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.data.domain.Pageable
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import java.time.Instant
+import java.time.format.DateTimeParseException
 import java.time.temporal.ChronoUnit
 
 @DataJpaTest
@@ -158,9 +160,51 @@ class AuditRepositoryTest {
         null,
         "Service-B",
         null,
-        who = null,
+        null,
       )
       assertThat(auditEvents.size).isEqualTo(1)
+    }
+
+    @Test
+    internal fun `filter audit events by all null parameters`() {
+      auditRepository.save(
+        AuditEvent(
+          what = "An Event",
+          `when` = Instant.now(),
+          operationId = "123456789",
+          service = "Service-A",
+          who = "John Smith",
+        )
+      )
+      auditRepository.save(
+        AuditEvent(
+          what = "Another Event",
+          `when` = Instant.now(),
+          operationId = "345678",
+          service = "Service-B",
+          who = "Fred Smith",
+        )
+      )
+      auditRepository.save(
+        AuditEvent(
+          what = "Another Event By John",
+          `when` = Instant.now(),
+          operationId = "234567",
+          service = "Service-C",
+          who = "John Smith",
+        )
+      )
+
+      assertThat(auditRepository.count()).isEqualTo(3)
+      val auditEvents = auditRepository.findPage(
+        Pageable.unpaged(),
+        null,
+        null,
+        null,
+        null,
+        null,
+      )
+      assertThat(auditEvents.size).isEqualTo(3)
     }
 
     @Test
@@ -200,7 +244,7 @@ class AuditRepositoryTest {
         null,
         null,
         null,
-        who = "John Smith",
+        "John Smith",
       )
       assertThat(auditEvents.size).isEqualTo(2)
     }
@@ -243,9 +287,65 @@ class AuditRepositoryTest {
         null,
         null,
         null,
-        who = null,
+        null,
       )
       assertThat(auditEvents.size).isEqualTo(3)
+    }
+
+    @Test()
+    internal fun `filter audit events by an invalid start date, throws exception`() {
+      auditRepository.save(
+        AuditEvent(
+          what = "An Event",
+          `when` = Instant.now(),
+          operationId = "123456789",
+          service = "Service-A",
+          who = "John Smith",
+        )
+      )
+
+      assertThat(auditRepository.count()).isEqualTo(1)
+
+      assertThrows(
+        DateTimeParseException::class.java
+      ) {
+        auditRepository.findPage(
+          Pageable.unpaged(),
+          Instant.parse("2021-14-04T17:17:30Z"),
+          null,
+          null,
+          null,
+          null,
+        )
+      }
+    }
+
+    @Test()
+    internal fun `filter audit events by an invalid end date, throws exception`() {
+      auditRepository.save(
+        AuditEvent(
+          what = "An Event",
+          `when` = Instant.now(),
+          operationId = "123456789",
+          service = "Service-A",
+          who = "John Smith",
+        )
+      )
+
+      assertThat(auditRepository.count()).isEqualTo(1)
+
+      assertThrows(
+        DateTimeParseException::class.java
+      ) {
+        auditRepository.findPage(
+          Pageable.unpaged(),
+          null,
+          Instant.parse("2021-14-74T17:17:30Z"),
+          null,
+          null,
+          null,
+        )
+      }
     }
 
     @Test
@@ -285,7 +385,7 @@ class AuditRepositoryTest {
         Instant.now().minus(1, ChronoUnit.DAYS),
         null,
         null,
-        who = null,
+        null,
       )
       assertThat(auditEvents.size).isEqualTo(2)
     }
@@ -328,9 +428,52 @@ class AuditRepositoryTest {
         Instant.now(),
         null,
         null,
-        who = null,
+        null,
       )
       assertThat(auditEvents.size).isEqualTo(3)
+    }
+
+    @Test
+    internal fun `filter audit events by date range, where start date is greater than end date, no results expected`() {
+      auditRepository.save(
+        AuditEvent(
+          what = "An Event",
+          `when` = Instant.now(),
+          operationId = "123456789",
+          service = "Service-A",
+          who = "John Smith",
+        )
+      )
+      auditRepository.save(
+        AuditEvent(
+          what = "Another Event",
+          `when` = Instant.now().minus(1, ChronoUnit.DAYS),
+          operationId = "345678",
+          service = "Service-B",
+          who = "Fred Smith",
+        )
+      )
+      auditRepository.save(
+        AuditEvent(
+          what = "Another Event By John",
+          `when` = Instant.now().minus(2, ChronoUnit.DAYS),
+          operationId = "234567",
+          service = "Service-C",
+          who = "John Smith",
+        )
+      )
+
+      assertThat(auditRepository.count()).isEqualTo(3)
+
+      val auditEvents = auditRepository.findPage(
+        Pageable.unpaged(),
+        Instant.now(),
+        Instant.now().minus(3, ChronoUnit.DAYS),
+        null,
+        null,
+        null,
+      )
+      assertThat(auditEvents.size).isEqualTo(0)
     }
   }
 }
