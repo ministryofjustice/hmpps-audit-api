@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.jpa
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -11,7 +10,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.data.domain.Pageable
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import java.time.Instant
-import java.time.format.DateTimeParseException
 import java.time.temporal.ChronoUnit
 
 @DataJpaTest
@@ -290,62 +288,6 @@ class AuditRepositoryTest {
         null,
       )
       assertThat(auditEvents.size).isEqualTo(3)
-    }
-
-    @Test()
-    internal fun `filter audit events by an invalid start date, throws exception`() {
-      auditRepository.save(
-        AuditEvent(
-          what = "An Event",
-          `when` = Instant.now(),
-          operationId = "123456789",
-          service = "Service-A",
-          who = "John Smith",
-        )
-      )
-
-      assertThat(auditRepository.count()).isEqualTo(1)
-
-      assertThrows(
-        DateTimeParseException::class.java
-      ) {
-        auditRepository.findPage(
-          Pageable.unpaged(),
-          Instant.parse("2021-14-04T17:17:30Z"),
-          null,
-          null,
-          null,
-          null,
-        )
-      }
-    }
-
-    @Test()
-    internal fun `filter audit events by an invalid end date, throws exception`() {
-      auditRepository.save(
-        AuditEvent(
-          what = "An Event",
-          `when` = Instant.now(),
-          operationId = "123456789",
-          service = "Service-A",
-          who = "John Smith",
-        )
-      )
-
-      assertThat(auditRepository.count()).isEqualTo(1)
-
-      assertThrows(
-        DateTimeParseException::class.java
-      ) {
-        auditRepository.findPage(
-          Pageable.unpaged(),
-          null,
-          Instant.parse("2021-14-74T17:17:30Z"),
-          null,
-          null,
-          null,
-        )
-      }
     }
 
     @Test

@@ -20,13 +20,13 @@ class AuditResourcePagingTest : IntegrationTest() {
   @Autowired
   private lateinit var auditRepository: AuditRepository
 
-  val serviceRequestBody: JSONObject = JSONObject().put("service", "offender-service")
-  val whatRequestBody: JSONObject = JSONObject().put("what", "OFFENDER_DELETED")
-  val whoRequestBody: JSONObject = JSONObject().put("who", "bobby.beans")
-  val whoAndWhatRequestBody: JSONObject = JSONObject().put("who", "bobby.beans").put("what", "OFFENDER_DELETED")
-  val startDateRequestBody: JSONObject = JSONObject().put("startDateTime", Instant.parse("2021-01-01T15:15:30Z"))
-  val endDateRequestBody: JSONObject = JSONObject().put("endDateTime", Instant.parse("2021-04-12T17:17:30Z"))
-  val dateRangeRequestBody: JSONObject = JSONObject().put("startDateTime", Instant.parse("2021-01-01T15:15:30Z"))
+  val serviceRequestBody = JSONObject().put("service", "offender-service")
+  val whatRequestBody = JSONObject().put("what", "OFFENDER_DELETED")
+  val whoRequestBody = JSONObject().put("who", "bobby.beans")
+  val whoAndWhatRequestBody = JSONObject().put("who", "bobby.beans").put("what", "OFFENDER_DELETED")
+  val startDateRequestBody = JSONObject().put("startDateTime", Instant.parse("2021-01-01T15:15:30Z"))
+  val endDateRequestBody = JSONObject().put("endDateTime", Instant.parse("2021-04-12T17:17:30Z"))
+  val dateRangeRequestBody = JSONObject().put("startDateTime", Instant.parse("2021-01-01T15:15:30Z"))
     .put("endDateTime", Instant.parse("2021-04-12T17:17:30Z"))
 
   val listOfAudits = listOf(
