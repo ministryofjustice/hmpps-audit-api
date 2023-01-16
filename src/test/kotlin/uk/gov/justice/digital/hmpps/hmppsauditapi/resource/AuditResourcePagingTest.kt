@@ -1,11 +1,13 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 
+import org.json.JSONObject
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.MediaType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.IntegrationTest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
@@ -17,6 +19,15 @@ class AuditResourcePagingTest : IntegrationTest() {
 
   @Autowired
   private lateinit var auditRepository: AuditRepository
+
+  val serviceRequestBody = JSONObject().put("service", "offender-service")
+  val whatRequestBody = JSONObject().put("what", "OFFENDER_DELETED")
+  val whoRequestBody = JSONObject().put("who", "bobby.beans")
+  val whoAndWhatRequestBody = JSONObject().put("who", "bobby.beans").put("what", "OFFENDER_DELETED")
+  val startDateRequestBody = JSONObject().put("startDateTime", Instant.parse("2021-01-01T15:15:30Z"))
+  val endDateRequestBody = JSONObject().put("endDateTime", Instant.parse("2021-04-12T17:17:30Z"))
+  val dateRangeRequestBody = JSONObject().put("startDateTime", Instant.parse("2021-01-01T15:15:30Z"))
+    .put("endDateTime", Instant.parse("2021-04-12T17:17:30Z"))
 
   val listOfAudits = listOf(
     AuditEvent(
@@ -67,70 +78,74 @@ class AuditResourcePagingTest : IntegrationTest() {
 
   @Test
   fun `find full page of audit events`() {
-    webTestClient.get().uri("/audit/paged?page=0&size=4&sort=who")
+    webTestClient.post().uri("/audit/paged?page=0&size=4&sort=who")
       .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .bodyValue(serviceRequestBody.toString())
       .exchange()
       .expectStatus().isOk
       .expectBody()
-      .jsonPath("$.content.length()").isEqualTo(4)
+      .jsonPath("$.content.length()").isEqualTo(2)
       .jsonPath("$.size").isEqualTo(4)
-      .jsonPath("$.totalElements").isEqualTo(4)
+      .jsonPath("$.totalElements").isEqualTo(2)
       .jsonPath("$.totalPages").isEqualTo(1)
       .jsonPath("$.last").isEqualTo(true)
-      .jsonPath("$.content[0].who").doesNotExist()
-      .jsonPath("$.content[1].who").isEqualTo("bobby.beans")
-      .jsonPath("$.content[2].who").isEqualTo("bobby.beans")
-      .jsonPath("$.content[3].who").isEqualTo("freddy.frog")
+      .jsonPath("$.content[0].who").isEqualTo("bobby.beans")
+      .jsonPath("$.content[1].who").isEqualTo("freddy.frog")
   }
 
   @Test
   fun `find full page of descending ordered audit events`() {
-    webTestClient.get().uri("/audit/paged?page=0&size=4&sort=who,desc")
+    webTestClient.post().uri("/audit/paged?page=0&size=4&sort=who,desc")
       .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .bodyValue(serviceRequestBody.toString())
       .exchange()
       .expectStatus().isOk
       .expectBody()
-      .jsonPath("$.content.length()").isEqualTo(4)
+      .jsonPath("$.content.length()").isEqualTo(2)
       .jsonPath("$.size").isEqualTo(4)
-      .jsonPath("$.totalElements").isEqualTo(4)
+      .jsonPath("$.totalElements").isEqualTo(2)
       .jsonPath("$.totalPages").isEqualTo(1)
       .jsonPath("$.last").isEqualTo(true)
       .jsonPath("$.content[0].who").isEqualTo("freddy.frog")
       .jsonPath("$.content[1].who").isEqualTo("bobby.beans")
-      .jsonPath("$.content[2].who").isEqualTo("bobby.beans")
-      .jsonPath("$.content[3].who").doesNotExist()
+      .jsonPath("$.content[2].who").doesNotExist()
   }
 
   @Test
   fun `find first page of audit events`() {
-    webTestClient.get().uri("/audit/paged?page=0&size=3&sort=who")
+    webTestClient.post().uri("/audit/paged?page=0&size=3&sort=who")
       .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .bodyValue(serviceRequestBody.toString())
       .exchange()
       .expectStatus().isOk
       .expectBody()
-      .jsonPath("$.content.length()").isEqualTo(3)
+      .jsonPath("$.content.length()").isEqualTo(2)
       .jsonPath("$.size").isEqualTo(3)
-      .jsonPath("$.totalElements").isEqualTo(4)
-      .jsonPath("$.totalPages").isEqualTo(2)
-      .jsonPath("$.last").isEqualTo(false)
-      .jsonPath("$.content[0].who").doesNotExist()
-      .jsonPath("$.content[1].who").isEqualTo("bobby.beans")
-      .jsonPath("$.content[2].who").isEqualTo("bobby.beans")
+      .jsonPath("$.totalElements").isEqualTo(2)
+      .jsonPath("$.totalPages").isEqualTo(1)
+      .jsonPath("$.last").isEqualTo(true)
+      .jsonPath("$.content[0].who").isEqualTo("bobby.beans")
+      .jsonPath("$.content[1].who").isEqualTo("freddy.frog")
   }
 
   @Test
   fun `find second page of audit events`() {
-    webTestClient.get().uri("/audit/paged?page=2&size=1&sort=who")
+    webTestClient.post().uri("/audit/paged?page=2&size=1&sort=who")
       .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .bodyValue(serviceRequestBody.toString())
       .exchange()
       .expectStatus().isOk
       .expectBody()
-      .jsonPath("$.content.length()").isEqualTo(1)
+      .jsonPath("$.content.length()").isEqualTo(0)
       .jsonPath("$.size").isEqualTo(1)
-      .jsonPath("$.totalElements").isEqualTo(4)
-      .jsonPath("$.totalPages").isEqualTo(4)
-      .jsonPath("$.last").isEqualTo(false)
-      .jsonPath("$.content[0].who").isEqualTo("bobby.beans")
+      .jsonPath("$.totalElements").isEqualTo(2)
+      .jsonPath("$.totalPages").isEqualTo(2)
+      .jsonPath("$.last").isEqualTo(true)
+      .jsonPath("$.content[0].who").doesNotExist()
   }
 
   @Suppress("ClassName")
@@ -139,8 +154,10 @@ class AuditResourcePagingTest : IntegrationTest() {
 
     @Test
     fun `filter audit events by what`() {
-      webTestClient.get().uri("/audit/paged?page=0&size=3&what=OFFENDER_DELETED")
+      webTestClient.post().uri("/audit/paged?page=0&size=3")
         .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(whatRequestBody.toString())
         .exchange()
         .expectStatus().isOk
         .expectBody()
@@ -155,8 +172,10 @@ class AuditResourcePagingTest : IntegrationTest() {
 
     @Test
     fun `filter audit events by who`() {
-      webTestClient.get().uri("/audit/paged?page=0&size=3&who=bobby.beans")
+      webTestClient.post().uri("/audit/paged?page=0&size=3")
         .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(whoRequestBody.toString())
         .exchange()
         .expectStatus().isOk
         .expectBody()
@@ -171,8 +190,10 @@ class AuditResourcePagingTest : IntegrationTest() {
 
     @Test
     fun `filter audit events by what and who`() {
-      webTestClient.get().uri("/audit/paged?page=0&size=3&what=OFFENDER_DELETED&who=bobby.beans")
+      webTestClient.post().uri("/audit/paged?page=0&size=3")
         .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(whoAndWhatRequestBody.toString())
         .exchange()
         .expectStatus().isOk
         .expectBody()
@@ -183,5 +204,56 @@ class AuditResourcePagingTest : IntegrationTest() {
         .jsonPath("$.last").isEqualTo(true)
         .jsonPath("$.content[0].operationId").isEqualTo("cadea6d876c62e2f5264c94c7b50875e")
     }
+
+    @Test
+    fun `filter audit events by startDateTme`() {
+      webTestClient.post().uri("/audit/paged?page=0&size=3")
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(startDateRequestBody.toString())
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .jsonPath("$.content.length()").isEqualTo(3)
+        .jsonPath("$.size").isEqualTo(3)
+        .jsonPath("$.totalElements").isEqualTo(3)
+        .jsonPath("$.totalPages").isEqualTo(1)
+        .jsonPath("$.last").isEqualTo(true)
+        .jsonPath("$.content[0].operationId").doesNotExist()
+    }
+  }
+
+  @Test
+  fun `filter audit events by endDateTime`() {
+    webTestClient.post().uri("/audit/paged?page=0&size=3")
+      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .bodyValue(endDateRequestBody.toString())
+      .exchange()
+      .expectStatus().isOk
+      .expectBody()
+      .jsonPath("$.content.length()").isEqualTo(3)
+      .jsonPath("$.size").isEqualTo(3)
+      .jsonPath("$.totalElements").isEqualTo(4)
+      .jsonPath("$.totalPages").isEqualTo(2)
+      .jsonPath("$.last").isEqualTo(false)
+      .jsonPath("$.content[0].operationId").doesNotExist()
+  }
+
+  @Test
+  fun `filter audit events by date range`() {
+    webTestClient.post().uri("/audit/paged?page=0&size=3")
+      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .bodyValue(dateRangeRequestBody.toString())
+      .exchange()
+      .expectStatus().isOk
+      .expectBody()
+      .jsonPath("$.content.length()").isEqualTo(3)
+      .jsonPath("$.size").isEqualTo(3)
+      .jsonPath("$.totalElements").isEqualTo(3)
+      .jsonPath("$.totalPages").isEqualTo(1)
+      .jsonPath("$.last").isEqualTo(true)
+      .jsonPath("$.content[0].operationId").doesNotExist()
   }
 }

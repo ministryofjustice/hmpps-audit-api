@@ -6,18 +6,30 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.stereotype.Repository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+import java.time.Instant
 import java.util.UUID
 
 @Repository
 interface AuditRepository : PagingAndSortingRepository<AuditEvent, UUID> {
+
   @Query(
     """
     select 
         ae from AuditEvent ae 
     where
-         (:what is null or ae.what=:what)
-     and (:who is null or ae.who=:who)
+        ((cast(:startDate as string) is null or ae.when >=:startDate )
+           and (cast(:endDate as string) is null or ae.when <=:endDate))
+     and (cast(:service as string) is null or ae.service =:service)
+     and (cast(:what as string) is null or ae.what =:what)
+     and (cast(:who as string) is null or ae.who =:who)
     """
   )
-  fun findPage(pageable: Pageable, who: String?, what: String?): Page<AuditEvent>
+  fun findPage(
+    pageable: Pageable,
+    startDate: Instant?,
+    endDate: Instant?,
+    service: String?,
+    what: String?,
+    who: String?
+  ): Page<AuditEvent>
 }

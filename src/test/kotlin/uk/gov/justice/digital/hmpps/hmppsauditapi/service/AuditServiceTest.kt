@@ -8,12 +8,14 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditFilterDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
 import java.time.Instant
@@ -150,11 +152,28 @@ class AuditServiceTest {
             )
           )
         )
-        whenever(auditRepository.findPage(any(), anyOrNull(), anyOrNull())).thenReturn(
+        whenever(
+          auditRepository.findPage(
+            any(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull()
+          )
+        ).thenReturn(
           listOfAudits
         )
 
-        val audits = auditService.findPage(Pageable.unpaged(), null, null)
+        val auditFilterDto = AuditFilterDto(
+          Instant.parse("2021-04-04T17:17:30Z"),
+          Instant.parse("2023-01-03T17:17:30Z"),
+          "offender-service",
+          "Another Event",
+          "Hola T"
+        )
+
+        val audits = auditService.findPage(Pageable.unpaged(), auditFilterDto)
         assertThat(audits).isEqualTo(
           PageImpl(
             listOf(
@@ -195,6 +214,71 @@ class AuditServiceTest {
           )
         )
       }
+    }
+  }
+
+  @Nested
+  inner class findFilteredAuditEvents {
+
+    @Test
+    fun `find all filtered audit events`() {
+      val listOfAudits = PageImpl(
+        listOf(
+          AuditEvent(
+            UUID.fromString("03a1624a-54e7-453e-8c79-816dbe02fd3c"),
+            "OFFENDER_DELETED",
+            Instant.parse("2020-12-31T08:11:30Z"),
+            "dadea6d876c62e2f5264c94c7b50875e",
+            "freddy.frog",
+            "offender-service",
+            "{\"offenderId\": \"98\"}"
+          )
+        )
+      )
+      whenever(
+        auditRepository.findPage(
+          any(),
+          anyOrNull(),
+          anyOrNull(),
+          anyOrNull(),
+          anyOrNull(),
+          anyOrNull()
+        )
+      ).thenReturn(
+        listOfAudits
+      )
+
+      val startDate = Instant.parse("2021-04-04T17:17:30Z")
+      val endDate = Instant.parse("2023-01-03T17:17:30Z")
+      val pageDetails = Pageable.unpaged()
+
+      val auditFilterDto = AuditFilterDto(
+        startDate,
+        endDate,
+        "offender-service",
+        "Hola T",
+        "Another Event"
+      )
+
+      val audits = auditService.findPage(pageDetails, auditFilterDto)
+
+      assertThat(audits).isEqualTo(
+        PageImpl(
+          listOf(
+            AuditDto(
+              UUID.fromString("03a1624a-54e7-453e-8c79-816dbe02fd3c"),
+              "OFFENDER_DELETED",
+              Instant.parse("2020-12-31T08:11:30Z"),
+              "dadea6d876c62e2f5264c94c7b50875e",
+              "freddy.frog",
+              "offender-service",
+              "{\"offenderId\": \"98\"}"
+            )
+          )
+        )
+      )
+
+      verify(auditRepository).findPage(pageDetails, startDate, endDate, "offender-service", "Another Event", "Hola T")
     }
   }
 }

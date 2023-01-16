@@ -33,23 +33,22 @@ class AuditResourceTest : IntegrationTest() {
   @TestInstance(PER_CLASS)
   @Nested
   inner class SecureGetEndpoints {
-    private fun secureEndpoints() =
+    private fun secureEndpointsGet() =
       listOf(
-        "/audit",
-        "/audit/paged"
+        "/audit"
       )
 
     @ParameterizedTest
-    @MethodSource("secureEndpoints")
+    @MethodSource("secureEndpointsGet")
     internal fun `requires a valid authentication token`(uri: String) {
-      webTestClient.get()
+      webTestClient.post()
         .uri(uri)
         .exchange()
         .expectStatus().isUnauthorized
     }
 
     @ParameterizedTest
-    @MethodSource("secureEndpoints")
+    @MethodSource("secureEndpointsGet")
     internal fun `requires the correct role`(uri: String) {
       webTestClient.get()
         .uri(uri)
@@ -59,7 +58,7 @@ class AuditResourceTest : IntegrationTest() {
     }
 
     @ParameterizedTest
-    @MethodSource("secureEndpoints")
+    @MethodSource("secureEndpointsGet")
     internal fun `satisfies the correct role but no scope`(uri: String) {
       webTestClient.get()
         .uri(uri)
@@ -69,7 +68,7 @@ class AuditResourceTest : IntegrationTest() {
     }
 
     @ParameterizedTest
-    @MethodSource("secureEndpoints")
+    @MethodSource("secureEndpointsGet")
     internal fun `satisfies the correct role but wrong scope`(uri: String) {
       webTestClient.get()
         .uri(uri)
@@ -79,9 +78,9 @@ class AuditResourceTest : IntegrationTest() {
     }
 
     @ParameterizedTest
-    @MethodSource("secureEndpoints")
+    @MethodSource("secureEndpointsGet")
     internal fun `satisfies the correct role and scope`(uri: String) {
-      whenever(auditRepository.findPage(any(), anyOrNull(), anyOrNull())).thenReturn(
+      whenever(auditRepository.findPage(any(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())).thenReturn(
         PageImpl(listOf())
       )
 
@@ -96,13 +95,13 @@ class AuditResourceTest : IntegrationTest() {
   @TestInstance(PER_CLASS)
   @Nested
   inner class securePostEndpoints {
-    private fun secureEndpoints() =
+    private fun secureEndpointsPost() =
       listOf(
         "/audit",
       )
 
     @ParameterizedTest
-    @MethodSource("secureEndpoints")
+    @MethodSource("secureEndpointsPost")
     internal fun `requires a valid authentication token`(uri: String) {
       webTestClient.post()
         .uri(uri)
@@ -111,7 +110,7 @@ class AuditResourceTest : IntegrationTest() {
     }
 
     @ParameterizedTest
-    @MethodSource("secureEndpoints")
+    @MethodSource("secureEndpointsPost")
     internal fun `requires the correct role`(uri: String) {
       webTestClient.post()
         .uri(uri)
@@ -122,7 +121,7 @@ class AuditResourceTest : IntegrationTest() {
     }
 
     @ParameterizedTest
-    @MethodSource("secureEndpoints")
+    @MethodSource("secureEndpointsPost")
     internal fun `satisfies the correct role but no scope`(uri: String) {
       webTestClient.post()
         .uri(uri)
@@ -133,7 +132,7 @@ class AuditResourceTest : IntegrationTest() {
     }
 
     @ParameterizedTest
-    @MethodSource("secureEndpoints")
+    @MethodSource("secureEndpointsPost")
     internal fun `satisfies the correct role but wrong scope`(uri: String) {
       webTestClient.post()
         .uri(uri)
@@ -144,7 +143,7 @@ class AuditResourceTest : IntegrationTest() {
     }
 
     @ParameterizedTest
-    @MethodSource("secureEndpoints")
+    @MethodSource("secureEndpointsPost")
     internal fun `satisfies the correct role and scope`(uri: String) {
       val auditEvent = AuditEvent(what = "secureEndpointCheck")
 
