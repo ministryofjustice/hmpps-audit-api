@@ -24,8 +24,8 @@ class QueueHealthCheckNegativeTest : IntegrationTest() {
         .withEndpointConfiguration(
           AwsClientBuilder.EndpointConfiguration(
             hmppsSqsProperties.localstackUrl,
-            hmppsSqsProperties.region
-          )
+            hmppsSqsProperties.region,
+          ),
         )
         .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
         .build()

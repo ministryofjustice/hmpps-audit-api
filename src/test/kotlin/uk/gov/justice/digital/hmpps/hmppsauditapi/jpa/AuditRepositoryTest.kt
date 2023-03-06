@@ -30,8 +30,8 @@ class AuditRepositoryTest {
     internal fun `can write to repository with basic attributes`() {
       auditRepository.save(
         AuditEvent(
-          what = "An Event with basic attributes"
-        )
+          what = "An Event with basic attributes",
+        ),
       )
 
       assertThat(auditRepository.count()).isEqualTo(1)
@@ -61,8 +61,8 @@ class AuditRepositoryTest {
           operationId = "123456789",
           who = "John Smith",
           service = "current-service",
-          details = details
-        )
+          details = details,
+        ),
       )
       assertThat(auditRepository.count()).isEqualTo(1)
       val auditEvent = auditRepository.findAll().first()
@@ -87,8 +87,8 @@ class AuditRepositoryTest {
           `when` = Instant.now(),
           operationId = "123456789",
           who = "John Smith",
-          service = "Service-A"
-        )
+          service = "Service-A",
+        ),
       )
       auditRepository.save(
         AuditEvent(
@@ -96,8 +96,8 @@ class AuditRepositoryTest {
           `when` = Instant.now(),
           operationId = "345678",
           who = "Fred Smith",
-          service = "Service-B"
-        )
+          service = "Service-B",
+        ),
       )
       auditRepository.save(
         AuditEvent(
@@ -105,8 +105,8 @@ class AuditRepositoryTest {
           `when` = Instant.now(),
           operationId = "234567",
           who = "John Jones",
-          service = "Service-C"
-        )
+          service = "Service-C",
+        ),
       )
 
       assertThat(auditRepository.count()).isEqualTo(3)
@@ -130,7 +130,7 @@ class AuditRepositoryTest {
           operationId = "123456789",
           service = "Service-A",
           who = "John Smith",
-        )
+        ),
       )
       auditRepository.save(
         AuditEvent(
@@ -139,7 +139,7 @@ class AuditRepositoryTest {
           operationId = "345678",
           service = "Service-B",
           who = "Fred Smith",
-        )
+        ),
       )
       auditRepository.save(
         AuditEvent(
@@ -148,7 +148,7 @@ class AuditRepositoryTest {
           operationId = "234567",
           service = "Service-C",
           who = "John Smith",
-        )
+        ),
       )
 
       assertThat(auditRepository.count()).isEqualTo(3)
@@ -172,7 +172,7 @@ class AuditRepositoryTest {
           operationId = "123456789",
           service = "Service-A",
           who = "John Smith",
-        )
+        ),
       )
       auditRepository.save(
         AuditEvent(
@@ -181,7 +181,7 @@ class AuditRepositoryTest {
           operationId = "345678",
           service = "Service-B",
           who = "Fred Smith",
-        )
+        ),
       )
       auditRepository.save(
         AuditEvent(
@@ -190,7 +190,7 @@ class AuditRepositoryTest {
           operationId = "234567",
           service = "Service-C",
           who = "John Smith",
-        )
+        ),
       )
 
       assertThat(auditRepository.count()).isEqualTo(3)
@@ -214,7 +214,7 @@ class AuditRepositoryTest {
           operationId = "123456789",
           service = "Service-A",
           who = "John Smith",
-        )
+        ),
       )
       auditRepository.save(
         AuditEvent(
@@ -223,7 +223,7 @@ class AuditRepositoryTest {
           operationId = "345678",
           service = "Service-B",
           who = "Fred Smith",
-        )
+        ),
       )
       auditRepository.save(
         AuditEvent(
@@ -232,7 +232,7 @@ class AuditRepositoryTest {
           operationId = "234567",
           service = "Service-C",
           who = "John Smith",
-        )
+        ),
       )
 
       assertThat(auditRepository.count()).isEqualTo(3)
@@ -256,7 +256,7 @@ class AuditRepositoryTest {
           operationId = "123456789",
           service = "Service-A",
           who = "John Smith",
-        )
+        ),
       )
       auditRepository.save(
         AuditEvent(
@@ -265,7 +265,7 @@ class AuditRepositoryTest {
           operationId = "345678",
           service = "Service-B",
           who = "Fred Smith",
-        )
+        ),
       )
       auditRepository.save(
         AuditEvent(
@@ -274,7 +274,7 @@ class AuditRepositoryTest {
           operationId = "234567",
           service = "Service-C",
           who = "John Smith",
-        )
+        ),
       )
 
       assertThat(auditRepository.count()).isEqualTo(3)
@@ -299,7 +299,7 @@ class AuditRepositoryTest {
           operationId = "123456789",
           service = "Service-A",
           who = "John Smith",
-        )
+        ),
       )
       auditRepository.save(
         AuditEvent(
@@ -308,7 +308,7 @@ class AuditRepositoryTest {
           operationId = "345678",
           service = "Service-B",
           who = "Fred Smith",
-        )
+        ),
       )
       auditRepository.save(
         AuditEvent(
@@ -317,7 +317,7 @@ class AuditRepositoryTest {
           operationId = "234567",
           service = "Service-C",
           who = "John Smith",
-        )
+        ),
       )
 
       assertThat(auditRepository.count()).isEqualTo(3)
@@ -341,7 +341,7 @@ class AuditRepositoryTest {
           operationId = "123456789",
           service = "Service-A",
           who = "John Smith",
-        )
+        ),
       )
       auditRepository.save(
         AuditEvent(
@@ -350,7 +350,7 @@ class AuditRepositoryTest {
           operationId = "345678",
           service = "Service-B",
           who = "Fred Smith",
-        )
+        ),
       )
       auditRepository.save(
         AuditEvent(
@@ -359,7 +359,7 @@ class AuditRepositoryTest {
           operationId = "234567",
           service = "Service-C",
           who = "John Smith",
-        )
+        ),
       )
 
       assertThat(auditRepository.count()).isEqualTo(3)
@@ -384,7 +384,7 @@ class AuditRepositoryTest {
           operationId = "123456789",
           service = "Service-A",
           who = "John Smith",
-        )
+        ),
       )
       auditRepository.save(
         AuditEvent(
@@ -393,7 +393,7 @@ class AuditRepositoryTest {
           operationId = "345678",
           service = "Service-B",
           who = "Fred Smith",
-        )
+        ),
       )
       auditRepository.save(
         AuditEvent(
@@ -402,7 +402,7 @@ class AuditRepositoryTest {
           operationId = "234567",
           service = "Service-C",
           who = "John Smith",
-        )
+        ),
       )
 
       assertThat(auditRepository.count()).isEqualTo(3)

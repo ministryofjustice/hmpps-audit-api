@@ -7,14 +7,14 @@ data class AuditFilterDto(
   @Schema(
     required = false,
     description = "The start date and time to filter the audit events",
-    example = "2020-07-01T15:15:30Z"
+    example = "2020-07-01T15:15:30Z",
   )
   val startDateTime: Instant? = null,
 
   @Schema(
     required = false,
     description = "The end date and time to filter the audit events",
-    example = "2020-07-01T15:15:30Z"
+    example = "2020-07-01T15:15:30Z",
   )
   val endDateTime: Instant? = null,
 
@@ -29,8 +29,8 @@ data class AuditFilterDto(
   @Schema(
     required = false,
     description = "The function or process to filter audit events by",
-    example = "COURT_REGISTER_BUILDING_UPDATE"
+    example = "COURT_REGISTER_BUILDING_UPDATE",
   )
   @field:Size(min = 2, max = 200)
-  val what: String? = null
+  val what: String? = null,
 )

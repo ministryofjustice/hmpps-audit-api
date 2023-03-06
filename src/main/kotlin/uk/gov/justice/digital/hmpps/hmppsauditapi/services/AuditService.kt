@@ -36,13 +36,16 @@ class AuditService(
 
   fun findPage(
     pageable: Pageable = Pageable.unpaged(),
-    auditFilterDto: AuditFilterDto
+    auditFilterDto: AuditFilterDto,
   ): Page<AuditDto> {
-
     with(auditFilterDto) {
       log.info(
-        "Searching audit events by startDate {} endDate {} service {} what {} who {}", startDateTime,
-        endDateTime, service, what, who
+        "Searching audit events by startDate {} endDate {} service {} what {} who {}",
+        startDateTime,
+        endDateTime,
+        service,
+        what,
+        who,
       )
       return auditRepository.findPage(
         pageable,
@@ -50,7 +53,7 @@ class AuditService(
         endDateTime,
         service,
         what,
-        who
+        who,
       )
         .map { AuditDto(it) }
     }

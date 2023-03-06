@@ -33,7 +33,7 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
         assertThat(it.what).isEqualTo("OFFENDER_DELETED")
         assertThat(it.who).isEqualTo("bobby.beans")
         assertThat(it.service).isEqualTo("offender-service")
-      }
+      },
     )
   }
 }
