@@ -22,7 +22,7 @@ interface AuditRepository : PagingAndSortingRepository<AuditEvent, UUID> {
      and (cast(:service as string) is null or ae.service =:service)
      and (cast(:what as string) is null or ae.what =:what)
      and (cast(:who as string) is null or ae.who =:who)
-    """
+    """,
   )
   fun findPage(
     pageable: Pageable,
@@ -30,6 +30,6 @@ interface AuditRepository : PagingAndSortingRepository<AuditEvent, UUID> {
     endDate: Instant?,
     service: String?,
     what: String?,
-    who: String?
+    who: String?,
   ): Page<AuditEvent>
 }

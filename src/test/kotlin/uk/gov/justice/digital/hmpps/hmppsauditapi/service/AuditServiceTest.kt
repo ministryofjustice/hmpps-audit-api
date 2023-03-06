@@ -37,7 +37,7 @@ class AuditServiceTest {
         AuditEvent(
           UUID.fromString("64505f1e-c9ca-4e54-8c62-d946359b667f"),
           "MINIMUM_FIELDS_EVENT",
-          Instant.parse("2021-04-04T17:17:30Z")
+          Instant.parse("2021-04-04T17:17:30Z"),
         ),
         AuditEvent(
           UUID.fromString("5c5ba3d7-0707-42f1-b9ea-949e22dc17ba"),
@@ -46,7 +46,7 @@ class AuditServiceTest {
           "badea6d876c62e2f5264c94c7b50875e",
           "bobby.beans",
           "court-register",
-          "{\"courtId\":\"AAAMH1\",\"buildingId\":936,\"building\":{\"id\":936,\"courtId\":\"AAAMH1\",\"buildingName\":\"Main Court Name Changed\"}}"
+          "{\"courtId\":\"AAAMH1\",\"buildingId\":936,\"building\":{\"id\":936,\"courtId\":\"AAAMH1\",\"buildingName\":\"Main Court Name Changed\"}}",
         ),
         AuditEvent(
           UUID.fromString("e5b4800c-dc4e-45f8-826c-877b1f3ce8de"),
@@ -55,7 +55,7 @@ class AuditServiceTest {
           "cadea6d876c62e2f5264c94c7b50875e",
           "bobby.beans",
           "offender-service",
-          "{\"offenderId\": \"97\"}"
+          "{\"offenderId\": \"97\"}",
         ),
         AuditEvent(
           UUID.fromString("03a1624a-54e7-453e-8c79-816dbe02fd3c"),
@@ -64,11 +64,11 @@ class AuditServiceTest {
           "dadea6d876c62e2f5264c94c7b50875e",
           "freddy.frog",
           "offender-service",
-          "{\"offenderId\": \"98\"}"
-        )
+          "{\"offenderId\": \"98\"}",
+        ),
       )
       whenever(auditRepository.findAll(any<Sort>())).thenReturn(
-        listOfAudits
+        listOfAudits,
       )
 
       val audits = auditService.findAll()
@@ -78,7 +78,10 @@ class AuditServiceTest {
             UUID.fromString("64505f1e-c9ca-4e54-8c62-d946359b667f"),
             "MINIMUM_FIELDS_EVENT",
             Instant.parse("2021-04-04T17:17:30Z"),
-            null, null, null, null
+            null,
+            null,
+            null,
+            null,
           ),
           AuditDto(
             UUID.fromString("5c5ba3d7-0707-42f1-b9ea-949e22dc17ba"),
@@ -87,7 +90,7 @@ class AuditServiceTest {
             "badea6d876c62e2f5264c94c7b50875e",
             "bobby.beans",
             "court-register",
-            "{\"courtId\":\"AAAMH1\",\"buildingId\":936,\"building\":{\"id\":936,\"courtId\":\"AAAMH1\",\"buildingName\":\"Main Court Name Changed\"}}"
+            "{\"courtId\":\"AAAMH1\",\"buildingId\":936,\"building\":{\"id\":936,\"courtId\":\"AAAMH1\",\"buildingName\":\"Main Court Name Changed\"}}",
           ),
           AuditDto(
             UUID.fromString("e5b4800c-dc4e-45f8-826c-877b1f3ce8de"),
@@ -96,7 +99,7 @@ class AuditServiceTest {
             "cadea6d876c62e2f5264c94c7b50875e",
             "bobby.beans",
             "offender-service",
-            "{\"offenderId\": \"97\"}"
+            "{\"offenderId\": \"97\"}",
           ),
           AuditDto(
             UUID.fromString("03a1624a-54e7-453e-8c79-816dbe02fd3c"),
@@ -105,9 +108,9 @@ class AuditServiceTest {
             "dadea6d876c62e2f5264c94c7b50875e",
             "freddy.frog",
             "offender-service",
-            "{\"offenderId\": \"98\"}"
-          )
-        )
+            "{\"offenderId\": \"98\"}",
+          ),
+        ),
       )
     }
 
@@ -121,7 +124,7 @@ class AuditServiceTest {
             AuditEvent(
               UUID.fromString("64505f1e-c9ca-4e54-8c62-d946359b667f"),
               "MINIMUM_FIELDS_EVENT",
-              Instant.parse("2021-04-04T17:17:30Z")
+              Instant.parse("2021-04-04T17:17:30Z"),
             ),
             AuditEvent(
               UUID.fromString("5c5ba3d7-0707-42f1-b9ea-949e22dc17ba"),
@@ -130,7 +133,7 @@ class AuditServiceTest {
               "badea6d876c62e2f5264c94c7b50875e",
               "bobby.beans",
               "court-register",
-              "{\"courtId\":\"AAAMH1\",\"buildingId\":936,\"building\":{\"id\":936,\"courtId\":\"AAAMH1\",\"buildingName\":\"Main Court Name Changed\"}}"
+              "{\"courtId\":\"AAAMH1\",\"buildingId\":936,\"building\":{\"id\":936,\"courtId\":\"AAAMH1\",\"buildingName\":\"Main Court Name Changed\"}}",
             ),
             AuditEvent(
               UUID.fromString("e5b4800c-dc4e-45f8-826c-877b1f3ce8de"),
@@ -139,7 +142,7 @@ class AuditServiceTest {
               "cadea6d876c62e2f5264c94c7b50875e",
               "bobby.beans",
               "offender-service",
-              "{\"offenderId\": \"97\"}"
+              "{\"offenderId\": \"97\"}",
             ),
             AuditEvent(
               UUID.fromString("03a1624a-54e7-453e-8c79-816dbe02fd3c"),
@@ -148,9 +151,9 @@ class AuditServiceTest {
               "dadea6d876c62e2f5264c94c7b50875e",
               "freddy.frog",
               "offender-service",
-              "{\"offenderId\": \"98\"}"
-            )
-          )
+              "{\"offenderId\": \"98\"}",
+            ),
+          ),
         )
         whenever(
           auditRepository.findPage(
@@ -159,10 +162,10 @@ class AuditServiceTest {
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),
-            anyOrNull()
-          )
+            anyOrNull(),
+          ),
         ).thenReturn(
-          listOfAudits
+          listOfAudits,
         )
 
         val auditFilterDto = AuditFilterDto(
@@ -170,7 +173,7 @@ class AuditServiceTest {
           Instant.parse("2023-01-03T17:17:30Z"),
           "offender-service",
           "Another Event",
-          "Hola T"
+          "Hola T",
         )
 
         val audits = auditService.findPage(Pageable.unpaged(), auditFilterDto)
@@ -181,7 +184,10 @@ class AuditServiceTest {
                 UUID.fromString("64505f1e-c9ca-4e54-8c62-d946359b667f"),
                 "MINIMUM_FIELDS_EVENT",
                 Instant.parse("2021-04-04T17:17:30Z"),
-                null, null, null, null
+                null,
+                null,
+                null,
+                null,
               ),
               AuditDto(
                 UUID.fromString("5c5ba3d7-0707-42f1-b9ea-949e22dc17ba"),
@@ -190,7 +196,7 @@ class AuditServiceTest {
                 "badea6d876c62e2f5264c94c7b50875e",
                 "bobby.beans",
                 "court-register",
-                "{\"courtId\":\"AAAMH1\",\"buildingId\":936,\"building\":{\"id\":936,\"courtId\":\"AAAMH1\",\"buildingName\":\"Main Court Name Changed\"}}"
+                "{\"courtId\":\"AAAMH1\",\"buildingId\":936,\"building\":{\"id\":936,\"courtId\":\"AAAMH1\",\"buildingName\":\"Main Court Name Changed\"}}",
               ),
               AuditDto(
                 UUID.fromString("e5b4800c-dc4e-45f8-826c-877b1f3ce8de"),
@@ -199,7 +205,7 @@ class AuditServiceTest {
                 "cadea6d876c62e2f5264c94c7b50875e",
                 "bobby.beans",
                 "offender-service",
-                "{\"offenderId\": \"97\"}"
+                "{\"offenderId\": \"97\"}",
               ),
               AuditDto(
                 UUID.fromString("03a1624a-54e7-453e-8c79-816dbe02fd3c"),
@@ -208,10 +214,10 @@ class AuditServiceTest {
                 "dadea6d876c62e2f5264c94c7b50875e",
                 "freddy.frog",
                 "offender-service",
-                "{\"offenderId\": \"98\"}"
-              )
-            )
-          )
+                "{\"offenderId\": \"98\"}",
+              ),
+            ),
+          ),
         )
       }
     }
@@ -231,9 +237,9 @@ class AuditServiceTest {
             "dadea6d876c62e2f5264c94c7b50875e",
             "freddy.frog",
             "offender-service",
-            "{\"offenderId\": \"98\"}"
-          )
-        )
+            "{\"offenderId\": \"98\"}",
+          ),
+        ),
       )
       whenever(
         auditRepository.findPage(
@@ -242,10 +248,10 @@ class AuditServiceTest {
           anyOrNull(),
           anyOrNull(),
           anyOrNull(),
-          anyOrNull()
-        )
+          anyOrNull(),
+        ),
       ).thenReturn(
-        listOfAudits
+        listOfAudits,
       )
 
       val startDate = Instant.parse("2021-04-04T17:17:30Z")
@@ -257,7 +263,7 @@ class AuditServiceTest {
         endDate,
         "offender-service",
         "Hola T",
-        "Another Event"
+        "Another Event",
       )
 
       val audits = auditService.findPage(pageDetails, auditFilterDto)
@@ -272,10 +278,10 @@ class AuditServiceTest {
               "dadea6d876c62e2f5264c94c7b50875e",
               "freddy.frog",
               "offender-service",
-              "{\"offenderId\": \"98\"}"
-            )
-          )
-        )
+              "{\"offenderId\": \"98\"}",
+            ),
+          ),
+        ),
       )
 
       verify(auditRepository).findPage(pageDetails, startDate, endDate, "offender-service", "Another Event", "Hola T")

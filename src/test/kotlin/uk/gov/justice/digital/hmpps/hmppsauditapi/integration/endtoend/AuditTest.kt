@@ -49,7 +49,7 @@ class AuditTest : QueueListenerIntegrationTest() {
         assertThat(it["service"]).isEqualTo("offender-service")
         assertThat(it.containsKey("details")).isEqualTo(false)
       },
-      isNull()
+      isNull(),
     )
     verify(auditRepository).save(any<AuditEvent>())
   }
@@ -82,7 +82,7 @@ class AuditTest : QueueListenerIntegrationTest() {
         "cadea6d876c62e2f5264c94c7b50875e",
         "bobby.beans",
         "offender-service",
-        "{\"offenderId\": \"97\"}"
+        "{\"offenderId\": \"97\"}",
       )
 
       webTestClient.post()

@@ -52,21 +52,21 @@ class AuditResource(
         content = [
           Content(
             mediaType = "application/json",
-            array = ArraySchema(schema = Schema(implementation = AuditDto::class))
-          )
-        ]
+            array = ArraySchema(schema = Schema(implementation = AuditDto::class)),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint, requires a valid OAuth2 token",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "403",
         description = "Forbidden, requires an authorisation with role ROLE_AUDIT",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-      )
-    ]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
   )
   fun findAll(): List<AuditDto> {
     return auditService.findAll()
@@ -85,34 +85,35 @@ class AuditResource(
         content = [
           Content(
             mediaType = "application/json",
-            array = ArraySchema(schema = Schema(implementation = AuditDto::class))
-          )
-        ]
+            array = ArraySchema(schema = Schema(implementation = AuditDto::class)),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "400",
         description = "Bad request, search criteria must be valid when supplied",
         content = [
-          Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))
-        ]
+          Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class)),
+        ],
       ),
       ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint, requires a valid OAuth2 token",
         content = [
-          Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))
-        ]
+          Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class)),
+        ],
       ),
       ApiResponse(
         responseCode = "403",
         description = "Forbidden, requires an authorisation with role ROLE_AUDIT",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-      )
-    ]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
   )
   fun findPage(
     pageable: Pageable = Pageable.unpaged(),
-    @RequestBody @Valid auditFilterDto: AuditFilterDto
+    @RequestBody @Valid
+    auditFilterDto: AuditFilterDto,
   ): Page<AuditDto> {
     return auditService.findPage(pageable, auditFilterDto)
   }
@@ -124,11 +125,11 @@ class AuditResource(
   @Operation(hidden = true)
   fun insertAuditEvent(
     @RequestHeader(value = "traceparent", required = false) traceParent: String?,
-    @RequestBody auditEvent: AuditEvent
+    @RequestBody auditEvent: AuditEvent,
   ) {
     val cleansedAuditEvent = auditEvent.copy(
       operationId = auditEvent.operationId ?: traceParent?.traceId(),
-      details = auditEvent.details?.jsonString()
+      details = auditEvent.details?.jsonString(),
     )
     auditService.sendAuditEvent(cleansedAuditEvent)
   }
@@ -165,12 +166,17 @@ data class AuditDto(
   val service: String?,
   @Schema(
     description = "Additional information",
-    example = "{\"courtId\":\"AAAMH1\",\"buildingId\":936,\"building\":{\"id\":936,\"courtId\":\"AAAMH1\",\"buildingName\":\"Main Court Name Changed\"}"
+    example = "{\"courtId\":\"AAAMH1\",\"buildingId\":936,\"building\":{\"id\":936,\"courtId\":\"AAAMH1\",\"buildingName\":\"Main Court Name Changed\"}",
   )
-  val details: String?
+  val details: String?,
 ) {
   constructor(auditEvent: AuditEvent) : this(
-    auditEvent.id!!, auditEvent.what, auditEvent.`when`, auditEvent.operationId, auditEvent.who,
-    auditEvent.service, auditEvent.details
+    auditEvent.id!!,
+    auditEvent.what,
+    auditEvent.`when`,
+    auditEvent.operationId,
+    auditEvent.who,
+    auditEvent.service,
+    auditEvent.details,
   )
 }

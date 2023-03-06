@@ -34,7 +34,7 @@ abstract class IntegrationTest {
   internal fun setAuthorisation(
     user: String = "hmpps-audit-client",
     roles: List<String> = listOf(),
-    scopes: List<String> = listOf()
+    scopes: List<String> = listOf(),
   ): (HttpHeaders) -> Unit = jwtAuthHelper.setAuthorisation(user, roles, scopes)
 
   @Autowired
@@ -62,7 +62,7 @@ abstract class IntegrationTest {
     @Bean("auditqueue-sqs-client")
     fun auditQueueSqsClient(
       hmppsSqsProperties: HmppsSqsProperties,
-      @Qualifier("auditqueue-sqs-dlq-client") auditQueueSqsDlqClient: AmazonSQS
+      @Qualifier("auditqueue-sqs-dlq-client") auditQueueSqsDlqClient: AmazonSQS,
     ): AmazonSQS =
       with(hmppsSqsProperties) {
         val config = queues["auditqueue"]

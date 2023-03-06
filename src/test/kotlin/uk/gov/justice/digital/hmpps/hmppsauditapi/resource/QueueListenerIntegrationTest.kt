@@ -22,7 +22,7 @@ abstract class QueueListenerIntegrationTest : IntegrationTest() {
     val queueAttributes =
       awsSqsClient.getQueueAttributes(
         awsSqsUrl,
-        listOf("ApproximateNumberOfMessages")
+        listOf("ApproximateNumberOfMessages"),
       )
     return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()
   }
@@ -31,7 +31,7 @@ abstract class QueueListenerIntegrationTest : IntegrationTest() {
     val queueAttributes =
       awsSqsDlqClient.getQueueAttributes(
         awsSqsDlqUrl,
-        listOf("ApproximateNumberOfMessages")
+        listOf("ApproximateNumberOfMessages"),
       )
     return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()
   }

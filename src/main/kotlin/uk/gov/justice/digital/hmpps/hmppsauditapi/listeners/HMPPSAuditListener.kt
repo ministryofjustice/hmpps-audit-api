@@ -17,7 +17,7 @@ import javax.persistence.Table
 @Service
 class HMPPSAuditListener(
   private val auditService: AuditService,
-  private val mapper: ObjectMapper
+  private val mapper: ObjectMapper,
 ) {
 
   @JmsListener(destination = "auditqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
@@ -46,6 +46,6 @@ class HMPPSAuditListener(
     @Schema(description = "Which service the Event relates to", example = "court-register")
     val service: String? = null,
     @Schema(description = "Additional information", example = "{\"courtId\":\"AAAMH1\",\"buildingId\":936,\"building\":{\"id\":936,\"courtId\":\"AAAMH1\",\"buildingName\":\"Main Court Name Changed\"}")
-    val details: String? = null
+    val details: String? = null,
   )
 }
