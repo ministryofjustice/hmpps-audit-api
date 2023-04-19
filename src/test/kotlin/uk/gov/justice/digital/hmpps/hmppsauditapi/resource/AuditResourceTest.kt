@@ -125,7 +125,7 @@ class AuditResourceTest : IntegrationTest() {
     internal fun `satisfies the correct role but no scope`(uri: String) {
       webTestClient.post()
         .uri(uri)
-        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
         .body(BodyInserters.fromValue(AuditEvent(what = "what")))
         .exchange()
         .expectStatus().isForbidden
@@ -136,7 +136,7 @@ class AuditResourceTest : IntegrationTest() {
     internal fun `satisfies the correct role but wrong scope`(uri: String) {
       webTestClient.post()
         .uri(uri)
-        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
         .body(BodyInserters.fromValue(AuditEvent(what = "what")))
         .exchange()
         .expectStatus().isForbidden
