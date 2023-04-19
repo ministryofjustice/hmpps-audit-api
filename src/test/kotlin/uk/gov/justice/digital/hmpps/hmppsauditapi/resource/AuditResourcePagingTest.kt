@@ -79,7 +79,7 @@ class AuditResourcePagingTest : IntegrationTest() {
   @Test
   fun `find full page of audit events`() {
     webTestClient.post().uri("/audit/paged?page=0&size=4&sort=who")
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
       .contentType(MediaType.APPLICATION_JSON)
       .bodyValue(serviceRequestBody.toString())
       .exchange()
@@ -97,7 +97,7 @@ class AuditResourcePagingTest : IntegrationTest() {
   @Test
   fun `find full page of descending ordered audit events`() {
     webTestClient.post().uri("/audit/paged?page=0&size=4&sort=who,desc")
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
       .contentType(MediaType.APPLICATION_JSON)
       .bodyValue(serviceRequestBody.toString())
       .exchange()
@@ -116,7 +116,7 @@ class AuditResourcePagingTest : IntegrationTest() {
   @Test
   fun `find first page of audit events`() {
     webTestClient.post().uri("/audit/paged?page=0&size=3&sort=who")
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
       .contentType(MediaType.APPLICATION_JSON)
       .bodyValue(serviceRequestBody.toString())
       .exchange()
@@ -134,7 +134,7 @@ class AuditResourcePagingTest : IntegrationTest() {
   @Test
   fun `find second page of audit events`() {
     webTestClient.post().uri("/audit/paged?page=2&size=1&sort=who")
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
       .contentType(MediaType.APPLICATION_JSON)
       .bodyValue(serviceRequestBody.toString())
       .exchange()
@@ -155,7 +155,7 @@ class AuditResourcePagingTest : IntegrationTest() {
     @Test
     fun `filter audit events by what`() {
       webTestClient.post().uri("/audit/paged?page=0&size=3")
-        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(whatRequestBody.toString())
         .exchange()
@@ -173,7 +173,7 @@ class AuditResourcePagingTest : IntegrationTest() {
     @Test
     fun `filter audit events by who`() {
       webTestClient.post().uri("/audit/paged?page=0&size=3")
-        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(whoRequestBody.toString())
         .exchange()
@@ -191,7 +191,7 @@ class AuditResourcePagingTest : IntegrationTest() {
     @Test
     fun `filter audit events by what and who`() {
       webTestClient.post().uri("/audit/paged?page=0&size=3")
-        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(whoAndWhatRequestBody.toString())
         .exchange()
@@ -208,7 +208,7 @@ class AuditResourcePagingTest : IntegrationTest() {
     @Test
     fun `filter audit events by startDateTme`() {
       webTestClient.post().uri("/audit/paged?page=0&size=3")
-        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(startDateRequestBody.toString())
         .exchange()
@@ -226,7 +226,7 @@ class AuditResourcePagingTest : IntegrationTest() {
   @Test
   fun `filter audit events by endDateTime`() {
     webTestClient.post().uri("/audit/paged?page=0&size=3")
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
       .contentType(MediaType.APPLICATION_JSON)
       .bodyValue(endDateRequestBody.toString())
       .exchange()
@@ -243,7 +243,7 @@ class AuditResourcePagingTest : IntegrationTest() {
   @Test
   fun `filter audit events by date range`() {
     webTestClient.post().uri("/audit/paged?page=0&size=3")
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT")))
       .contentType(MediaType.APPLICATION_JSON)
       .bodyValue(dateRangeRequestBody.toString())
       .exchange()

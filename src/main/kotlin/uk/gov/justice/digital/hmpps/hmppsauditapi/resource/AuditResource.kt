@@ -119,7 +119,7 @@ class AuditResource(
   }
 
   @Deprecated("Audit events should be sent via audit queue")
-  @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_write')")
+  @PreAuthorize("hasRole('ROLE_AUDIT')")
   @PostMapping("")
   @ResponseStatus(HttpStatus.ACCEPTED)
   @Operation(hidden = true)
