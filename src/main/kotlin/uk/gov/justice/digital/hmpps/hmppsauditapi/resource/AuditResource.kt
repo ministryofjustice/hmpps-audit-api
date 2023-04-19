@@ -72,10 +72,10 @@ class AuditResource(
     return auditService.findAll()
   }
 
-  @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_read')")
+  @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_write')")
   @PostMapping("/paged")
   @Operation(
-    summary = "Get pages audit events",
+    summary = "Get paged audit events",
     description = "Get pages audit events, role required is ROLE_AUDIT",
     security = [SecurityRequirement(name = "ROLE_AUDIT")],
     responses = [
