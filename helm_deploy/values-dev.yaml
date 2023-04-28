@@ -1,11 +1,15 @@
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
 # Environment specific values, override helm_deploy/hmpps-audit-api/values.yaml
 generic-service:
+
   replicaCount: 2
+
   ingress:
     host: audit-api-dev.hmpps.service.justice.gov.uk
+
+  scheduledDowntime:
+    enabled: true
+    startup: '35 6 * * 1-5' # Start at 6:35am UTC Monday-Friday
+    shutdown: '35 21 * * 1-5' # Stop at 9:35pm UTC Monday-Friday
 
   env:
     OAUTH_ENDPOINT_URL: "https://sign-in-dev.hmpps.service.justice.gov.uk/auth"
