@@ -3,9 +3,12 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
+import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import uk.gov.justice.digital.hmpps.hmppsauditapi.IntegrationTest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
+import uk.gov.justice.hmpps.sqs.HmppsQueue
+import uk.gov.justice.hmpps.sqs.countAllMessagesOnQueue
 
 abstract class QueueListenerIntegrationTest : IntegrationTest() {
 
@@ -18,23 +21,13 @@ abstract class QueueListenerIntegrationTest : IntegrationTest() {
   @Autowired
   protected lateinit var listener: HMPPSAuditListener
 
-  fun getNumberOfMessagesCurrentlyOnQueue(): Int? {
-    val queueAttributes =
-      awsSqsClient.getQueueAttributes(
-        awsSqsUrl,
-        listOf("ApproximateNumberOfMessages"),
-      )
-    return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()
-  }
+  internal val auditQueue by lazy { hmppsQueueService.findByQueueId("auditqueue") as HmppsQueue }
+  internal val auditQueueSqsClient by lazy { auditQueue.sqsClient }
+  internal val auditQueueUrl by lazy { auditQueue.queueUrl }
+  internal val auditSqsDlqClient by lazy { auditQueue.sqsDlqClient as SqsAsyncClient }
+  internal val auditDlqUrl by lazy { auditQueue.dlqUrl as String }
 
-  fun getNumberOfMessagesCurrentlyOnDlq(): Int? {
-    val queueAttributes =
-      awsSqsDlqClient.getQueueAttributes(
-        awsSqsDlqUrl,
-        listOf("ApproximateNumberOfMessages"),
-      )
-    return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()
-  }
+  fun getNumberOfMessagesCurrentlyOnQueue(): Int = auditQueueSqsClient.countAllMessagesOnQueue(auditQueueUrl).get()
 
-  fun String.queueUrl(): String = awsSqsClient.getQueueUrl(this).queueUrl
+  fun getNumberOfMessagesCurrentlyOnDlq(): Int = auditSqsDlqClient.countAllMessagesOnQueue(auditDlqUrl).get()
 }

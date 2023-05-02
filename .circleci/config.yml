@@ -8,7 +8,7 @@ jobs:
     executor:
       name: hmpps/localstack
       jdk_tag: "19.0"
-      localstack_tag: "0.12.10"
+      localstack_tag: "1.4"
     steps:
       - checkout
       - hmpps/install_aws_cli
@@ -99,6 +99,7 @@ workflows:
                 - main
     jobs:
       - hmpps/gradle_owasp_dependency_check:
+          jdk_tag: "19.0""
           slack_channel: hmpps_tech_alerts_security
           context:
             - hmpps-common-vars

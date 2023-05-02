@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.service
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -25,7 +24,11 @@ class AuditServiceTest {
   private val telemetryClient: TelemetryClient = mock()
   private val auditRepository: AuditRepository = mock()
   private val auditService =
-    AuditService(telemetryClient, auditRepository, jacksonObjectMapper(), mock())
+    AuditService(
+      telemetryClient,
+      auditRepository,
+//      jacksonObjectMapper(), mock()
+    )
 
   @Nested
   @Suppress("ClassName")

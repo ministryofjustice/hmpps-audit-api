@@ -6,6 +6,7 @@ import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 
 class PurgeQueueTest : QueueListenerIntegrationTest() {
@@ -64,7 +65,9 @@ class PurgeQueueTest : QueueListenerIntegrationTest() {
     }
   """
       await untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 0 }
-      awsSqsDlqClient.sendMessage(auditQueueConfig.dlqName!!.queueUrl(), message)
+      awsSqsClient.sendMessage(
+        SendMessageRequest.builder().queueUrl(auditDlqUrl).messageBody(message).build(),
+      )
       await untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 1 }
 
       webTestClient.put()

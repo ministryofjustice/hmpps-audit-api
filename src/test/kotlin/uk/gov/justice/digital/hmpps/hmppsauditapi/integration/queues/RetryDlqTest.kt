@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.springframework.http.MediaType
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 
@@ -68,7 +69,9 @@ class RetryDlqTest : QueueListenerIntegrationTest() {
   """
       await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
       await untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 0 }
-      awsSqsDlqClient.sendMessage(awsSqsDlqUrl, message)
+      awsSqsClient.sendMessage(
+        SendMessageRequest.builder().queueUrl(awsSqsDlqUrl).messageBody(message).build(),
+      )
       await untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 1 }
 
       webTestClient.put()
@@ -101,7 +104,9 @@ class RetryDlqTest : QueueListenerIntegrationTest() {
   """
       await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
       await untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 0 }
-      awsSqsDlqClient.sendMessage(awsSqsDlqUrl, message)
+      awsSqsDlqClient.sendMessage(
+        SendMessageRequest.builder().queueUrl(awsSqsDlqUrl).messageBody(message).build(),
+      )
       await untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 1 }
 
       webTestClient.put()

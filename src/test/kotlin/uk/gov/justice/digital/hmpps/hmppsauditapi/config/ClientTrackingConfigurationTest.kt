@@ -1,13 +1,11 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.config
 
-import com.microsoft.applicationinsights.web.internal.RequestTelemetryContext
-import com.microsoft.applicationinsights.web.internal.ThreadContext
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.data.MapEntry.entry
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
+import io.opentelemetry.api.common.AttributeKey
+import io.opentelemetry.api.trace.Tracer
+import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.extension.RegisterExtension
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer
 import org.springframework.context.annotation.Import
@@ -35,49 +33,93 @@ class ClientTrackingConfigurationTest {
   private val res = MockHttpServletResponse()
   private val req = MockHttpServletRequest()
 
-  @BeforeEach
-  fun setup() {
-    ThreadContext.setRequestTelemetryContext(RequestTelemetryContext(1L))
-  }
-
-  @AfterEach
-  fun tearDown() {
-    ThreadContext.remove()
-  }
+  private val tracer: Tracer = otelTesting.openTelemetry.getTracer("test")
 
   @Test
   fun shouldAddClientIdAndUserNameToInsightTelemetry() {
     val token = jwtAuthHelper.createJwt("bob")
     req.addHeader(HttpHeaders.AUTHORIZATION, "Bearer $token")
-    clientTrackingInterceptor.preHandle(req, res, "null")
-    val insightTelemetry = ThreadContext.getRequestTelemetryContext().httpRequestTelemetry.properties
-    assertThat(insightTelemetry).contains(entry("username", "bob"), entry("clientId", "hmpps-audit-client"))
+
+    tracer.spanBuilder("span").startSpan().run {
+      makeCurrent().use { clientTrackingInterceptor.preHandle(req, res, "null") }
+      end()
+    }
+    otelTesting.assertTraces().hasTracesSatisfyingExactly(
+      { t ->
+        t.hasSpansSatisfyingExactly(
+          {
+            it.hasAttribute(AttributeKey.stringKey("username"), "bob")
+            it.hasAttribute(AttributeKey.stringKey("clientId"), "hmpps-manage-users")
+          },
+        )
+      },
+    )
   }
 
   @Test
   fun shouldAddClientIdAndUserNameToInsightTelemetryEvenIfTokenExpired() {
     val token = jwtAuthHelper.createJwt("Fred", expiryTime = Duration.ofHours(-1L))
     req.addHeader(HttpHeaders.AUTHORIZATION, "Bearer $token")
-    clientTrackingInterceptor.preHandle(req, res, "null")
-    val insightTelemetry = ThreadContext.getRequestTelemetryContext().httpRequestTelemetry.properties
-    assertThat(insightTelemetry).contains(entry("username", "Fred"), entry("clientId", "hmpps-audit-client"))
+
+    tracer.spanBuilder("span").startSpan().run {
+      makeCurrent().use { clientTrackingInterceptor.preHandle(req, res, "null") }
+      end()
+    }
+    otelTesting.assertTraces().hasTracesSatisfyingExactly(
+      { t ->
+        t.hasSpansSatisfyingExactly(
+          {
+            it.hasAttribute(AttributeKey.stringKey("username"), "Fred")
+            it.hasAttribute(AttributeKey.stringKey("clientId"), "hmpps-manage-users")
+          },
+        )
+      },
+    )
   }
 
   @Test
   fun shouldAddClientIpToInsightTelemetry() {
-    val SOME_IP_ADDRESS = "12.13.14.15"
-    req.remoteAddr = SOME_IP_ADDRESS
-    clientTrackingInterceptor.preHandle(req, res, "null")
-    val insightTelemetry = ThreadContext.getRequestTelemetryContext().httpRequestTelemetry.properties
-    assertThat(insightTelemetry).contains(entry("clientIpAddress", SOME_IP_ADDRESS))
+    val someIpAddress = "12.13.14.15"
+    req.remoteAddr = someIpAddress
+
+    tracer.spanBuilder("span").startSpan().run {
+      makeCurrent().use { clientTrackingInterceptor.preHandle(req, res, "null") }
+      end()
+    }
+    otelTesting.assertTraces().hasTracesSatisfyingExactly(
+      { t ->
+        t.hasSpansSatisfyingExactly(
+          {
+            it.hasAttribute(AttributeKey.stringKey("clientIpAddress"), someIpAddress)
+          },
+        )
+      },
+    )
   }
 
   @Test
   fun shouldAddClientIpToInsightTelemetryWithoutPortNumber() {
-    val SOME_IP_ADDRESS = "12.13.14.15"
-    req.remoteAddr = "$SOME_IP_ADDRESS:6789"
-    clientTrackingInterceptor.preHandle(req, res, "null")
-    val insightTelemetry = ThreadContext.getRequestTelemetryContext().httpRequestTelemetry.properties
-    assertThat(insightTelemetry).contains(entry("clientIpAddress", SOME_IP_ADDRESS))
+    val someIpAddress = "12.13.14.15"
+    req.remoteAddr = "$someIpAddress:6789"
+
+    tracer.spanBuilder("span").startSpan().run {
+      makeCurrent().use { clientTrackingInterceptor.preHandle(req, res, "null") }
+      end()
+    }
+    otelTesting.assertTraces().hasTracesSatisfyingExactly(
+      { t ->
+        t.hasSpansSatisfyingExactly(
+          {
+            it.hasAttribute(AttributeKey.stringKey("clientIpAddress"), someIpAddress)
+          },
+        )
+      },
+    )
+  }
+
+  private companion object {
+    @JvmStatic
+    @RegisterExtension
+    private val otelTesting: OpenTelemetryExtension = OpenTelemetryExtension.create()
   }
 }
