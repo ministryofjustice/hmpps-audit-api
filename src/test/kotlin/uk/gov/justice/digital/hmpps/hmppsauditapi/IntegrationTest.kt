@@ -1,8 +1,12 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Import
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
@@ -10,13 +14,14 @@ import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import uk.gov.justice.digital.hmpps.hmppsauditapi.helper.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
+import uk.gov.justice.hmpps.sqs.HmppsQueueFactory
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.HmppsSqsProperties
 import uk.gov.justice.hmpps.sqs.MissingQueueException
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-// @Import(IntegrationTest.SqsConfig::class)
+@Import(IntegrationTest.SqsConfig::class, JwtAuthHelper::class)
 @ActiveProfiles("test")
 abstract class IntegrationTest {
   @Autowired
@@ -47,27 +52,25 @@ abstract class IntegrationTest {
     hmppsQueueService.findByQueueId("auditqueue") ?: throw MissingQueueException("HmppsQueue auditqueue not found")
   }
 
-  class MissingQueueException(message: String) : RuntimeException(message)
-
   protected val awsSqsDlqClient by lazy { auditQueueConfig.sqsDlqClient as SqsAsyncClient }
   protected val awsSqsUrl by lazy { auditQueueConfig.queueUrl }
   protected val awsSqsDlqUrl by lazy { auditQueueConfig.dlqUrl as String }
 
-  @SpyBean(name = "auditqueue-sqs-client")
+  @SpyBean
+  @Qualifier("auditqueue-sqs-client")
   protected lateinit var awsSqsClient: SqsAsyncClient
 
-//  @TestConfiguration
-//  class SqsConfig(private val hmppsQueueFactory: HmppsQueueFactory) {
-//
-//    @Bean("auditqueue-sqs-client")
-//    fun auditQueueSqsClient(
-//      hmppsSqsProperties: HmppsSqsProperties,
-//      @Qualifier("auditqueue-sqs-dlq-client") auditQueueSqsDlqClient: AmazonSQS,
-//    ): AmazonSQS =
-//      with(hmppsSqsProperties) {
-//        val config = queues["auditqueue"]
-//          ?: throw uk.gov.justice.hmpps.sqs.MissingQueueException("HmppsSqsProperties config for auditqueue not found")
-//        hmppsQueueFactory.createSqsClient("auditqueue", config, hmppsSqsProperties, auditQueueSqsDlqClient)
-//      }
-//  }
+  @TestConfiguration
+  class SqsConfig(private val hmppsQueueFactory: HmppsQueueFactory) {
+    @Bean("auditqueue-sqs-client")
+    fun outboundQueueSqsClient(
+      hmppsSqsProperties: HmppsSqsProperties,
+      @Qualifier("auditqueue-sqs-dlq-client") outboundQueueSqsDlqClient: SqsAsyncClient,
+    ): SqsAsyncClient =
+      with(hmppsSqsProperties) {
+        val config = queues["auditqueue"]
+          ?: throw uk.gov.justice.hmpps.sqs.MissingQueueException("HmppsSqsProperties config for auditqueue not found")
+        hmppsQueueFactory.createSqsAsyncClient(config, hmppsSqsProperties, outboundQueueSqsDlqClient)
+      }
+  }
 }
