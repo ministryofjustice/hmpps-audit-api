@@ -49,7 +49,7 @@ class ClientTrackingConfigurationTest {
         t.hasSpansSatisfyingExactly(
           {
             it.hasAttribute(AttributeKey.stringKey("username"), "bob")
-            it.hasAttribute(AttributeKey.stringKey("clientId"), "hmpps-manage-users")
+            it.hasAttribute(AttributeKey.stringKey("clientId"), "hmpps-audit-client")
           },
         )
       },
@@ -70,7 +70,7 @@ class ClientTrackingConfigurationTest {
         t.hasSpansSatisfyingExactly(
           {
             it.hasAttribute(AttributeKey.stringKey("username"), "Fred")
-            it.hasAttribute(AttributeKey.stringKey("clientId"), "hmpps-manage-users")
+            it.hasAttribute(AttributeKey.stringKey("clientId"), "hmpps-audit-client")
           },
         )
       },
