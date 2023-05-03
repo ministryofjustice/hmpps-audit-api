@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
@@ -25,11 +26,11 @@ import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditFilterDto
+import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
 import java.io.IOException
 import java.time.Instant
 import java.util.UUID
-import javax.validation.Valid
 
 // This is a hack to get around the fact that springdocs responses cannot contain generics
 class AuditDtoPage : PageImpl<AuditDto>(mutableListOf<AuditDto>())
@@ -38,6 +39,7 @@ class AuditDtoPage : PageImpl<AuditDto>(mutableListOf<AuditDto>())
 @RequestMapping("/audit", produces = [MediaType.APPLICATION_JSON_VALUE])
 class AuditResource(
   private val auditService: AuditService,
+  private val auditQueueService: AuditQueueService,
 ) {
   @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_read')")
   @GetMapping("")
@@ -131,7 +133,7 @@ class AuditResource(
       operationId = auditEvent.operationId ?: traceParent?.traceId(),
       details = auditEvent.details?.jsonString(),
     )
-    auditService.sendAuditEvent(cleansedAuditEvent)
+    auditQueueService.sendAuditEvent(cleansedAuditEvent)
   }
 
   private fun String.traceId(): String? {

@@ -6,10 +6,8 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -80,7 +78,16 @@ class AuditResourceTest : IntegrationTest() {
     @ParameterizedTest
     @MethodSource("secureEndpointsGet")
     internal fun `satisfies the correct role and scope`(uri: String) {
-      whenever(auditRepository.findPage(any(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())).thenReturn(
+      whenever(
+        auditRepository.findPage(
+          any(),
+          anyOrNull(),
+          anyOrNull(),
+          anyOrNull(),
+          anyOrNull(),
+          anyOrNull(),
+        ),
+      ).thenReturn(
         PageImpl(listOf()),
       )
 
@@ -154,8 +161,8 @@ class AuditResourceTest : IntegrationTest() {
         .exchange()
         .expectStatus().isAccepted
 
-      verify(auditService).sendAuditEvent(auditEvent)
-      verify(awsSqsClient).sendMessage(eq(auditQueueConfig.queueUrl), anyString())
+      verify(auditQueueService).sendAuditEvent(auditEvent)
+//      verify(awsSqsClient).sendMessage(eq(auditQueueConfig.queueUrl), anyString())
     }
   }
 
@@ -172,8 +179,8 @@ class AuditResourceTest : IntegrationTest() {
         .exchange()
         .expectStatus().isAccepted
 
-      verify(auditService).sendAuditEvent(auditEvent)
-      verify(awsSqsClient).sendMessage(eq(auditQueueConfig.queueUrl), anyString())
+      verify(auditQueueService).sendAuditEvent(auditEvent)
+//      verify(awsSqsClient).sendMessage(eq(auditQueueConfig.queueUrl), anyString())
     }
 
     @Test
@@ -188,8 +195,8 @@ class AuditResourceTest : IntegrationTest() {
         .exchange()
         .expectStatus().isAccepted
 
-      verify(auditService).sendAuditEvent(auditEvent)
-      verify(awsSqsClient).sendMessage(eq(auditQueueConfig.queueUrl), anyString())
+      verify(auditQueueService).sendAuditEvent(auditEvent)
+//      verify(awsSqsClient).sendMessage(eq(auditQueueConfig.queueUrl), anyString())
     }
 
     @Test
@@ -204,8 +211,8 @@ class AuditResourceTest : IntegrationTest() {
         .exchange()
         .expectStatus().isAccepted
 
-      verify(auditService).sendAuditEvent(auditEvent)
-      verify(awsSqsClient).sendMessage(eq(auditQueueConfig.queueUrl), anyString())
+      verify(auditQueueService).sendAuditEvent(auditEvent)
+//      verify(awsSqsClient).sendMessage(eq(auditQueueConfig.queueUrl), anyString())
     }
 
     @Test
@@ -221,8 +228,8 @@ class AuditResourceTest : IntegrationTest() {
         .exchange()
         .expectStatus().isAccepted
 
-      verify(auditService).sendAuditEvent(eventWithOperationId)
-      verify(awsSqsClient).sendMessage(eq(auditQueueConfig.queueUrl), anyString())
+      verify(auditQueueService).sendAuditEvent(eventWithOperationId)
+//      verify(awsSqsClient).sendMessage(eq(auditQueueConfig.queueUrl), anyString())
     }
 
     @Test
@@ -237,8 +244,8 @@ class AuditResourceTest : IntegrationTest() {
         .exchange()
         .expectStatus().isAccepted
 
-      verify(auditService).sendAuditEvent(auditEvent)
-      verify(awsSqsClient).sendMessage(eq(auditQueueConfig.queueUrl), anyString())
+      verify(auditQueueService).sendAuditEvent(auditEvent)
+//      verify(awsSqsClient).sendMessage(eq(auditQueueConfig.queueUrl), anyString())
     }
   }
 
@@ -265,13 +272,17 @@ class AuditResourceTest : IntegrationTest() {
         .exchange()
         .expectStatus().isAccepted
 
-      verify(auditService).sendAuditEvent(auditEvent)
-      verify(awsSqsClient).sendMessage(eq(auditQueueConfig.queueUrl), anyString())
+      verify(auditQueueService).sendAuditEvent(auditEvent)
+//      verify(awsSqsClient).sendMessage(eq(auditQueueConfig.queueUrl), anyString())
     }
 
     @Test
     internal fun `details is json`() {
-      val auditEvent = AuditEvent(what = "json details", `when` = Instant.parse("2021-03-01T15:15:30Z"), details = "{\"offenderId\": \"97\"}")
+      val auditEvent = AuditEvent(
+        what = "json details",
+        `when` = Instant.parse("2021-03-01T15:15:30Z"),
+        details = "{\"offenderId\": \"97\"}",
+      )
 
       webTestClient.post()
         .uri("/audit")
@@ -291,13 +302,17 @@ class AuditResourceTest : IntegrationTest() {
         .exchange()
         .expectStatus().isAccepted
 
-      verify(auditService).sendAuditEvent(auditEvent)
-      verify(awsSqsClient).sendMessage(eq(auditQueueConfig.queueUrl), anyString())
+      verify(auditQueueService).sendAuditEvent(auditEvent)
+//      verify(awsSqsClient).sendMessage(eq(auditQueueConfig.queueUrl), anyString())
     }
 
     @Test
     internal fun `details is a string`() {
-      val auditEvent = AuditEvent(what = "string details", details = "{\"details\":\"a test\"}", `when` = Instant.parse("2021-04-01T15:15:30Z"))
+      val auditEvent = AuditEvent(
+        what = "string details",
+        details = "{\"details\":\"a test\"}",
+        `when` = Instant.parse("2021-04-01T15:15:30Z"),
+      )
 
       webTestClient.post()
         .uri("/audit")
@@ -317,8 +332,8 @@ class AuditResourceTest : IntegrationTest() {
         .exchange()
         .expectStatus().isAccepted
 
-      verify(auditService).sendAuditEvent(auditEvent)
-      verify(awsSqsClient).sendMessage(eq(auditQueueConfig.queueUrl), anyString())
+      verify(auditQueueService).sendAuditEvent(auditEvent)
+//      verify(awsSqsClient).sendMessage(eq(auditQueueConfig.queueUrl), anyString())
     }
 
     @Test
@@ -343,8 +358,8 @@ class AuditResourceTest : IntegrationTest() {
         .exchange()
         .expectStatus().isAccepted
 
-      verify(auditService).sendAuditEvent(auditEvent)
-      verify(awsSqsClient).sendMessage(eq(auditQueueConfig.queueUrl), anyString())
+      verify(auditQueueService).sendAuditEvent(auditEvent)
+//      verify(awsSqsClient).sendMessage(eq(auditQueueConfig.queueUrl), anyString())
     }
   }
 

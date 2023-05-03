@@ -13,6 +13,7 @@ import org.mockito.kotlin.mockingDetails
 import org.mockito.kotlin.verify
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyInserters
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 import java.time.Instant
@@ -35,7 +36,9 @@ class AuditTest : QueueListenerIntegrationTest() {
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
 
-    awsSqsClient.sendMessage(awsSqsUrl, message)
+    awsSqsClient.sendMessage(
+      SendMessageRequest.builder().queueUrl(awsSqsUrl).messageBody(message).build(),
+    )
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
 

@@ -1,28 +1,28 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.listeners
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.awspring.cloud.sqs.annotation.SqsListener
 import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.media.Schema
-import org.springframework.jms.annotation.JmsListener
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.Id
+import jakarta.persistence.Table
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
 import java.time.Instant
 import java.util.UUID
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.Id
-import javax.persistence.Table
 
 @Service
 class HMPPSAuditListener(
   private val auditService: AuditService,
-  private val mapper: ObjectMapper,
+  private val objectMapper: ObjectMapper,
 ) {
 
-  @JmsListener(destination = "auditqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
+  @SqsListener("auditqueue", factory = "hmppsQueueContainerFactoryProxy")
   fun onAuditEvent(message: String) {
-    val auditEvent: AuditEvent = mapper.readValue(message, AuditEvent::class.java)
+    val auditEvent: AuditEvent = objectMapper.readValue(message, AuditEvent::class.java)
     auditService.audit(auditEvent)
   }
 
