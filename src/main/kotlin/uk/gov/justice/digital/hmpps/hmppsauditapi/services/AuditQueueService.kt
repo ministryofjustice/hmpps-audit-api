@@ -14,7 +14,7 @@ class AuditQueueService(
   private val objectMapper: ObjectMapper,
 ) {
   private val auditQueue by lazy {
-    hmppsQueueService.findByQueueId("audit") ?: throw RuntimeException("Queue with name audit doesn't exist")
+    hmppsQueueService.findByQueueId("auditqueue") ?: throw RuntimeException("Queue with name audit doesn't exist")
   }
   private val auditQueueUrl by lazy { auditQueue.queueUrl }
   private val auditSqsClient by lazy { auditQueue.sqsClient }
