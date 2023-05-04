@@ -12,7 +12,7 @@ generic-service:
     shutdown: '35 21 * * 1-5' # Stop at 9:35pm UTC Monday-Friday
 
   env:
-    OAUTH_ENDPOINT_URL: "https://sign-in-dev.hmpps.service.justice.gov.uk/auth"
+    OAUTH_ENDPOINT_URL: "http://hmpps-auth.hmpps-auth-dev.svc.cluster.local/auth"
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
 
 # CloudPlatform AlertManager receiver to route promethues alerts to slack
