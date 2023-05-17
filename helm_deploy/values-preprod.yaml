@@ -8,11 +8,6 @@ generic-service:
   ingress:
     host: audit-api-preprod.hmpps.service.justice.gov.uk
 
-  scheduledDowntime:
-    enabled: true
-    startup: '35 6 * * 1-5' # Start at 6:35am UTC Monday-Friday
-    shutdown: '35 21 * * 1-5' # Stop at 9:35pm UTC Monday-Friday
-
   env:
     OAUTH_ENDPOINT_URL: "https://sign-in-preprod.hmpps.service.justice.gov.uk/auth"
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
