@@ -21,7 +21,6 @@ import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.IntegrationTest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
-import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditType.*
 import java.time.Instant
 import java.util.UUID
 
@@ -100,7 +99,7 @@ class AuditResourceTest : IntegrationTest() {
         .exchange()
         .expectStatus().isOk
 
-      verify(auditQueueService).sendAuditAuditEvent(AUDIT_GET_ALL_PAGED.name, any())
+      verify(auditQueueService).sendAuditAuditEvent(AuditType.AUDIT_GET_ALL_PAGED.name, any())
       verify(awsSqsClient).sendMessage(
         SendMessageRequest.builder().queueUrl(auditQueueConfig.queueUrl).messageBody(anyString()).build(),
       )
