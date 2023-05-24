@@ -9,7 +9,7 @@ generic-service:
     host: audit-api-preprod.hmpps.service.justice.gov.uk
 
   env:
-    OAUTH_ENDPOINT_URL: "http://hmpps-auth.hmpps-auth-dev.svc.cluster.local/auth"
+    OAUTH_ENDPOINT_URL: "http://hmpps-auth.hmpps-auth-preprod.svc.cluster.local/auth"
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
 
 # CloudPlatform AlertManager receiver to route promethues alerts to slack
