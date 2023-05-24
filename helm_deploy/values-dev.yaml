@@ -19,5 +19,6 @@ generic-service:
 # See https://user-guide.cloud-platform.service.justice.gov.uk/documentation/monitoring-an-app/how-to-create-alarms.html#creating-your-own-custom-alerts
 generic-prometheus-alerts:
   alertSeverity: hmpps_tech_non_prod
+  businessHoursOnly: true
   rdsAlertsDatabases:
     cloud-platform-f6d47a99708f20d5: "hmpps audit api"
