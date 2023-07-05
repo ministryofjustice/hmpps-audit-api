@@ -1,7 +1,7 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.1.4"
-  kotlin("plugin.spring") version "1.8.21"
-  kotlin("plugin.jpa") version "1.8.21"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.2.2"
+  kotlin("plugin.spring") version "1.8.22"
+  kotlin("plugin.jpa") version "1.8.22"
 }
 
 configurations {
@@ -15,7 +15,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.0.0")
   implementation("org.springframework.cloud:spring-cloud-starter-aws-messaging:2.2.6.RELEASE")
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
 
   implementation("org.apache.commons:commons-lang3:3.12.0")
 
@@ -29,7 +29,7 @@ dependencies {
   testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   testImplementation("org.mockito:mockito-inline:5.2.0")
 
-  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.24.0")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.27.0")
   testImplementation("javax.xml.bind:jaxb-api:2.3.1")
 }
 

@@ -47,6 +47,10 @@ class AuditResource(
   @StandardApiResponses
   @GetMapping("")
   fun findAll(): List<AuditDto> {
+    auditQueueService.sendAuditAuditEvent(
+      AuditType.AUDIT_GET_ALL.name,
+      "",
+    )
     return auditService.findAll()
   }
 
@@ -133,5 +137,5 @@ data class AuditDto(
 }
 
 enum class AuditType {
-  AUDIT_GET_ALL_PAGED, AUDIT_GET_BY_SERVICE, AUDIT_GET_BY_USER, AUDIT_GET_BY_DATE, AUDIT_GET_BY_DATE_TIME_BETWEEN,
+  AUDIT_GET_ALL, AUDIT_GET_ALL_PAGED, AUDIT_GET_BY_SERVICE, AUDIT_GET_BY_USER, AUDIT_GET_BY_DATE, AUDIT_GET_BY_DATE_TIME_BETWEEN,
 }

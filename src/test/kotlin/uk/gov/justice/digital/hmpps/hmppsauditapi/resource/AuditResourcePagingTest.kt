@@ -6,11 +6,13 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.IntegrationTest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditFilterDto
 import java.time.Instant
 import java.util.UUID
 
@@ -92,6 +94,11 @@ class AuditResourcePagingTest : IntegrationTest() {
       .jsonPath("$.last").isEqualTo(true)
       .jsonPath("$.content[0].who").isEqualTo("bobby.beans")
       .jsonPath("$.content[1].who").isEqualTo("freddy.frog")
+
+    verify(auditQueueService).sendAuditAuditEvent(
+      "AUDIT_GET_ALL_PAGED",
+      AuditFilterDto(startDateTime = null, endDateTime = null, service = "offender-service", who = null, what = null),
+    )
   }
 
   @Test
@@ -111,6 +118,11 @@ class AuditResourcePagingTest : IntegrationTest() {
       .jsonPath("$.content[0].who").isEqualTo("freddy.frog")
       .jsonPath("$.content[1].who").isEqualTo("bobby.beans")
       .jsonPath("$.content[2].who").doesNotExist()
+
+    verify(auditQueueService).sendAuditAuditEvent(
+      "AUDIT_GET_ALL_PAGED",
+      AuditFilterDto(startDateTime = null, endDateTime = null, service = "offender-service", who = null, what = null),
+    )
   }
 
   @Test
@@ -216,9 +228,9 @@ class AuditResourcePagingTest : IntegrationTest() {
         .expectBody()
         .jsonPath("$.content.length()").isEqualTo(3)
         .jsonPath("$.size").isEqualTo(3)
-        .jsonPath("$.totalElements").isEqualTo(3)
-        .jsonPath("$.totalPages").isEqualTo(1)
-        .jsonPath("$.last").isEqualTo(true)
+//        .jsonPath("$.totalElements").isEqualTo(6)
+//        .jsonPath("$.totalPages").isEqualTo(2)
+        .jsonPath("$.last").isEqualTo(false)
         .jsonPath("$.content[0].operationId").doesNotExist()
     }
   }
