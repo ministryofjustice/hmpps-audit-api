@@ -5,4 +5,4 @@ spring:
     password: admin_password
 
 oauth:
-  endpoint.url: http://localhost:8080/auth
+  endpoint.url: http://localhost:9090/auth
