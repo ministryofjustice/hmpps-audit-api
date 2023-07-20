@@ -145,7 +145,7 @@ class AuditResourceFilteredPagingTest : IntegrationTest() {
       .jsonPath("$.content.length()").isEqualTo(3)
       .jsonPath("$.size").isEqualTo(3)
       .jsonPath("$.totalElements").isEqualTo(5)
-      .jsonPath("$.totalPages").isEqualTo(1)
+      .jsonPath("$.totalPages").isEqualTo(2)
       .jsonPath("$.last").isEqualTo(false)
       .jsonPath("$.content[0].operationId").doesNotExist()
   }
