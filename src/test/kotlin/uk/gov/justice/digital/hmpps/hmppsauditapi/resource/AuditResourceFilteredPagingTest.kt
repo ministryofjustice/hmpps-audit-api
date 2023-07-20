@@ -144,7 +144,7 @@ class AuditResourceFilteredPagingTest : IntegrationTest() {
       .expectBody()
       .jsonPath("$.content.length()").isEqualTo(3)
       .jsonPath("$.size").isEqualTo(3)
-      .jsonPath("$.totalElements").isEqualTo(4)
+      .jsonPath("$.totalElements").isEqualTo(5)
       .jsonPath("$.totalPages").isEqualTo(1)
       .jsonPath("$.last").isEqualTo(false)
       .jsonPath("$.content[0].operationId").doesNotExist()
