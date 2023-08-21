@@ -43,17 +43,12 @@ To run Ktlint format:
 ./gradlew ktlintFormat
 ```
 
-To apply ktlint styles to intellij
-```
-./gradlew ktlintApplyToIdea
-```
-
 To register pre-commit check to run Ktlint format:
 ```
-./gradlew ktlintApplyToIdea addKtlintFormatGitPreCommitHook 
+./gradlew addKtlintFormatGitPreCommitHook 
 ```
 
 ...or to register pre-commit check to only run Ktlint check:
 ```
-./gradlew ktlintApplyToIdea addKtlintCheckGitPreCommitHook
+./gradlew addKtlintCheckGitPreCommitHook
 ```
