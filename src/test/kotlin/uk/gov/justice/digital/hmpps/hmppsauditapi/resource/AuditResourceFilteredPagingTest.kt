@@ -72,7 +72,6 @@ class AuditResourceFilteredPagingTest : IntegrationTest() {
   fun `insert test audit events`() {
     listOfAudits.forEach {
       auditRepository.save(it)
-      auditRepository.save(it)
     }
   }
 
