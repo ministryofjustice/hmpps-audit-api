@@ -28,6 +28,8 @@ class AuditTest : QueueListenerIntegrationTest() {
       "what": "OFFENDER_DELETED",
       "when": "2021-01-25T12:30:00Z",
       "operationId": "badea6d876c62e2f5264c94c7b50875e",
+      "subjectId": "y1dea6d876c62e2f5264c94c7b50875r",
+      "subjectType": "PERSON",
       "who": "bobby.beans",
       "service": "offender-service",
       "details": "{ \"offenderId\": \"99\"}"
