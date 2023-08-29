@@ -22,7 +22,7 @@ class AuditResourceFilteredPagingTest : IntegrationTest() {
   val whatRequestBody = JSONObject().put("what", "OFFENDER_DELETED")
   val whoRequestBody = JSONObject().put("who", "bobby.beans")
   val whoAndWhatRequestBody = JSONObject().put("who", "bobby.beans").put("what", "OFFENDER_DELETED")
-  val startDateRequestBody = JSONObject().put("startDateTime", Instant.parse("2021-01-01T15:15:30Z"))
+  val startDateRequestBody = JSONObject().put("startDateTime", Instant.parse("2021-01-01T15:15:30Z")).put("endDateTime", Instant.parse("2021-12-31T17:17:30Z"))
   val endDateRequestBody = JSONObject().put("endDateTime", Instant.parse("2021-04-12T17:17:30Z"))
   val dateRangeRequestBody = JSONObject().put("startDateTime", Instant.parse("2021-01-01T15:15:30Z"))
     .put("endDateTime", Instant.parse("2021-04-12T17:17:30Z"))
@@ -141,16 +141,16 @@ class AuditResourceFilteredPagingTest : IntegrationTest() {
 
   @Test
   fun `filter audit events by startDateTme`() {
-    webTestClient.post().uri("/audit/paged?page=0&size=3")
+    webTestClient.post().uri("/audit/paged?page=0&size=2")
       .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
       .contentType(MediaType.APPLICATION_JSON)
       .bodyValue(startDateRequestBody.toString())
       .exchange()
       .expectStatus().isOk
       .expectBody()
-      .jsonPath("$.content.length()").isEqualTo(3)
-      .jsonPath("$.size").isEqualTo(3)
-      .jsonPath("$.totalElements").isEqualTo(4)
+      .jsonPath("$.content.length()").isEqualTo(2)
+      .jsonPath("$.size").isEqualTo(2)
+      .jsonPath("$.totalElements").isEqualTo(3)
       .jsonPath("$.totalPages").isEqualTo(2)
       .jsonPath("$.last").isEqualTo(false)
       .jsonPath("$.content[0].operationId").doesNotExist()
