@@ -22,7 +22,7 @@ class AuditResourceFilteredPagingTest : IntegrationTest() {
   val whatRequestBody = JSONObject().put("what", "OFFENDER_DELETED")
   val whoRequestBody = JSONObject().put("who", "bobby.beans")
   val whoAndWhatRequestBody = JSONObject().put("who", "bobby.beans").put("what", "OFFENDER_DELETED")
-  val startDateRequestBody = JSONObject().put("startDateTime", Instant.parse("2021-01-01T15:15:30Z"))
+  val startDateRequestBody = JSONObject().put("startDateTime", Instant.parse("2021-01-01T15:15:30Z")).put("endDateTime", Instant.parse("2021-12-31T17:17:30Z"))
   val endDateRequestBody = JSONObject().put("endDateTime", Instant.parse("2021-04-12T17:17:30Z"))
   val dateRangeRequestBody = JSONObject().put("startDateTime", Instant.parse("2021-01-01T15:15:30Z"))
     .put("endDateTime", Instant.parse("2021-04-12T17:17:30Z"))
@@ -38,6 +38,8 @@ class AuditResourceFilteredPagingTest : IntegrationTest() {
       "COURT_REGISTER_BUILDING_UPDATE",
       Instant.parse("2021-04-03T10:15:30Z"),
       "badea6d876c62e2f5264c94c7b50875b",
+      "da8ea6d876c62e2f5264c94c7b50867r",
+      "PERSON",
       "bobby.beans",
       "court-register",
       "{\"courtId\":\"AAAMH1\",\"buildingId\":936,\"building\":{\"id\":936,\"courtId\":\"AAAMH1\",\"buildingName\":\"Main Court Name Changed\"}}",
@@ -47,6 +49,8 @@ class AuditResourceFilteredPagingTest : IntegrationTest() {
       "OFFENDER_DELETED",
       Instant.parse("2021-04-01T15:15:30Z"),
       "cadea6d876c62e2f5264c94c7b50875c",
+      "da4ea6d876c62e2f5264c94c7b508c57",
+      "PERSON",
       "bobby.beans",
       "offender-service",
       "{\"offenderId\": \"97\"}",
@@ -56,6 +60,8 @@ class AuditResourceFilteredPagingTest : IntegrationTest() {
       "OFFENDER_DELETED",
       Instant.parse("2020-12-31T08:11:30Z"),
       "dadea6d876c62e2f5264c94c7b50875d",
+      "mu2ea6d876c62e2f5264c94c7b508d57",
+      "PERSON",
       "freddy.frog",
       "offender-service",
       "{\"offenderId\": \"98\"}",
@@ -135,16 +141,16 @@ class AuditResourceFilteredPagingTest : IntegrationTest() {
 
   @Test
   fun `filter audit events by startDateTme`() {
-    webTestClient.post().uri("/audit/paged?page=0&size=3")
+    webTestClient.post().uri("/audit/paged?page=0&size=2")
       .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
       .contentType(MediaType.APPLICATION_JSON)
       .bodyValue(startDateRequestBody.toString())
       .exchange()
       .expectStatus().isOk
       .expectBody()
-      .jsonPath("$.content.length()").isEqualTo(3)
-      .jsonPath("$.size").isEqualTo(3)
-      .jsonPath("$.totalElements").isEqualTo(5)
+      .jsonPath("$.content.length()").isEqualTo(2)
+      .jsonPath("$.size").isEqualTo(2)
+      .jsonPath("$.totalElements").isEqualTo(3)
       .jsonPath("$.totalPages").isEqualTo(2)
       .jsonPath("$.last").isEqualTo(false)
       .jsonPath("$.content[0].operationId").doesNotExist()
