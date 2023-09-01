@@ -186,6 +186,8 @@ class AuditServiceTest {
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
           ),
         ).thenReturn(
           listOfAudits,
@@ -282,6 +284,8 @@ class AuditServiceTest {
           anyOrNull(),
           anyOrNull(),
           anyOrNull(),
+          anyOrNull(),
+          anyOrNull(),
         ),
       ).thenReturn(
         listOfAudits,
@@ -295,6 +299,8 @@ class AuditServiceTest {
         startDate,
         endDate,
         "offender-service",
+        "fedea6d876c62e2f5264c94c7b50873w",
+        "PERSON",
         "Hola T",
         "Another Event",
       )
@@ -319,7 +325,7 @@ class AuditServiceTest {
         ),
       )
 
-      verify(auditRepository).findPage(pageDetails, startDate, endDate, "offender-service", "Another Event", "Hola T")
+      verify(auditRepository).findPage(pageDetails, startDate, endDate, "offender-service", "fedea6d876c62e2f5264c94c7b50873w", "PERSON", "Another Event", "Hola T")
     }
   }
 }

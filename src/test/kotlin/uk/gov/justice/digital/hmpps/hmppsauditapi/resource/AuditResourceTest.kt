@@ -88,6 +88,8 @@ class AuditResourceTest : IntegrationTest() {
           anyOrNull(),
           anyOrNull(),
           anyOrNull(),
+          anyOrNull(),
+          anyOrNull(),
         ),
       ).thenReturn(
         PageImpl(listOf()),
