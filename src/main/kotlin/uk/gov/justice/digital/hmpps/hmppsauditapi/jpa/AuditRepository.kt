@@ -22,6 +22,8 @@ interface AuditRepository : PagingAndSortingRepository<AuditEvent, UUID>, CrudRe
            and (cast(:endDate as string) is null or ae.when <=:endDate))
      and (cast(:service as string) is null or ae.service =:service)
      and (cast(:what as string) is null or ae.what =:what)
+     and (cast(:subjectId as string) is null or ae.subjectId =:subjectId)
+     and (cast(:subjectType as string) is null or ae.subjectType =:subjectType)
      and (cast(:who as string) is null or ae.who =:who)
     """,
   )
@@ -30,6 +32,8 @@ interface AuditRepository : PagingAndSortingRepository<AuditEvent, UUID>, CrudRe
     startDate: Instant?,
     endDate: Instant?,
     service: String?,
+    subjectId: String?,
+    subjectType: String?,
     what: String?,
     who: String?,
   ): Page<AuditEvent>

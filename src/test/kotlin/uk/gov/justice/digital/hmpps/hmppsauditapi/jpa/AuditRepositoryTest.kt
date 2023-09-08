@@ -43,6 +43,8 @@ class AuditRepositoryTest {
       assertThat(auditEvent.operationId).isNull()
       assertThat(auditEvent.who).isNull()
       assertThat(auditEvent.service).isNull()
+      assertThat(auditEvent.subjectId).isNull()
+      assertThat(auditEvent.subjectType).isNull()
       assertThat(auditEvent.details).isNull()
     }
 
@@ -61,6 +63,8 @@ class AuditRepositoryTest {
           operationId = "123456789",
           who = "John Smith",
           service = "current-service",
+          subjectId = "11111111",
+          subjectType = "PERSON",
           details = details,
         ),
       )
@@ -72,6 +76,8 @@ class AuditRepositoryTest {
       assertThat(auditEvent.operationId).isEqualTo("123456789")
       assertThat(auditEvent.who).isEqualTo("John Smith")
       assertThat(auditEvent.service).isEqualTo("current-service")
+      assertThat(auditEvent.subjectId).isEqualTo("11111111")
+      assertThat(auditEvent.subjectType).isEqualTo("PERSON")
       assertThat(auditEvent.details).isEqualTo(details)
     }
   }
@@ -120,9 +126,11 @@ class AuditRepositoryTest {
         Pageable.unpaged(),
         Instant.now().minus(1, ChronoUnit.DAYS),
         Instant.now().plus(1, ChronoUnit.DAYS),
-        "Service-B",
-        "Another Event By Fred S",
+        service = "Service-B",
+        what = "Another Event By Fred S",
         who = "Fred Smith",
+        subjectType = null,
+        subjectId = null,
       )
       assertThat(auditEvents.size).isEqualTo(1)
     }
@@ -163,6 +171,8 @@ class AuditRepositoryTest {
         null,
         null,
         "Service-B",
+        null,
+        null,
         null,
         null,
       )
@@ -207,6 +217,8 @@ class AuditRepositoryTest {
         null,
         null,
         null,
+        null,
+        null,
       )
       assertThat(auditEvents.size).isEqualTo(3)
     }
@@ -244,6 +256,8 @@ class AuditRepositoryTest {
       assertThat(auditRepository.count()).isEqualTo(3)
       val auditEvents = auditRepository.findPage(
         Pageable.unpaged(),
+        null,
+        null,
         null,
         null,
         null,
@@ -292,6 +306,8 @@ class AuditRepositoryTest {
         null,
         null,
         null,
+        null,
+        null,
       )
       assertThat(auditEvents.size).isEqualTo(3)
     }
@@ -331,6 +347,8 @@ class AuditRepositoryTest {
         Pageable.unpaged(),
         null,
         Instant.now().minus(1, ChronoUnit.DAYS),
+        null,
+        null,
         null,
         null,
         null,
@@ -377,6 +395,8 @@ class AuditRepositoryTest {
         null,
         null,
         null,
+        null,
+        null,
       )
       assertThat(auditEvents.size).isEqualTo(3)
     }
@@ -420,8 +440,112 @@ class AuditRepositoryTest {
         null,
         null,
         null,
+        null,
+        null,
       )
       assertThat(auditEvents.size).isEqualTo(0)
+    }
+
+    @Test
+    internal fun `filter audit events by subjectId`() {
+      auditRepository.save(
+        AuditEvent(
+          what = "An Event",
+          `when` = Instant.now(),
+          operationId = "123456789",
+          service = "Service-A",
+          subjectId = "11111",
+          subjectType = "PERSON",
+          who = "John Smith",
+        ),
+      )
+      auditRepository.save(
+        AuditEvent(
+          what = "Another Event",
+          `when` = Instant.now(),
+          operationId = "345678",
+          service = "Service-B",
+          subjectId = "22222",
+          subjectType = "PERSON",
+          who = "Fred Smith",
+        ),
+      )
+      auditRepository.save(
+        AuditEvent(
+          what = "Another Event By John",
+          `when` = Instant.now(),
+          operationId = "234567",
+          service = "Service-C",
+          subjectId = "33333",
+          subjectType = "PERSON",
+          who = "John Smith",
+        ),
+      )
+
+      assertThat(auditRepository.count()).isEqualTo(3)
+      val auditEvents = auditRepository.findPage(
+        Pageable.unpaged(),
+        null,
+        null,
+        null,
+        "11111",
+        null,
+        null,
+        null,
+      )
+      assertThat(auditEvents.size).isEqualTo(1)
+      assertThat(auditEvents.first().subjectId).isEqualTo("11111")
+    }
+
+    @Test
+    internal fun `filter audit events by subjectType`() {
+      auditRepository.save(
+        AuditEvent(
+          what = "An Event",
+          `when` = Instant.now(),
+          operationId = "123456789",
+          service = "Service-A",
+          subjectId = "11111",
+          subjectType = "PERSON",
+          who = "John Smith",
+        ),
+      )
+      auditRepository.save(
+        AuditEvent(
+          what = "Another Event",
+          `when` = Instant.now(),
+          operationId = "345678",
+          service = "Service-B",
+          subjectId = "22222",
+          subjectType = "PERSON",
+          who = "Fred Smith",
+        ),
+      )
+      auditRepository.save(
+        AuditEvent(
+          what = "Another Event By John",
+          `when` = Instant.now(),
+          operationId = "234567",
+          service = "Service-C",
+          subjectId = "33333",
+          subjectType = "SYSTEM",
+          who = "John Smith",
+        ),
+      )
+
+      assertThat(auditRepository.count()).isEqualTo(3)
+      val auditEvents = auditRepository.findPage(
+        Pageable.unpaged(),
+        null,
+        null,
+        null,
+        null,
+        "PERSON",
+        null,
+        null,
+      )
+      assertThat(auditEvents.size).isEqualTo(2)
+      assertThat(auditEvents.stream().allMatch { ae -> ae.subjectType == "PERSON" }).isTrue()
     }
   }
 }
