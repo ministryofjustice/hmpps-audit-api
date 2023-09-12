@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.4.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.4.1"
   kotlin("plugin.spring") version "1.9.10"
   kotlin("plugin.jpa") version "1.9.10"
 }
@@ -19,7 +19,7 @@ dependencies {
 
   implementation("org.apache.commons:commons-lang3:3.13.0")
 
-  runtimeOnly("com.h2database:h2:2.2.220")
+  runtimeOnly("com.h2database:h2:2.2.222")
   runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("org.postgresql:postgresql:42.6.0")
 
@@ -29,18 +29,18 @@ dependencies {
   testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   testImplementation("org.mockito:mockito-inline:5.2.0")
 
-  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.29.0")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.30.0")
   testImplementation("javax.xml.bind:jaxb-api:2.3.1")
 }
 
 java {
-  toolchain.languageVersion.set(JavaLanguageVersion.of(19))
+  toolchain.languageVersion.set(JavaLanguageVersion.of(20))
 }
 
 tasks {
   withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
-      jvmTarget = "19"
+      jvmTarget = "20"
     }
   }
 }
