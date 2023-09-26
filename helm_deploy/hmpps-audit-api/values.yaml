@@ -2,6 +2,7 @@
 # Values here are the same across all environments
 generic-service:
   nameOverride: hmpps-audit-api
+  productId: "DPS018"
 
   replicaCount: 4
 
