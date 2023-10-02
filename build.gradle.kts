@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.4.1"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.5.0"
   kotlin("plugin.spring") version "1.9.10"
   kotlin("plugin.jpa") version "1.9.10"
 }
@@ -19,7 +19,7 @@ dependencies {
 
   implementation("org.apache.commons:commons-lang3:3.13.0")
 
-  runtimeOnly("com.h2database:h2:2.2.222")
+  runtimeOnly("com.h2database:h2:2.2.224")
   runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("org.postgresql:postgresql:42.6.0")
 
@@ -29,7 +29,7 @@ dependencies {
   testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   testImplementation("org.mockito:mockito-inline:5.2.0")
 
-  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.30.0")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.30.1")
   testImplementation("javax.xml.bind:jaxb-api:2.3.1")
 }
 
