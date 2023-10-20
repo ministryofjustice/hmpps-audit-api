@@ -29,7 +29,7 @@ dependencies {
   testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   testImplementation("org.mockito:mockito-inline:5.2.0")
 
-  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.31.0")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("javax.xml.bind:jaxb-api:2.3.1")
 }
 
