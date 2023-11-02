@@ -7,6 +7,7 @@
   {
     "id": "5c5ba3d7-0707-42f1-b9ea-949e22dc17ba",
     "operationId": "badea6d876c62e2f5264c94c7b50875e",
+    "correlationId": "er4ea6d876c62e2f5264c94c7b50863r",
     "what": "COURT_REGISTER_BUILDING_UPDATE",
     "when": "2021-04-03T10:15:30Z",
     "who": "bobby.beans",
@@ -16,6 +17,7 @@
   {
     "id": "e5b4800c-dc4e-45f8-826c-877b1f3ce8de",
     "operationId": "cadea6d876c62e2f5264c94c7b50875e",
+    "correlationId": "er4ea6d876c62e2f5264c94c7b50863r",
     "what": "OFFENDER_DELETED",
     "when": "2021-04-01T15:15:30Z",
     "who": "bobby.beans",
@@ -25,6 +27,7 @@
   {
     "id": "03a1624a-54e7-453e-8c79-816dbe02fd3c",
     "operationId": "dadea6d876c62e2f5264c94c7b50875e",
+    "correlationId": "er4ea6d876c62e2f5264c94c7b50863r",
     "what": "OFFENDER_DELETED",
     "when": "2020-12-31T08:11:30Z",
     "who": "freddy.frog",

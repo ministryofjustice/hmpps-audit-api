@@ -27,7 +27,6 @@ class AuditServiceTest {
     AuditService(
       telemetryClient,
       auditRepository,
-//      jacksonObjectMapper(), mock()
     )
 
   @Nested
@@ -49,6 +48,7 @@ class AuditServiceTest {
           "badea6d876c62e2f5264c94c7b50875e",
           "1adea6d876c62e2f5264c94c7b508755",
           "PERSON",
+          "3rdea6d876c62e2f5264c94c7b508548",
           "bobby.beans",
           "court-register",
           "{\"courtId\":\"AAAMH1\",\"buildingId\":936,\"building\":{\"id\":936,\"courtId\":\"AAAMH1\",\"buildingName\":\"Main Court Name Changed\"}}",
@@ -60,6 +60,7 @@ class AuditServiceTest {
           "cadea6d876c62e2f5264c94c7b50875e",
           "4adea6d876c62e2f5264c94c7b50875e",
           "PERSON",
+          "3rdea6d876c62e2f5264c94c7b508548",
           "bobby.beans",
           "offender-service",
           "{\"offenderId\": \"97\"}",
@@ -71,6 +72,7 @@ class AuditServiceTest {
           "dadea6d876c62e2f5264c94c7b50875e",
           "5adea6d876c62e2f5264c94c7b50875e",
           "PERSON",
+          "3rdea6d876c62e2f5264c94c7b508548",
           "freddy.frog",
           "offender-service",
           "{\"offenderId\": \"98\"}",
@@ -93,6 +95,7 @@ class AuditServiceTest {
             null,
             null,
             null,
+            null,
           ),
           AuditDto(
             UUID.fromString("5c5ba3d7-0707-42f1-b9ea-949e22dc17ba"),
@@ -101,6 +104,7 @@ class AuditServiceTest {
             "badea6d876c62e2f5264c94c7b50875e",
             "1adea6d876c62e2f5264c94c7b508755",
             "PERSON",
+            "3rdea6d876c62e2f5264c94c7b508548",
             "bobby.beans",
             "court-register",
             "{\"courtId\":\"AAAMH1\",\"buildingId\":936,\"building\":{\"id\":936,\"courtId\":\"AAAMH1\",\"buildingName\":\"Main Court Name Changed\"}}",
@@ -112,6 +116,7 @@ class AuditServiceTest {
             "cadea6d876c62e2f5264c94c7b50875e",
             "4adea6d876c62e2f5264c94c7b50875e",
             "PERSON",
+            "3rdea6d876c62e2f5264c94c7b508548",
             "bobby.beans",
             "offender-service",
             "{\"offenderId\": \"97\"}",
@@ -123,6 +128,7 @@ class AuditServiceTest {
             "dadea6d876c62e2f5264c94c7b50875e",
             "5adea6d876c62e2f5264c94c7b50875e",
             "PERSON",
+            "3rdea6d876c62e2f5264c94c7b508548",
             "freddy.frog",
             "offender-service",
             "{\"offenderId\": \"98\"}",
@@ -150,6 +156,7 @@ class AuditServiceTest {
               "badea6d876c62e2f5264c94c7b50875e",
               "serea6d876c62e2f5264c94c7b5083et",
               "CASE_NOTE",
+              "3rdea6d876c62e2f5264c94c7b508548",
               "bobby.beans",
               "court-register",
               "{\"courtId\":\"AAAMH1\",\"buildingId\":936,\"building\":{\"id\":936,\"courtId\":\"AAAMH1\",\"buildingName\":\"Main Court Name Changed\"}}",
@@ -161,6 +168,7 @@ class AuditServiceTest {
               "cadea6d876c62e2f5264c94c7b50875e",
               "reqea6d876c62e2f5264c94c7b50843h",
               "PERSON",
+              "3rdea6d876c62e2f5264c94c7b508548",
               "bobby.beans",
               "offender-service",
               "{\"offenderId\": \"97\"}",
@@ -172,6 +180,7 @@ class AuditServiceTest {
               "dadea6d876c62e2f5264c94c7b50875e",
               "zadea6d876c62e2f5264c94c7b508752",
               "CASE_NOTE",
+              "3rdea6d876c62e2f5264c94c7b508548",
               "freddy.frog",
               "offender-service",
               "{\"offenderId\": \"98\"}",
@@ -181,6 +190,7 @@ class AuditServiceTest {
         whenever(
           auditRepository.findPage(
             any(),
+            anyOrNull(),
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),
@@ -215,6 +225,7 @@ class AuditServiceTest {
                 null,
                 null,
                 null,
+                null,
               ),
               AuditDto(
                 UUID.fromString("5c5ba3d7-0707-42f1-b9ea-949e22dc17ba"),
@@ -223,6 +234,7 @@ class AuditServiceTest {
                 "badea6d876c62e2f5264c94c7b50875e",
                 "serea6d876c62e2f5264c94c7b5083et",
                 "CASE_NOTE",
+                "3rdea6d876c62e2f5264c94c7b508548",
                 "bobby.beans",
                 "court-register",
                 "{\"courtId\":\"AAAMH1\",\"buildingId\":936,\"building\":{\"id\":936,\"courtId\":\"AAAMH1\",\"buildingName\":\"Main Court Name Changed\"}}",
@@ -234,6 +246,7 @@ class AuditServiceTest {
                 "cadea6d876c62e2f5264c94c7b50875e",
                 "reqea6d876c62e2f5264c94c7b50843h",
                 "PERSON",
+                "3rdea6d876c62e2f5264c94c7b508548",
                 "bobby.beans",
                 "offender-service",
                 "{\"offenderId\": \"97\"}",
@@ -245,6 +258,7 @@ class AuditServiceTest {
                 "dadea6d876c62e2f5264c94c7b50875e",
                 "zadea6d876c62e2f5264c94c7b508752",
                 "CASE_NOTE",
+                "3rdea6d876c62e2f5264c94c7b508548",
                 "freddy.frog",
                 "offender-service",
                 "{\"offenderId\": \"98\"}",
@@ -270,6 +284,7 @@ class AuditServiceTest {
             "dadea6d876c62e2f5264c94c7b50875e",
             "fedea6d876c62e2f5264c94c7b50873w",
             "PERSON",
+            "3rdea6d876c62e2f5264c94c7b508548",
             "freddy.frog",
             "offender-service",
             "{\"offenderId\": \"98\"}",
@@ -279,6 +294,7 @@ class AuditServiceTest {
       whenever(
         auditRepository.findPage(
           any(),
+          anyOrNull(),
           anyOrNull(),
           anyOrNull(),
           anyOrNull(),
@@ -301,6 +317,7 @@ class AuditServiceTest {
         "offender-service",
         "fedea6d876c62e2f5264c94c7b50873w",
         "PERSON",
+        "3rdea6d876c62e2f5264c94c7b508548",
         "Hola T",
         "Another Event",
       )
@@ -317,6 +334,7 @@ class AuditServiceTest {
               "dadea6d876c62e2f5264c94c7b50875e",
               "fedea6d876c62e2f5264c94c7b50873w",
               "PERSON",
+              "3rdea6d876c62e2f5264c94c7b508548",
               "freddy.frog",
               "offender-service",
               "{\"offenderId\": \"98\"}",
@@ -325,7 +343,7 @@ class AuditServiceTest {
         ),
       )
 
-      verify(auditRepository).findPage(pageDetails, startDate, endDate, "offender-service", "fedea6d876c62e2f5264c94c7b50873w", "PERSON", "Another Event", "Hola T")
+      verify(auditRepository).findPage(pageDetails, startDate, endDate, "offender-service", "fedea6d876c62e2f5264c94c7b50873w", "PERSON", "3rdea6d876c62e2f5264c94c7b508548", "Another Event", "Hola T")
     }
   }
 }
