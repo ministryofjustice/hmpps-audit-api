@@ -30,6 +30,10 @@ data class AuditFilterDto(
   @field:Size(min = 2, max = 200)
   val subjectType: String? = null,
 
+  @Schema(required = false, description = "The correlation ID of the audit event", example = "da8ea6d876c62e2f5264c94c7b50867r")
+  @field:Size(min = 2, max = 200)
+  val correlationId: String? = null,
+
   @Schema(required = false, description = "The user who initiated the audit event", example = "Joe.Bloggs")
   @field:Size(min = 2, max = 80)
   val who: String? = null,

@@ -35,12 +35,13 @@ class AuditService(
   ): Page<AuditDto> {
     with(auditFilterDto) {
       log.info(
-        "Searching audit events by startDate {} endDate {} service {} subjectId {} subjectType {} what {} who {}",
+        "Searching audit events by startDate {} endDate {} service {} subjectId {} subjectType {} correlationId {} what {} who {}",
         startDateTime,
         endDateTime,
         service,
         subjectId,
         subjectType,
+        correlationId,
         what,
         who,
       )
@@ -51,6 +52,7 @@ class AuditService(
         service,
         subjectId,
         subjectType,
+        correlationId,
         what,
         who,
       )
@@ -65,6 +67,7 @@ private fun AuditEvent.asMap(): Map<String, String> {
   items.addIfNotNull("operationId", operationId)
   items.addIfNotNull("subjectId", subjectId)
   items.addIfNotNull("subjectType", subjectType)
+  items.addIfNotNull("correlationId", correlationId)
   items.addIfNotNull("service", service)
   return items.toMap()
 }
