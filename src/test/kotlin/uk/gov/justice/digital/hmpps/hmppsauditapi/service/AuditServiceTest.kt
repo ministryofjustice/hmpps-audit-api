@@ -271,7 +271,7 @@ class AuditServiceTest {
   }
 
   @Nested
-  inner class findFilteredAuditEvents {
+  inner class FindFilteredAuditEvents {
 
     @Test
     fun `find all filtered audit events`() {
