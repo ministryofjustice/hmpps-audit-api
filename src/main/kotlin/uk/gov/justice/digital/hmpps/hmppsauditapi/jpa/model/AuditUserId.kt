@@ -16,7 +16,7 @@ import java.time.LocalDateTime
 )
 data class AuditUserId(
   @Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   val id: Long = 0L,
 
   @ManyToOne(fetch = LAZY)
