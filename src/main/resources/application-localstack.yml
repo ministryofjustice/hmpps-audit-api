@@ -11,6 +11,10 @@ hmpps.sqs:
       queueName: mainQueue
       asyncQueueClient: true
       dlqName: mainDlq
+    newuserqueue:
+      queueName: mainQueue
+      asyncQueueClient: true
+      dlqName: mainDlq
 
 spring:
   jpa:
