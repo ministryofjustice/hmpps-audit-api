@@ -6,4 +6,4 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.AuditUser
 
 // TODO test
 @Repository
-interface AuditUserRepository: CrudRepository<AuditUser, Long>
+interface AuditUserRepository : CrudRepository<AuditUser, Long>

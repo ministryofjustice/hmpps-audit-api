@@ -1,7 +1,14 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model
 
 import io.swagger.v3.oas.annotations.media.Schema
-import jakarta.persistence.*
+import jakarta.persistence.Entity
+import jakarta.persistence.Table
+import jakarta.persistence.Id
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.FetchType
+import jakarta.persistence.JoinColumn
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
 import java.time.LocalDateTime

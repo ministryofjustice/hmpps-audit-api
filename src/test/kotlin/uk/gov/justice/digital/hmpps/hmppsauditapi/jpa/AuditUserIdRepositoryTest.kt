@@ -38,8 +38,8 @@ class AuditUserIdRepositoryTest {
     assertThat(foundUserIdes).hasSize(2)
       .extracting("userId")
       .containsOnly(userId)
-    assertThat(foundUserIdes).allMatch {
-      auditUserId -> auditUserId.auditUser.id.toString() == savedAuditUser.id.toString()
+    assertThat(foundUserIdes).allMatch { auditUserId ->
+      auditUserId.auditUser.id.toString() == savedAuditUser.id.toString()
     }
   }
 }

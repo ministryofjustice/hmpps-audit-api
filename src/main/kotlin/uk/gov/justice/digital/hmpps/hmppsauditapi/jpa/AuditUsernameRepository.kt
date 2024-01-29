@@ -6,6 +6,6 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.AuditUsername
 
 // TODO test
 @Repository
-interface AuditUsernameRepository: CrudRepository<AuditUsername, Long> {
-  fun findAllByUsername(username : String) : List<AuditUsername>
+interface AuditUsernameRepository : CrudRepository<AuditUsername, Long> {
+    fun findAllByUsername(username: String): List<AuditUsername>
 }

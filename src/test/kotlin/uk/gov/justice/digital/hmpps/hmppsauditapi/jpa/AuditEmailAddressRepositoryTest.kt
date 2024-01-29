@@ -38,8 +38,8 @@ class AuditEmailAddressRepositoryTest {
     assertThat(foundEmailAddresses).hasSize(2)
       .extracting("emailAddress")
       .containsOnly(email)
-    assertThat(foundEmailAddresses).allMatch {
-      auditEmailAddress -> auditEmailAddress.auditUser.id.toString() == savedAuditUser.id.toString()
+    assertThat(foundEmailAddresses).allMatch { auditEmailAddress ->
+      auditEmailAddress.auditUser.id.toString() == savedAuditUser.id.toString()
     }
   }
 }
