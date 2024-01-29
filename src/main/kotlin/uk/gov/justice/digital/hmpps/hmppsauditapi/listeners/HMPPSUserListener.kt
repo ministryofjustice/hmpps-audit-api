@@ -10,7 +10,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.services.UserService
 class HMPPSUserListener(
   private val userService: UserService,
   private val objectMapper: ObjectMapper,
-  ) {
+) {
 
   @SqsListener("newuserqueue", factory = "hmppsQueueContainerFactoryProxy")
   fun onUserCreation(message: String) {
@@ -24,5 +24,4 @@ class HMPPSUserListener(
     val username: String,
     val emailAddress: String,
   )
-
 }
