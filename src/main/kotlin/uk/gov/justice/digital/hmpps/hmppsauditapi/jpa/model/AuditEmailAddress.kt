@@ -5,7 +5,6 @@ import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
 import java.time.LocalDateTime
-import java.util.*
 
 @Entity(name = "AuditEmailAddress")
 @Table(name = "audit_email_address")
@@ -16,7 +15,7 @@ import java.util.*
 )
 data class AuditEmailAddress(
   @Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   val id: Long = 0L,
 
   @ManyToOne(fetch = FetchType.LAZY)
