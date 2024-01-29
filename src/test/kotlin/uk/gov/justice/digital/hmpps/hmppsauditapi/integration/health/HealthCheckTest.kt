@@ -7,6 +7,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.function.Consumer
 
+// TODO health check for newuserqueue
 class HealthCheckTest : IntegrationTest() {
 
   @Test
