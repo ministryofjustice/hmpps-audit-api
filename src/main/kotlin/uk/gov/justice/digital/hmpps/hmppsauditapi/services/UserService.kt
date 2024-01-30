@@ -14,7 +14,6 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.AuthUserUuid
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.AuthUsername
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSUserListener.UserCreationEvent
 
-// TODO test
 @Service
 class UserService(
   private val auditUserRepository: AuditUserRepository,
