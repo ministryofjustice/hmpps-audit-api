@@ -34,11 +34,11 @@ class AuthUsernameRepositoryTest {
     authUsernameRepository.save(authUsername3)
 
     // Then
-    val foundUsernamees = authUsernameRepository.findAllByUsername(username)
-    assertThat(foundUsernamees).hasSize(2)
+    val foundUsernames = authUsernameRepository.findAllByUsername(username)
+    assertThat(foundUsernames).hasSize(2)
       .extracting("username")
       .containsOnly(username)
-    assertThat(foundUsernamees).allMatch { authUsername ->
+    assertThat(foundUsernames).allMatch { authUsername ->
       authUsername.auditUser.id == savedAuditUser.id
     }
   }
