@@ -6,8 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.AuditUsername
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.AuditUser
+import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.AuditUsername
 
 @ExtendWith(SpringExtension::class)
 @DataJpaTest
