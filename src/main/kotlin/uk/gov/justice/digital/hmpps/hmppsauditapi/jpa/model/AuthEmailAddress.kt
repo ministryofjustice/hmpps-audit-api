@@ -13,14 +13,14 @@ import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
 import java.time.LocalDateTime
 
-@Entity(name = "AuditEmailAddress")
-@Table(name = "audit_email_address")
+@Entity(name = "AuthEmailAddress")
+@Table(name = "auth_email_address")
 @Schema(
   description = "Stores all email addresses for a given user." +
     "AUDIT_USER_ID is the unique ID given by the audit service to each user." +
     "A user can have multiple records if their email address has been changed.",
 )
-data class AuditEmailAddress(
+data class AuthEmailAddress(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   val id: Long = 0L,

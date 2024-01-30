@@ -7,39 +7,39 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.AuditUser
-import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.AuditUsername
+import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.AuthUsername
 
 @ExtendWith(SpringExtension::class)
 @DataJpaTest
-class AuditUsernameRepositoryTest {
+class AuthUsernameRepositoryTest {
 
   @Autowired
-  private lateinit var auditUsernameRepository: AuditUsernameRepository
+  private lateinit var authUsernameRepository: AuthUsernameRepository
 
   @Autowired
   private lateinit var auditUserRepository: AuditUserRepository
 
   @Test
-  fun `should find all AuditUsername by username`() {
+  fun `should find all AuthUsernames by username`() {
     // Given
     val username = "jsmith"
     val savedAuditUser = auditUserRepository.save(AuditUser())
-    val auditUsername1 = AuditUsername(auditUser = savedAuditUser, username = username)
-    val auditUsername2 = AuditUsername(auditUser = savedAuditUser, username = username)
-    val auditUsername3 = AuditUsername(auditUser = savedAuditUser, username = "an old username")
+    val authUsername1 = AuthUsername(auditUser = savedAuditUser, username = username)
+    val authUsername2 = AuthUsername(auditUser = savedAuditUser, username = username)
+    val authUsername3 = AuthUsername(auditUser = savedAuditUser, username = "an old username")
 
     // When
-    auditUsernameRepository.save(auditUsername1)
-    auditUsernameRepository.save(auditUsername2)
-    auditUsernameRepository.save(auditUsername3)
+    authUsernameRepository.save(authUsername1)
+    authUsernameRepository.save(authUsername2)
+    authUsernameRepository.save(authUsername3)
 
     // Then
-    val foundUsernamees = auditUsernameRepository.findAllByUsername(username)
+    val foundUsernamees = authUsernameRepository.findAllByUsername(username)
     assertThat(foundUsernamees).hasSize(2)
       .extracting("username")
       .containsOnly(username)
-    assertThat(foundUsernamees).allMatch { auditUsername ->
-      auditUsername.auditUser.id == savedAuditUser.id
+    assertThat(foundUsernamees).allMatch { authUsername ->
+      authUsername.auditUser.id == savedAuditUser.id
     }
   }
 }

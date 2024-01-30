@@ -6,7 +6,7 @@ CREATE TABLE audit_user
 );
 
 
-CREATE TABLE audit_user_id
+CREATE TABLE auth_user_id
 (
     id                 SERIAL PRIMARY KEY,
     audit_user_id      UUID         NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE audit_user_id
 
 );
 
-CREATE TABLE audit_email_address
+CREATE TABLE auth_email_address
 (
     id                 SERIAL PRIMARY KEY,
     audit_user_id      UUID         NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE audit_email_address
     FOREIGN KEY (audit_user_id) REFERENCES audit_user (id)
 );
 
-CREATE TABLE audit_username
+CREATE TABLE auth_username
 (
     id                 SERIAL PRIMARY KEY,
     audit_user_id      UUID         NOT NULL,

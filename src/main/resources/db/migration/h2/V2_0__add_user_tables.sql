@@ -18,7 +18,7 @@ CREATE TABLE audit_user_id
 
 );
 
-CREATE TABLE audit_email_address
+CREATE TABLE auth_email_address
 (
     id                 SERIAL PRIMARY KEY,
     audit_user_id      UUID         NOT NULL,
