@@ -3,20 +3,20 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditEmailAddressRepository
-import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditUserIdRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditUserRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditUsernameRepository
+import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuthUserIdRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.AuditEmailAddress
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.AuditUser
-import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.AuditUserId
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.AuditUsername
+import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.AuthUserId
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSUserListener.UserCreationEvent
 
 // TODO test
 @Service
 class UserService(
   private val auditUserRepository: AuditUserRepository,
-  private val auditUserIdRepository: AuditUserIdRepository,
+  private val authUserIdRepository: AuthUserIdRepository,
   private val auditEmailAddressRepository: AuditEmailAddressRepository,
   private val auditUsernameRepository: AuditUsernameRepository,
 ) {
@@ -29,11 +29,11 @@ class UserService(
 
   // TODO userUUID too?
   private fun checkUserDoesNotExist(newUserDetails: UserCreationEvent) {
-    val auditUserIds: List<AuditUserId> = auditUserIdRepository.findAllByUserId(newUserDetails.userId)
+    val authUserIds: List<AuthUserId> = authUserIdRepository.findAllByUserId(newUserDetails.userId)
     val auditEmailAddresses: List<AuditEmailAddress> = auditEmailAddressRepository.findAllByEmailAddress(newUserDetails.emailAddress)
     val auditUsernames: List<AuditUsername> = auditUsernameRepository.findAllByUsername(newUserDetails.username)
 
-    if (auditUserIds.isNotEmpty()) {
+    if (authUserIds.isNotEmpty()) {
       throw RuntimeException("User with user ID ${newUserDetails.userId} already exists")
     }
     if (auditEmailAddresses.isNotEmpty()) {
@@ -47,7 +47,7 @@ class UserService(
   private fun saveRecords(newUserDetails: UserCreationEvent) {
     val savedAuditUser: AuditUser = auditUserRepository.save(AuditUser())
 
-    auditUserIdRepository.save(AuditUserId(auditUser = savedAuditUser, userId = newUserDetails.userId))
+    authUserIdRepository.save(AuthUserId(auditUser = savedAuditUser, userId = newUserDetails.userId))
     auditEmailAddressRepository.save(AuditEmailAddress(auditUser = savedAuditUser, emailAddress = newUserDetails.emailAddress))
     auditUsernameRepository.save(AuditUsername(auditUser = savedAuditUser, username = newUserDetails.username))
   }

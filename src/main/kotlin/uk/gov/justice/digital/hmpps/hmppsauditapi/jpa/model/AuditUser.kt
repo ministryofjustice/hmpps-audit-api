@@ -15,18 +15,14 @@ import kotlin.collections.List
 
 @Entity(name = "AuditUser")
 @Table(name = "audit_user")
-@Schema(
-  description = "Stores all email addresses for a given user. " +
-    "AuditUserId is the unique ID given by the audit service to each user. " +
-    "A user can have multiple records if their email address has been changed.",
-)
+@Schema(description = "Stores a unique ID for each user from auth.")
 data class AuditUser(
   @Id
   @GeneratedValue
   val id: UUID = UUID.randomUUID(),
 
   @OneToMany(mappedBy = "auditUser", cascade = [CascadeType.ALL], orphanRemoval = true)
-  val userIds: List<AuditUserId>? = ArrayList(),
+  val userIds: List<AuthUserId>? = ArrayList(),
 
   @OneToMany(mappedBy = "auditUser", cascade = [CascadeType.ALL], orphanRemoval = true)
   val emailAddresses: List<AuditEmailAddress>? = ArrayList(),

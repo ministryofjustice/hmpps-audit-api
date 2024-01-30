@@ -17,7 +17,7 @@ import java.time.LocalDateTime
 @Table(name = "audit_email_address")
 @Schema(
   description = "Stores all email addresses for a given user." +
-    "AuditUserId is the unique ID given by the audit service to each user." +
+    "AUDIT_USER_ID is the unique ID given by the audit service to each user." +
     "A user can have multiple records if their email address has been changed.",
 )
 data class AuditEmailAddress(
