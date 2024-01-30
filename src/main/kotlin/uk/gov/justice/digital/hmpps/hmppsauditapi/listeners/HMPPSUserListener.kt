@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.awspring.cloud.sqs.annotation.SqsListener
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.UserService
+import java.util.UUID
 
 // TODO test
 @Service
@@ -19,7 +20,7 @@ class HMPPSUserListener(
   }
 
   data class UserCreationEvent(
-    val userUuid: String,
+    val userUuid: UUID,
     val userId: String,
     val username: String,
     val emailAddress: String,

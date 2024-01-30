@@ -12,6 +12,7 @@ import jakarta.persistence.Table
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
 import java.time.LocalDateTime
+import java.util.UUID
 
 @Entity(name = "AuthUserUuid")
 @Table(name = "auth_user_uuid")
@@ -29,7 +30,7 @@ data class AuthUserUuid(
   @JoinColumn(name = "audit_user_id")
   val auditUser: AuditUser,
 
-  val userUuid: String,
+  val userUuid: UUID,
   val active: Boolean = true,
 
   @CreationTimestamp

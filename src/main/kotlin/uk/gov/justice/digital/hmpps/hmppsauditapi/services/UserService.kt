@@ -34,7 +34,7 @@ class UserService(
     val authUserIds: List<AuthUserId> = authUserIdRepository.findAllByUserId(newUserDetails.userId)
     val authEmailAddresses: List<AuthEmailAddress> = authEmailAddressRepository.findAllByEmailAddress(newUserDetails.emailAddress)
     val authUsernames: List<AuthUsername> = authUsernameRepository.findAllByUsername(newUserDetails.username)
-    val authUserUuids: List<AuthUserUuid> = authUserUuidRepository.findAllByUuid(newUserDetails.userUuid)
+    val authUserUuids: List<AuthUserUuid> = authUserUuidRepository.findAllByUserUuid(newUserDetails.userUuid)
 
     ensureNewUserHasNoExistingRecord(authUserIds, "User with user ID ${newUserDetails.userId} already exists")
     ensureNewUserHasNoExistingRecord(authEmailAddresses, "User with email address ${newUserDetails.emailAddress} already exists")
