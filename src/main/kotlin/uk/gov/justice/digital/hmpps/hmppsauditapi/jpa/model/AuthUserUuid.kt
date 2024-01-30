@@ -13,14 +13,14 @@ import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
 import java.time.LocalDateTime
 
-@Entity(name = "AuthUserId")
-@Table(name = "auth_user_id")
+@Entity(name = "AuthUserUuid")
+@Table(name = "auth_user_uuid")
 @Schema(
-  description = "Stores all user IDs for a given user. " +
+  description = "Stores all auth user UUIDs for a given user. " +
     "AUDIT_USER_ID is the unique ID given by the audit service to each user. " +
-    "In rare cases, a user may have more than one user_id however most will have just one.",
+    "In most cases, a user will only have a maximum of one userUuid.",
 )
-data class AuthUserId(
+data class AuthUserUuid(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   val id: Long = 0L,
@@ -29,7 +29,7 @@ data class AuthUserId(
   @JoinColumn(name = "audit_user_id")
   val auditUser: AuditUser,
 
-  val userId: String,
+  val userUuid: String,
   val active: Boolean = true,
 
   @CreationTimestamp
