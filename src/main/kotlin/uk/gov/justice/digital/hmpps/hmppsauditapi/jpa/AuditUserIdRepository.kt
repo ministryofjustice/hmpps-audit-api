@@ -4,7 +4,6 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.AuditUserId
 
-// TODO test
 @Repository
 interface AuditUserIdRepository : CrudRepository<AuditUserId, Long> {
   fun findAllByUserId(userId: String): List<AuditUserId>

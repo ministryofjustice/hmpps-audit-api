@@ -39,7 +39,7 @@ class AuditEmailAddressRepositoryTest {
       .extracting("emailAddress")
       .containsOnly(email)
     assertThat(foundEmailAddresses).allMatch { auditEmailAddress ->
-      auditEmailAddress.auditUser.id.toString() == savedAuditUser.id.toString()
+      auditEmailAddress.auditUser.id == savedAuditUser.id
     }
   }
 }

@@ -39,7 +39,7 @@ class AuditUserIdRepositoryTest {
       .extracting("userId")
       .containsOnly(userId)
     assertThat(foundUserIdes).allMatch { auditUserId ->
-      auditUserId.auditUser.id.toString() == savedAuditUser.id.toString()
+      auditUserId.auditUser.id == savedAuditUser.id
     }
   }
 }
