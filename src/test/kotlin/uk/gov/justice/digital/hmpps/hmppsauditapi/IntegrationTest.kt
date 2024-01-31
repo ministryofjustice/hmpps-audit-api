@@ -52,6 +52,10 @@ abstract class IntegrationTest {
     hmppsQueueService.findByQueueId("auditqueue") ?: throw MissingQueueException("HmppsQueue auditqueue not found")
   }
 
+  protected val newUserQueueConfig by lazy {
+    hmppsQueueService.findByQueueId("newuserqueue") ?: throw MissingQueueException("HmppsQueue newuserqueue not found")
+  }
+
   protected val awsSqsDlqClient by lazy { auditQueueConfig.sqsDlqClient as SqsAsyncClient }
   protected val awsSqsUrl by lazy { auditQueueConfig.queueUrl }
   protected val awsSqsDlqUrl by lazy { auditQueueConfig.dlqUrl as String }
