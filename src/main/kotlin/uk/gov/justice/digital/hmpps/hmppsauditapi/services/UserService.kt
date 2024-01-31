@@ -41,7 +41,7 @@ class UserService(
     ensureNewUserHasNoExistingRecord(authUserUuids, "User with UUID ${newUserDetails.userUuid} already exists")
   }
 
-  fun <T> ensureNewUserHasNoExistingRecord(list: List<T>, message: String) {
+  private fun <T> ensureNewUserHasNoExistingRecord(list: List<T>, message: String) {
     if (list.isNotEmpty()) {
       throw RuntimeException(message)
     }

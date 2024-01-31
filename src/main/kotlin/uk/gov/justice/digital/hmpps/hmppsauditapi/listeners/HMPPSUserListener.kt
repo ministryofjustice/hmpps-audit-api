@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.UserService
 import java.util.UUID
 
-// TODO test
 @Service
 class HMPPSUserListener(
   private val userService: UserService,
