@@ -7,7 +7,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.function.Consumer
 
-// TODO health check for newuserqueue
 class HealthCheckTest : IntegrationTest() {
 
   @Test
@@ -22,7 +21,7 @@ class HealthCheckTest : IntegrationTest() {
   }
 
   @Test
-  fun `Queue health reports queue details`() {
+  fun `Queue health reports audit queue details`() {
     webTestClient.get().uri("/health")
       .exchange()
       .expectStatus().isOk
@@ -33,6 +32,19 @@ class HealthCheckTest : IntegrationTest() {
       .jsonPath("components.auditqueue-health.details.messagesOnDlq").isEqualTo(0)
       .jsonPath("components.auditqueue-health.details.dlqStatus").isEqualTo("UP")
       .jsonPath("components.auditqueue-health.details.dlqName").isEqualTo(auditQueueConfig.dlqName!!)
+  }
+
+  fun `Queue health reports audit new user details`() {
+    webTestClient.get().uri("/health")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody()
+      .jsonPath("components.newuserqueue-health.details.queueName").isEqualTo(auditQueueConfig.queueName)
+      .jsonPath("components.newuserqueue-health.details.messagesOnQueue").isEqualTo(0)
+      .jsonPath("components.newuserqueue-health.details.messagesInFlight").isEqualTo(0)
+      .jsonPath("components.newuserqueue-health.details.messagesOnDlq").isEqualTo(0)
+      .jsonPath("components.newuserqueue-health.details.dlqStatus").isEqualTo("UP")
+      .jsonPath("components.newuserqueue-health.details.dlqName").isEqualTo(auditQueueConfig.dlqName!!)
   }
 
   @Test
