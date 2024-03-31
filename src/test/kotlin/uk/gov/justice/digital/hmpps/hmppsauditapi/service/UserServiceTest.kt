@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
+import uk.gov.justice.digital.hmpps.hmppsauditapi.exception.UserAlreadyExistsException
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditUserRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuthEmailAddressRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuthUserIdRepository
@@ -99,38 +100,38 @@ class UserServiceTest {
   }
 
   @Test
-  fun `saveNewUserDetails should throw RuntimeException when user ID already exists`() {
+  fun `saveNewUserDetails should throw UserAlreadyExistsException when user ID already exists`() {
     given(authUserIdRepository.findAllByUserId(newUserDetails.userId)).willReturn(listOf(AuthUserId(userId = AUTH_USER_ID, auditUser = AuditUser())))
 
     assertThatThrownBy { userService.saveNewUserDetails(newUserDetails) }
-      .isInstanceOf(RuntimeException::class.java)
+      .isInstanceOf(UserAlreadyExistsException::class.java)
       .hasMessageContaining("User with user ID ${newUserDetails.userId} already exists")
   }
 
   @Test
-  fun `saveNewUserDetails should throw RuntimeException when user email address already exists`() {
+  fun `saveNewUserDetails should throw UserAlreadyExistsException when user email address already exists`() {
     given(authEmailAddressRepository.findAllByEmailAddress(newUserDetails.emailAddress)).willReturn(listOf(AuthEmailAddress(emailAddress = AUTH_EMAIL_ADDRESS, auditUser = AuditUser())))
 
     assertThatThrownBy { userService.saveNewUserDetails(newUserDetails) }
-      .isInstanceOf(RuntimeException::class.java)
+      .isInstanceOf(UserAlreadyExistsException::class.java)
       .hasMessageContaining("User with email address ${newUserDetails.emailAddress} already exists")
   }
 
   @Test
-  fun `saveNewUserDetails should throw RuntimeException when username already exists`() {
+  fun `saveNewUserDetails should throw UserAlreadyExistsException when username already exists`() {
     given(authUsernameRepository.findAllByUsername(newUserDetails.username)).willReturn(listOf(AuthUsername(username = AUTH_USERNAME, auditUser = AuditUser())))
 
     assertThatThrownBy { userService.saveNewUserDetails(newUserDetails) }
-      .isInstanceOf(RuntimeException::class.java)
+      .isInstanceOf(UserAlreadyExistsException::class.java)
       .hasMessageContaining("User with username ${newUserDetails.username} already exists")
   }
 
   @Test
-  fun `saveNewUserDetails should throw RuntimeException when user UUID already exists`() {
+  fun `saveNewUserDetails should throw UserAlreadyExistsException when user UUID already exists`() {
     given(authUserUuidRepository.findAllByUserUuid(newUserDetails.userUuid)).willReturn(listOf(AuthUserUuid(userUuid = AUTH_USER_UUID, auditUser = AuditUser())))
 
     assertThatThrownBy { userService.saveNewUserDetails(newUserDetails) }
-      .isInstanceOf(RuntimeException::class.java)
+      .isInstanceOf(UserAlreadyExistsException::class.java)
       .hasMessageContaining("User with UUID ${newUserDetails.userUuid} already exists")
   }
 }
