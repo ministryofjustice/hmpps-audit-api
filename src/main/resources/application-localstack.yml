@@ -11,7 +11,7 @@ hmpps.sqs:
       queueName: mainQueue
       asyncQueueClient: true
       dlqName: mainDlq
-    newuserqueue:
+    audituserqueue:
       queueName: mainQueue
       asyncQueueClient: true
       dlqName: mainDlq

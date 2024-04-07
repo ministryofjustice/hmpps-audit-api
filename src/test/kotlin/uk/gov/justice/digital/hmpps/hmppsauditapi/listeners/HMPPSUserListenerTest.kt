@@ -25,13 +25,14 @@ internal class HMPPSUserListenerTest : QueueListenerIntegrationTest() {
   internal fun `will call service for a user creation event`() {
     val message = """
     {
+      "eventType": "CREATE_USER",
       "userUuid": "b1f4b9cf-1017-491f-82b5-b153ebcda33b",
       "userId": "1234567890",
       "username": "jsmith",
       "emailAddress": "john.smith@domain.com"
     }
   """
-    userListener.onUserCreation(message)
+    userListener.onAuditUserEvent(message)
 
     doNothing().whenever(userService).saveNewUserDetails(any())
 

@@ -40,12 +40,12 @@ class HealthCheckTest : IntegrationTest() {
       .exchange()
       .expectStatus().isOk
       .expectBody()
-      .jsonPath("components.newuserqueue-health.details.queueName").isEqualTo(newUserQueueConfig.queueName)
-      .jsonPath("components.newuserqueue-health.details.messagesOnQueue").isEqualTo(0)
-      .jsonPath("components.newuserqueue-health.details.messagesInFlight").isEqualTo(0)
-      .jsonPath("components.newuserqueue-health.details.messagesOnDlq").isEqualTo(0)
-      .jsonPath("components.newuserqueue-health.details.dlqStatus").isEqualTo("UP")
-      .jsonPath("components.newuserqueue-health.details.dlqName").isEqualTo(newUserQueueConfig.dlqName!!)
+      .jsonPath("components.audituserqueue-health.details.queueName").isEqualTo(auditUserQueueConfig.queueName)
+      .jsonPath("components.audituserqueue-health.details.messagesOnQueue").isEqualTo(0)
+      .jsonPath("components.audituserqueue-health.details.messagesInFlight").isEqualTo(0)
+      .jsonPath("components.audituserqueue-health.details.messagesOnDlq").isEqualTo(0)
+      .jsonPath("components.audituserqueue-health.details.dlqStatus").isEqualTo("UP")
+      .jsonPath("components.audituserqueue-health.details.dlqName").isEqualTo(auditUserQueueConfig.dlqName!!)
   }
 
   @Test

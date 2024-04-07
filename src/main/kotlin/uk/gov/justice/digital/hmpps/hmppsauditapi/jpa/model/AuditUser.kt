@@ -15,7 +15,7 @@ import kotlin.collections.List
 
 @Entity(name = "AuditUser")
 @Table(name = "audit_user")
-@Schema(description = "Stores a unique ID for each user from auth.")
+@Schema(description = "Stores a unique ID for each user from auth")
 data class AuditUser(
   @Id
   @GeneratedValue
@@ -29,6 +29,9 @@ data class AuditUser(
 
   @OneToMany(mappedBy = "auditUser", cascade = [CascadeType.ALL], orphanRemoval = true)
   val usernames: List<AuthUsername>? = ArrayList(),
+
+  @OneToMany(mappedBy = "auditUser", cascade = [CascadeType.ALL], orphanRemoval = true)
+  val userUuids: List<AuthUserUuid>? = ArrayList(),
 
   @CreationTimestamp
   val creationTime: LocalDateTime = LocalDateTime.now(),

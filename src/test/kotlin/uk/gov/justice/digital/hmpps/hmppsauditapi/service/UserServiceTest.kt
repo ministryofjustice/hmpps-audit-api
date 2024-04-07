@@ -64,7 +64,7 @@ class UserServiceTest {
   @Captor
   private lateinit var authUserUuidCaptor: ArgumentCaptor<AuthUserUuid>
 
-  private val newUserDetails = UserCreationEvent(AUTH_USER_UUID, AUTH_USER_ID, AUTH_USERNAME, AUTH_EMAIL_ADDRESS)
+  private val newUserDetails = UserCreationEvent(userUuid = AUTH_USER_UUID, userId = AUTH_USER_ID, username = AUTH_USERNAME, emailAddress = AUTH_EMAIL_ADDRESS)
 
   @BeforeEach
   fun setUp() {
