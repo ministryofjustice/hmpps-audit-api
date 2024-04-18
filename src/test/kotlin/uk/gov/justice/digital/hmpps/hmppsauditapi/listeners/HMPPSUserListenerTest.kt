@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.SpyBean
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.UserService
-import java.util.UUID
 
 internal class HMPPSUserListenerTest : QueueListenerIntegrationTest() {
 
@@ -26,7 +25,6 @@ internal class HMPPSUserListenerTest : QueueListenerIntegrationTest() {
     val message = """
     {
       "eventType": "CREATE_USER",
-      "userUuid": "b1f4b9cf-1017-491f-82b5-b153ebcda33b",
       "userId": "1234567890",
       "username": "jsmith",
       "emailAddress": "john.smith@domain.com"
@@ -38,7 +36,6 @@ internal class HMPPSUserListenerTest : QueueListenerIntegrationTest() {
 
     verify(userService).saveNewUserDetails(
       check {
-        assertThat(it.userUuid).isEqualTo(UUID.fromString("b1f4b9cf-1017-491f-82b5-b153ebcda33b"))
         assertThat(it.userId).isEqualTo("1234567890")
         assertThat(it.username).isEqualTo("jsmith")
         assertThat(it.emailAddress).isEqualTo("john.smith@domain.com")

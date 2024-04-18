@@ -30,9 +30,6 @@ data class AuditUser(
   @OneToMany(mappedBy = "auditUser", cascade = [CascadeType.ALL], orphanRemoval = true)
   val usernames: List<AuthUsername>? = ArrayList(),
 
-  @OneToMany(mappedBy = "auditUser", cascade = [CascadeType.ALL], orphanRemoval = true)
-  val userUuids: List<AuthUserUuid>? = ArrayList(),
-
   @CreationTimestamp
   val creationTime: LocalDateTime = LocalDateTime.now(),
 
