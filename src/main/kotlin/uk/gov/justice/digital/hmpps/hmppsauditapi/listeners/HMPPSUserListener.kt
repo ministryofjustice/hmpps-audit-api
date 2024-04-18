@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditUserEventType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditUserEventType.CREATE_USER
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.UserService
-import java.util.UUID
 
 @Service
 class HMPPSUserListener(
@@ -30,7 +29,6 @@ class HMPPSUserListener(
 
   data class UserCreationEvent(
     val eventType: AuditUserEventType = CREATE_USER,
-    val userUuid: UUID,
     val userId: String,
     val username: String,
     val emailAddress: String,
