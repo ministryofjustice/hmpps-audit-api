@@ -94,7 +94,7 @@ hmpps.sqs:
   queues:
     auditqueue:
       asyncQueueClient: true
-    audituserqueue:
+    auditusersqueue:
       asyncQueueClient: true
 
 oauth:
