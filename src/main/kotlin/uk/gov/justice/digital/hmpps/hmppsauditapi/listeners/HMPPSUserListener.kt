@@ -14,7 +14,7 @@ class HMPPSUserListener(
   private val objectMapper: ObjectMapper,
 ) {
 
-  @SqsListener("audituserqueue", factory = "hmppsQueueContainerFactoryProxy")
+  @SqsListener("auditusersqueue", factory = "hmppsQueueContainerFactoryProxy")
   fun onAuditUserEvent(message: String) {
     val jsonNode: JsonNode = objectMapper.readTree(message)
     val eventType: AuditUserEventType = AuditUserEventType.valueOf(jsonNode.get("eventType").asText())

@@ -15,7 +15,7 @@ hmpps.sqs:
       queueName: ${random.uuid}
       asyncQueueClient: true
       dlqName: ${random.uuid}
-    audituserqueue:
+    auditusersqueue:
       queueName: ${random.uuid}
       asyncQueueClient: true
       dlqName: ${random.uuid}
