@@ -94,8 +94,8 @@ hmpps.sqs:
   queues:
     auditqueue:
       asyncQueueClient: true
-#    auditusersqueue:
-#      asyncQueueClient: true
+    auditusersqueue:
+      asyncQueueClient: true
 
 oauth:
   token.url: ${oauth.endpoint.url}/oauth/token

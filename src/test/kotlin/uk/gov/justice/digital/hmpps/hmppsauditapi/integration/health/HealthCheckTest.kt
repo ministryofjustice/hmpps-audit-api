@@ -34,19 +34,19 @@ class HealthCheckTest : IntegrationTest() {
       .jsonPath("components.auditqueue-health.details.dlqName").isEqualTo(auditQueueConfig.dlqName!!)
   }
 
-//  @Test
-//  fun `Queue health reports new user queue details`() {
-//    webTestClient.get().uri("/health")
-//      .exchange()
-//      .expectStatus().isOk
-//      .expectBody()
-//      .jsonPath("components.auditusersqueue-health.details.queueName").isEqualTo(auditUsersQueueConfig.queueName)
-//      .jsonPath("components.auditusersqueue-health.details.messagesOnQueue").isEqualTo(0)
-//      .jsonPath("components.auditusersqueue-health.details.messagesInFlight").isEqualTo(0)
-//      .jsonPath("components.auditusersqueue-health.details.messagesOnDlq").isEqualTo(0)
-//      .jsonPath("components.auditusersqueue-health.details.dlqStatus").isEqualTo("UP")
-//      .jsonPath("components.auditusersqueue-health.details.dlqName").isEqualTo(auditUsersQueueConfig.dlqName!!)
-//  }
+  @Test
+  fun `Queue health reports new user queue details`() {
+    webTestClient.get().uri("/health")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody()
+      .jsonPath("components.auditusersqueue-health.details.queueName").isEqualTo(auditUsersQueueConfig.queueName)
+      .jsonPath("components.auditusersqueue-health.details.messagesOnQueue").isEqualTo(0)
+      .jsonPath("components.auditusersqueue-health.details.messagesInFlight").isEqualTo(0)
+      .jsonPath("components.auditusersqueue-health.details.messagesOnDlq").isEqualTo(0)
+      .jsonPath("components.auditusersqueue-health.details.dlqStatus").isEqualTo("UP")
+      .jsonPath("components.auditusersqueue-health.details.dlqName").isEqualTo(auditUsersQueueConfig.dlqName!!)
+  }
 
   @Test
   fun `Health info reports version`() {
