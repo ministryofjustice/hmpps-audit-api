@@ -44,11 +44,11 @@ TMPDIR=/private$TMPDIR  docker-compose up --scale hmpps-audit-api=0
 
 And then using gradle:
 ```
-./gradlew bootRun --args='--spring.profiles.active=dev,localstack'
+./gradlew bootRun --args='--spring.profiles.active=dev,localstack,postgres'
 ```
 
 The service can be run similarly within IntelliJ by running the main class with the following VM options:
 ```
--Dspring.profiles.active=dev,localstack
+-Dspring.profiles.active=dev,localstack,postgres
 ```
 

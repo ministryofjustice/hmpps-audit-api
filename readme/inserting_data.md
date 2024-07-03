@@ -36,7 +36,7 @@ To send the above payload:
 
 ```sh
 aws --region=eu-west-2 --endpoint-url=http://localhost:4566 sqs send-message \
-    --queue-url http://localstack:4576/queue/mainQueue\
+    --queue-url http://localstack:4576/queue/000000000000/mainQueue\
     --message-body '{
                       "operationId": "badea6d876c62e2f5264c94c7b50875e",
                       "what": "COURT_REGISTER_BUILDING_UPDATE",
