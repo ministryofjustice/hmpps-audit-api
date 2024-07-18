@@ -22,3 +22,6 @@ generic-prometheus-alerts:
   businessHoursOnly: true
   rdsAlertsDatabases:
     cloud-platform-f6d47a99708f20d5: "hmpps audit api"
+
+  cron:
+    retry_dlqs_schedule: "*/10 7-20 * * 1-5"
