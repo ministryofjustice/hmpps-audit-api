@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.then
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.data.domain.PageImpl
@@ -23,15 +24,16 @@ import java.util.UUID
 class AuditServiceTest {
   private val telemetryClient: TelemetryClient = mock()
   private val auditRepository: AuditRepository = mock()
-  private val auditService =
+  private val saveToS3Bucket = false
+  private var auditService =
     AuditService(
       telemetryClient,
       auditRepository,
+      saveToS3Bucket,
     )
 
   @Nested
-  @Suppress("ClassName")
-  inner class findAuditEvents {
+  inner class FindAuditEvents {
 
     @Test
     fun `find all audit events`() {
@@ -138,7 +140,7 @@ class AuditServiceTest {
     }
 
     @Nested
-    inner class findPagedAuditEvents {
+    inner class FindPagedAuditEvents {
 
       @Test
       fun `find all paged audit events`() {
@@ -344,6 +346,45 @@ class AuditServiceTest {
       )
 
       verify(auditRepository).findPage(pageDetails, startDate, endDate, "offender-service", "fedea6d876c62e2f5264c94c7b50873w", "PERSON", "3rdea6d876c62e2f5264c94c7b508548", "Another Event", "Hola T")
+    }
+  }
+
+  @Nested
+  inner class SaveAuditEvent {
+
+    val auditEvent = AuditEvent(
+      UUID.fromString("03a1624a-54e7-453e-8c79-816dbe02fd3c"),
+      "OFFENDER_DELETED",
+      Instant.parse("2020-12-31T08:11:30Z"),
+      "dadea6d876c62e2f5264c94c7b50875e",
+      "fedea6d876c62e2f5264c94c7b50873w",
+      "PERSON",
+      "3rdea6d876c62e2f5264c94c7b508548",
+      "freddy.frog",
+      "offender-service",
+      "{\"offenderId\": \"98\"}",
+    )
+
+    @Test
+    fun `save audit event to database when saveToS3Bucket is false`() {
+      auditService = AuditService(telemetryClient, auditRepository, false)
+
+      auditService.audit(
+        auditEvent,
+      )
+
+      verify(auditRepository).save(auditEvent)
+    }
+
+    @Test
+    fun `save audit event to S3 bucket when saveToS3Bucket is true`() {
+      auditService = AuditService(telemetryClient, auditRepository, true)
+
+      auditService.audit(
+        auditEvent,
+      )
+
+      then(auditRepository).shouldHaveNoInteractions()
     }
   }
 }
