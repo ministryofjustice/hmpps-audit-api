@@ -58,7 +58,6 @@ workflows:
               only:
                 - HAAR-2636-fix
           requires:
-            - validate
             - build_docker
             - helm_lint
       - request-preprod-approval:
