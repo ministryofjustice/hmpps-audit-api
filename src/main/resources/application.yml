@@ -89,13 +89,16 @@ cloud:
       auto: false
       static: ${aws.region}
 
-hmpps.sqs:
-  queueAdminRole: ROLE_AUDIT_API_QUEUE_ADMIN
-  queues:
-    auditqueue:
-      asyncQueueClient: true
-    auditusersqueue:
-      asyncQueueClient: true
+hmpps:
+  sqs:
+    queueAdminRole: ROLE_AUDIT_API_QUEUE_ADMIN
+    queues:
+      auditqueue:
+        asyncQueueClient: true
+      auditusersqueue:
+        asyncQueueClient: true
+  repository:
+    saveToS3Bucket: false
 
 oauth:
   token.url: ${oauth.endpoint.url}/oauth/token

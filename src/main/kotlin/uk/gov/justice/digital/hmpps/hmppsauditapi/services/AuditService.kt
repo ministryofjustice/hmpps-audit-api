@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
 import com.microsoft.applicationinsights.TelemetryClient
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -17,6 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 class AuditService(
   private val telemetryClient: TelemetryClient,
   private val auditRepository: AuditRepository,
+  @Value("\${hmpps.repository.saveToS3Bucket}") private val saveToS3Bucket: Boolean,
 ) {
   private companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -24,7 +26,11 @@ class AuditService(
 
   fun audit(auditEvent: AuditEvent) {
     telemetryClient.trackEvent("hmpps-audit", auditEvent.asMap())
-    auditRepository.save(auditEvent)
+    if (saveToS3Bucket) {
+      // do nothing, will be completed as part of another ticket
+    } else {
+      auditRepository.save(auditEvent)
+    }
   }
 
   fun findAll(): List<AuditDto> = auditRepository.findAll(Sort.by(DESC, "when")).map { AuditDto(it) }
