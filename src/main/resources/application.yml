@@ -98,7 +98,7 @@ hmpps:
       auditusersqueue:
         asyncQueueClient: true
   repository:
-    saveToS3Bucket: false
+    saveToS3Bucket: true
 
 oauth:
   token.url: ${oauth.endpoint.url}/oauth/token
