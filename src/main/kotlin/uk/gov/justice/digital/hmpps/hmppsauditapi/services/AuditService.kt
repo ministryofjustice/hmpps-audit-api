@@ -18,6 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 class AuditService(
   private val telemetryClient: TelemetryClient,
   private val auditRepository: AuditRepository,
+  private val auditS3Client: AuditS3Client,
   @Value("\${hmpps.repository.saveToS3Bucket}") private val saveToS3Bucket: Boolean,
 ) {
   private companion object {
@@ -26,8 +27,8 @@ class AuditService(
 
   fun audit(auditEvent: AuditEvent) {
     telemetryClient.trackEvent("hmpps-audit", auditEvent.asMap())
-    if (saveToS3Bucket) {
-      // do nothing, will be completed as part of another ticket
+    if (saveToS3Bucket && auditEvent.service == "hmpps-audit-poc-ui") {
+      auditS3Client.save(auditEvent)
     } else {
       auditRepository.save(auditEvent)
     }

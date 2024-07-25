@@ -20,6 +20,7 @@ dependencies {
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
 
   implementation("org.apache.commons:commons-lang3:3.14.0")
+  implementation("software.amazon.awssdk:s3:2.26.22")
 
   runtimeOnly("com.h2database:h2:2.2.224")
   runtimeOnly("org.flywaydb:flyway-core")
