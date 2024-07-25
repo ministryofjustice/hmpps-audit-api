@@ -56,7 +56,7 @@ class AuditS3ClientTest {
     verify(s3Client).putObject(putObjectRequestCaptor.capture(), requestBodyCaptor.capture())
     val putObjectRequest = putObjectRequestCaptor.value
     assertThat(putObjectRequest.bucket()).isEqualTo("bucketName")
-    assertThat(putObjectRequest.key()).isEqualTo("2020/12/31/testUser/07c867b1fb88d84fdcb16090619da3da.json")
+    assertThat(putObjectRequest.key()).isEqualTo("year=2020/month=12/day=31/user=testUser/07c867b1fb88d84fdcb16090619da3da.json")
     assertThat(String(requestBodyCaptor.value.contentStreamProvider().newStream().readAllBytes(), StandardCharsets.UTF_8)).isEqualTo(auditEventJsonString)
   }
 }

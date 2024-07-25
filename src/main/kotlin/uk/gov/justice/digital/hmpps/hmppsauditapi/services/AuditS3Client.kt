@@ -34,7 +34,7 @@ class AuditS3Client(
 
   private fun generateFilename(auditEvent: HMPPSAuditListener.AuditEvent, auditEventJsonString: String): String {
     val whenDateTime = auditEvent.`when`.atZone(ZoneId.systemDefault()).toLocalDateTime()
-    return "${whenDateTime.year}/${whenDateTime.monthValue}/${whenDateTime.dayOfMonth}/${auditEvent.who}/" +
+    return "year=${whenDateTime.year}/month=${whenDateTime.monthValue}/day=${whenDateTime.dayOfMonth}/user=${auditEvent.who}/" +
       "${getMd5HashFromJsonString(auditEventJsonString)}.json"
   }
 
