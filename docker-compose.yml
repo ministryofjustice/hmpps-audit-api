@@ -37,7 +37,7 @@ services:
       - "4566-4597:4566-4597"
       - 8999:8080
     environment:
-      - SERVICES=sqs
+      - SERVICES=sqs,s3,s3control
       - DEBUG=${DEBUG- }
       - DOCKER_HOST=unix:///var/run/docker.sock
     volumes:

@@ -7,12 +7,13 @@ import software.amazon.awssdk.auth.credentials.AnonymousCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import uk.gov.justice.digital.hmpps.hmppsauditapi.IntegrationTest
+import uk.gov.justice.digital.hmpps.hmppsauditapi.integration.S3TestConfig
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueHealth
 import uk.gov.justice.hmpps.sqs.HmppsSqsProperties
 import java.net.URI
 
-@Import(QueueHealthCheckNegativeTest.TestConfig::class)
+@Import(QueueHealthCheckNegativeTest.TestConfig::class, S3TestConfig::class)
 class QueueHealthCheckNegativeTest : IntegrationTest() {
 
   @TestConfiguration

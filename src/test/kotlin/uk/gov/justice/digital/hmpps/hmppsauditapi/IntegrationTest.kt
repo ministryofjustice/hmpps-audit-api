@@ -12,6 +12,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import uk.gov.justice.digital.hmpps.hmppsauditapi.helper.JwtAuthHelper
+import uk.gov.justice.digital.hmpps.hmppsauditapi.integration.S3TestConfig
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
 import uk.gov.justice.hmpps.sqs.HmppsQueueFactory
@@ -21,7 +22,7 @@ import uk.gov.justice.hmpps.sqs.MissingQueueException
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(IntegrationTest.SqsConfig::class, JwtAuthHelper::class)
+@Import(IntegrationTest.SqsConfig::class, JwtAuthHelper::class, S3TestConfig::class)
 @ActiveProfiles("test")
 abstract class IntegrationTest {
   @Autowired
