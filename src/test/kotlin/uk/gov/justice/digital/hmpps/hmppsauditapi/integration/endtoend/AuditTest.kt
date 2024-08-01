@@ -30,7 +30,7 @@ import java.time.Instant
 import java.util.UUID
 
 class AuditTest @Autowired constructor(
-   override var webTestClient: WebTestClient
+  override var webTestClient: WebTestClient,
 ) : QueueListenerIntegrationTest() {
 
   private val basicAuditEvent = AuditEvent(what = "basicAuditEvent")
@@ -56,7 +56,6 @@ class AuditTest @Autowired constructor(
       }
     }
   }
-
 
   @Test
   fun `will consume an audit event message`() {
@@ -97,67 +96,67 @@ class AuditTest @Autowired constructor(
     verify(auditRepository).save(any<AuditEvent>())
   }
 
-    @Test
-    fun `save basic audit entry to database`() {
-      System.setProperty("hmpps.repository.saveToS3Bucket", "false")
-      webTestClient.post()
-        .uri("/audit")
-        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(BodyInserters.fromValue(basicAuditEvent))
-        .exchange()
-        .expectStatus().isAccepted
+  @Test
+  fun `save basic audit entry to database`() {
+    System.setProperty("hmpps.repository.saveToS3Bucket", "false")
+    webTestClient.post()
+      .uri("/audit")
+      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .body(BodyInserters.fromValue(basicAuditEvent))
+      .exchange()
+      .expectStatus().isAccepted
 
-      await untilCallTo { mockingDetails(auditRepository).invocations.size } matches { it == 1 }
+    await untilCallTo { mockingDetails(auditRepository).invocations.size } matches { it == 1 }
 
-      verify(telemetryClient).trackEvent(eq("hmpps-audit"), any(), isNull())
-      verify(auditRepository).save(any<AuditEvent>())
-      verifyNoInteractions(auditS3Client)
-    }
+    verify(telemetryClient).trackEvent(eq("hmpps-audit"), any(), isNull())
+    verify(auditRepository).save(any<AuditEvent>())
+    verifyNoInteractions(auditS3Client)
+  }
 
-    @Test
-    fun `save basic audit entry to S3 bucket`() {
-      System.setProperty("hmpps.repository.saveToS3Bucket", "true")
-      webTestClient.post()
-        .uri("/audit")
-        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(BodyInserters.fromValue(basicAuditEvent))
-        .exchange()
-        .expectStatus().isAccepted
+  @Test
+  fun `save basic audit entry to S3 bucket`() {
+    System.setProperty("hmpps.repository.saveToS3Bucket", "true")
+    webTestClient.post()
+      .uri("/audit")
+      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .body(BodyInserters.fromValue(basicAuditEvent))
+      .exchange()
+      .expectStatus().isAccepted
 
-      await untilCallTo { mockingDetails(auditS3Client).invocations.size } matches { it == 1 }
+    await untilCallTo { mockingDetails(auditS3Client).invocations.size } matches { it == 1 }
 
-      verify(telemetryClient).trackEvent(eq("hmpps-audit"), any(), isNull())
-      verify(auditS3Client).save(any<AuditEvent>())
-      verifyNoInteractions(auditRepository)
-    }
+    verify(telemetryClient).trackEvent(eq("hmpps-audit"), any(), isNull())
+    verify(auditS3Client).save(any<AuditEvent>())
+    verifyNoInteractions(auditRepository)
+  }
 
-    @Test
-    fun `save full audit entry to database`() {
-      System.setProperty("hmpps.repository.saveToS3Bucket", "false")
-      val auditEvent = AuditEvent(
-        UUID.fromString("e5b4800c-dc4e-45f8-826c-877b1f3ce8de"),
-        "OFFENDER_DELETED",
-        Instant.parse("2021-04-01T15:15:30Z"),
-        "cadea6d876c62e2f5264c94c7b50875e",
-        "bobby.beans",
-        "offender-service",
-        "{\"offenderId\": \"97\"}",
-      )
+  @Test
+  fun `save full audit entry to database`() {
+    System.setProperty("hmpps.repository.saveToS3Bucket", "false")
+    val auditEvent = AuditEvent(
+      UUID.fromString("e5b4800c-dc4e-45f8-826c-877b1f3ce8de"),
+      "OFFENDER_DELETED",
+      Instant.parse("2021-04-01T15:15:30Z"),
+      "cadea6d876c62e2f5264c94c7b50875e",
+      "bobby.beans",
+      "offender-service",
+      "{\"offenderId\": \"97\"}",
+    )
 
-      webTestClient.post()
-        .uri("/audit")
-        .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(BodyInserters.fromValue(auditEvent))
-        .exchange()
-        .expectStatus().isAccepted
+    webTestClient.post()
+      .uri("/audit")
+      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .body(BodyInserters.fromValue(auditEvent))
+      .exchange()
+      .expectStatus().isAccepted
 
-      await untilCallTo { mockingDetails(auditRepository).invocations.size } matches { it == 1 }
+    await untilCallTo { mockingDetails(auditRepository).invocations.size } matches { it == 1 }
 
-      verify(telemetryClient).trackEvent(eq("hmpps-audit"), any(), isNull())
-      verify(auditRepository).save(auditEvent)
-      verifyNoInteractions(auditS3Client)
-    }
+    verify(telemetryClient).trackEvent(eq("hmpps-audit"), any(), isNull())
+    verify(auditRepository).save(auditEvent)
+    verifyNoInteractions(auditS3Client)
+  }
 }

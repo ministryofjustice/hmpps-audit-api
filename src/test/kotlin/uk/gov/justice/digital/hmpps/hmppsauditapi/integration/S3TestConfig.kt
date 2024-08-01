@@ -11,12 +11,12 @@ import java.net.URI
 @TestConfiguration
 class S3TestConfig {
 
-    @Bean
-    fun s3Client(hmppsSqsProperties: HmppsSqsProperties): S3Client {
-        return S3Client.builder()
-            .endpointOverride(URI.create(hmppsSqsProperties.localstackUrl))
-            .region(Region.of(hmppsSqsProperties.region))
-            .credentialsProvider(AnonymousCredentialsProvider.create())
-            .build()
-    }
+  @Bean
+  fun s3Client(hmppsSqsProperties: HmppsSqsProperties): S3Client {
+    return S3Client.builder()
+      .endpointOverride(URI.create(hmppsSqsProperties.localstackUrl))
+      .region(Region.of(hmppsSqsProperties.region))
+      .credentialsProvider(AnonymousCredentialsProvider.create())
+      .build()
+  }
 }
