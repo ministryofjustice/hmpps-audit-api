@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   hmpps: ministryofjustice/hmpps@9
+  localstack: localstack/platform@2.2
 
 jobs:
   validate:
@@ -10,6 +11,7 @@ jobs:
       jdk_tag: "21.0"
       localstack_tag: "3"
     steps:
+      - localstack/startup
       - checkout
       - hmpps/install_aws_cli
       - run:
