@@ -2,7 +2,6 @@ version: 2.1
 
 orbs:
   hmpps: ministryofjustice/hmpps@9
-  localstack: localstack/platform@2.2
 
 jobs:
   validate:
