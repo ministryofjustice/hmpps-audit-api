@@ -30,7 +30,7 @@ class AuditTestDatabase @Autowired constructor(
   override var webTestClient: WebTestClient,
 ) : QueueListenerIntegrationTest() {
 
-  private val basicAuditEvent = AuditEvent(what = "basicAuditEvent")
+  private val basicAuditEvent = AuditEvent(what = "basicAuditEvent", service = "hmpps-audit-poc-ui")
 
   @SpyBean
   private lateinit var auditS3Client: AuditS3Client
