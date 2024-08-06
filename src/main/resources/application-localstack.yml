@@ -19,3 +19,7 @@ hmpps.sqs:
 spring:
   jpa:
     show-sql: true
+
+hmpps:
+  repository:
+    saveToS3Bucket: false
