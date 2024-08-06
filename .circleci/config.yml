@@ -10,10 +10,14 @@ jobs:
       name: hmpps/localstack
       jdk_tag: "21.0"
       localstack_tag: "3"
+    docker:
+      - image: circleci/python:3.8
     steps:
+      - setup_remote_docker:
+          version: 20.10.7
       - checkout
       - run:
-          name: Install Python and pip3
+          name: Install AWS CLI
           command: |
             sudo apt-get update
             sudo apt-get install -y python3 python3-pip
