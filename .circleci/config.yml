@@ -23,6 +23,9 @@ jobs:
           command: |
             docker run -d -e SERVICES=s3,sqs,sns,s3control -p 4566:4566 -p 4571:4571 --name localstack localstack/localstack
       - run:
+          name: Wait for LocalStack to start
+          command: sleep 10
+      - run:
           name: Wait for LocalStack to be ready
           command: |
             until curl http://localhost:4566/health | grep '"s3": "running"'; do sleep 5; done
