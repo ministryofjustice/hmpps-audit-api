@@ -2,7 +2,6 @@ version: 2.1
 
 orbs:
   hmpps: ministryofjustice/hmpps@9
-  localstack: localstack/platform@2.2
 
 jobs:
   validate:
@@ -24,7 +23,14 @@ jobs:
       - hmpps/install_aws_cli
       - localstack/startup
       - run:
-          name: Wait for SQS and SNS to be ready
+          name: Wait for SQS, S3 and SNS to be ready
+          command: |
+            docker run -d -e SERVICES=s3,sqs,sns,s3control -p 4566:4566 -p 4571:4571 --name localstack localstack/localstack
+      - run:
+          name: Check LocalStack Logs
+          command: docker logs localstack
+      - run:
+          name: Wait for LocalStack to be ready
           command: |
             curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 http://localhost:4566
             awslocal s3 mb s3://test
