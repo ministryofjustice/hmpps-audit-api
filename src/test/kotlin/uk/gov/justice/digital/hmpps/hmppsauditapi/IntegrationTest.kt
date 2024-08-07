@@ -23,7 +23,7 @@ import uk.gov.justice.hmpps.sqs.MissingQueueException
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(IntegrationTest.SqsConfig::class, JwtAuthHelper::class, S3TestConfig::class)
-@ActiveProfiles("test")
+@ActiveProfiles("test", "circleci")
 abstract class IntegrationTest {
   @Autowired
   lateinit var webTestClient: WebTestClient
