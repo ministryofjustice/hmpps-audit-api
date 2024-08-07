@@ -15,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
+import org.springframework.test.context.support.DefaultActiveProfilesResolver
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
@@ -22,7 +23,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrat
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditS3Client
 
 @TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=true"])
-@ActiveProfiles(inheritProfiles = false)
+@ActiveProfiles(resolver = DefaultActiveProfilesResolver::class, inheritProfiles = false)
 class AuditTestS3Bucket @Autowired constructor(
   override var webTestClient: WebTestClient,
 ) : QueueListenerIntegrationTest() {
