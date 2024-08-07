@@ -1,3 +1,4 @@
+import org.gradle.internal.classpath.Instrumented.systemProperty
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -47,4 +48,8 @@ tasks {
       compilerOptions.jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
     }
   }
+}
+
+tasks.check {
+  systemProperty("spring.profiles.active", System.getProperty("spring.profiles.active"))
 }
