@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.integration
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Profile
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
 import software.amazon.awssdk.regions.Region
@@ -18,6 +19,7 @@ class S3TestConfig {
   private lateinit var bucketName: String
 
   @Bean
+  @Profile("!circleci")
   fun s3Client(hmppsSqsProperties: HmppsSqsProperties): S3Client {
     val s3Client = S3Client.builder()
       .endpointOverride(URI.create(hmppsSqsProperties.localstackUrl))
@@ -25,7 +27,7 @@ class S3TestConfig {
       .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("dummy", "dummy")))
       .forcePathStyle(true)
       .build()
-    if (!s3Client.listBuckets().hasBuckets()) {
+    if (s3Client.listBuckets().buckets().size == 0) {
       s3Client.createBucket(CreateBucketRequest.builder().bucket(bucketName).build())
     }
     return s3Client
