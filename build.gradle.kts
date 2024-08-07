@@ -1,4 +1,3 @@
-import org.gradle.internal.classpath.Instrumented.systemProperty
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
