@@ -22,7 +22,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrat
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditS3Client
 
 @TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=true"])
-@ActiveProfiles(profiles = [])
+@ActiveProfiles(inheritProfiles= false)
 class AuditTestS3Bucket @Autowired constructor(
   override var webTestClient: WebTestClient,
 ) : QueueListenerIntegrationTest() {
