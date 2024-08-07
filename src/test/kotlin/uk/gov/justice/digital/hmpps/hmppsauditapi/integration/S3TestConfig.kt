@@ -1,8 +1,10 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.integration
 
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
@@ -31,5 +33,12 @@ class S3TestConfig {
       s3Client.createBucket(CreateBucketRequest.builder().bucket(bucketName).build())
     }
     return s3Client
+  }
+
+  @Bean
+  @Profile("circleci")
+  @Primary
+  fun s3ClientCircleCi(): S3Client {
+    return Mockito.mock(S3Client::class.java)
   }
 }
