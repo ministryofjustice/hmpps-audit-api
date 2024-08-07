@@ -50,6 +50,6 @@ tasks {
   }
 }
 
-tasks.check {
+tasks.test {
   systemProperty("spring.profiles.active", System.getProperty("spring.profiles.active"))
 }
