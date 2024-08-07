@@ -27,7 +27,7 @@ import java.time.Instant
 import java.util.UUID
 
 @TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=false"])
-@ActiveProfiles("")
+@ActiveProfiles(profiles = [])
 class AuditTestDatabase @Autowired constructor(
   override var webTestClient: WebTestClient,
 ) : QueueListenerIntegrationTest() {
