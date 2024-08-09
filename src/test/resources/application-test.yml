@@ -8,7 +8,7 @@ management.endpoint:
 aws:
   provider: localstack
   s3:
-    auditBucketName: "auditBucket"
+    auditBucketName: "hmpps-audit-bucket"
 
 hmpps.sqs:
   provider: localstack
