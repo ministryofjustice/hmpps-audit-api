@@ -35,4 +35,4 @@ spring:
 
 hmpps:
   repository:
-    saveToS3Bucket: false
+    saveToS3Bucket: true
