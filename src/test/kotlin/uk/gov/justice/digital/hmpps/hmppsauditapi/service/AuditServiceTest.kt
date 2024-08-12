@@ -33,6 +33,7 @@ class AuditServiceTest {
       auditRepository,
       auditS3Client,
       saveToS3Bucket,
+      "test",
     )
 
   @Nested
@@ -370,7 +371,7 @@ class AuditServiceTest {
 
     @Test
     fun `save audit event to database when saveToS3Bucket is false`() {
-      auditService = AuditService(telemetryClient, auditRepository, auditS3Client, false)
+      auditService = AuditService(telemetryClient, auditRepository, auditS3Client, false, "test")
 
       auditService.audit(
         auditEvent,
@@ -381,7 +382,7 @@ class AuditServiceTest {
 
     @Test
     fun `save audit event to S3 bucket when saveToS3Bucket is true`() {
-      auditService = AuditService(telemetryClient, auditRepository, auditS3Client, true)
+      auditService = AuditService(telemetryClient, auditRepository, auditS3Client, true, "test")
 
       auditService.audit(
         auditEvent,

@@ -48,7 +48,7 @@ class HMPPSAuditListener(
     @Schema(description = "The correlation ID for the Event", example = "cadea6d876c62e2f5264c94c7b50875e")
     val correlationId: String? = null,
     @Schema(description = "Who initiated the Event", example = "fred.smith@myemail.com")
-    val who: String? = null,
+    var who: String? = null,
     @Schema(description = "Which service the Event relates to", example = "court-register")
     val service: String? = null,
     @Schema(description = "Additional information", example = "{\"courtId\":\"AAAMH1\",\"buildingId\":936,\"building\":{\"id\":936,\"courtId\":\"AAAMH1\",\"buildingName\":\"Main Court Name Changed\"}")
