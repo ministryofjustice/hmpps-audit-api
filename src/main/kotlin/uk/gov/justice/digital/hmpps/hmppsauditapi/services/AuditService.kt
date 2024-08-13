@@ -20,16 +20,14 @@ class AuditService(
   private val auditRepository: AuditRepository,
   private val auditS3Client: AuditS3Client,
   @Value("\${hmpps.repository.saveToS3Bucket}") private val saveToS3Bucket: Boolean,
-  @Value("\${aws.s3.auditBucketName}") private val bucketName: String,
 ) {
   private companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 
   fun audit(auditEvent: AuditEvent) {
+    telemetryClient.trackEvent("hmpps-audit", auditEvent.asMap())
     if (saveToS3Bucket && auditEvent.service == "hmpps-audit-poc-ui") {
-      auditEvent.who = bucketName
-      telemetryClient.trackEvent("hmpps-audit", auditEvent.asMap())
       auditS3Client.save(auditEvent)
     } else {
       auditRepository.save(auditEvent)
