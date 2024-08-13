@@ -12,6 +12,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.time.ZoneId
+import java.util.Base64
 
 @Service
 class AuditS3Client(
@@ -25,12 +26,16 @@ class AuditS3Client(
     val auditEventJsonString = objectMapper.writeValueAsString(auditEvent)
     val fileName = generateFilename(auditEvent, auditEventJsonString)
 
+    val jsonBytes = auditEventJsonString.toByteArray(StandardCharsets.UTF_8)
+
+    val md5Digest = MessageDigest.getInstance("MD5").digest(jsonBytes)
+    val md5Base64 = Base64.getEncoder().encodeToString(md5Digest)
+
     val putObjectRequest = PutObjectRequest.builder()
       .bucket(bucketName)
       .key(fileName)
+      .contentMD5(md5Base64)
       .build()
-
-    val jsonBytes = auditEventJsonString.toByteArray(StandardCharsets.UTF_8)
 
     try {
       s3Client.putObject(putObjectRequest, RequestBody.fromBytes(jsonBytes))

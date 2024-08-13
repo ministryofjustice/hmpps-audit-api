@@ -27,9 +27,7 @@ class AuditService(
 
   fun audit(auditEvent: AuditEvent) {
     telemetryClient.trackEvent("hmpps-audit", auditEvent.asMap())
-    telemetryClient.trackEvent("hmpps-audit-mohamad", mapOf("auditService" to "before if statement"))
     if (saveToS3Bucket && auditEvent.service == "hmpps-audit-poc-ui") {
-      telemetryClient.trackEvent("hmpps-audit-mohamad", mapOf("auditService" to "inside if statement"))
       auditS3Client.save(auditEvent)
     } else {
       auditRepository.save(auditEvent)
