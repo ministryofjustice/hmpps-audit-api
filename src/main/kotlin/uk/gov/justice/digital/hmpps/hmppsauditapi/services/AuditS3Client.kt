@@ -34,7 +34,7 @@ class AuditS3Client(
 
     try {
       s3Client.putObject(putObjectRequest, RequestBody.fromBytes(jsonBytes))
-      telemetryClient.trackEvent("hmpps-audit-mohamad", mapOf("success" to "successful" ))
+      telemetryClient.trackEvent("hmpps-audit-mohamad", mapOf("success" to "successful"))
     } catch (e: Exception) {
       telemetryClient.trackEvent("hmpps-audit-mohamad", mapOf("errorMessage" to (e.message ?: "Unknown error")))
     }
