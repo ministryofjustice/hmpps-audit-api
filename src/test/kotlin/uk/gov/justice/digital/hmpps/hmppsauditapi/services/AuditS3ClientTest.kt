@@ -42,7 +42,7 @@ class AuditS3ClientTest {
 
   @BeforeEach
   fun setup() {
-    auditS3Client = AuditS3Client(s3Client, objectMapper, telemetryClient, "test")
+    auditS3Client = AuditS3Client(s3Client, objectMapper, telemetryClient, "bucketName")
   }
 
   @Test
