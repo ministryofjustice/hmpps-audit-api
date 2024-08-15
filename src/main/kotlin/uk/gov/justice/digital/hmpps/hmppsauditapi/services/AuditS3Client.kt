@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
@@ -39,7 +40,15 @@ class AuditS3Client(
 
     try {
       s3Client.putObject(putObjectRequest, RequestBody.fromBytes(jsonBytes))
-      telemetryClient.trackEvent("hmpps-audit-mohamad", mapOf("success" to "successful"))
+      val getObjectRequest = GetObjectRequest.builder()
+        .bucket(bucketName)
+        .key(fileName)
+        .build()
+
+      val s3Object = s3Client.getObject(getObjectRequest)
+      val objectContent = s3Object.readAllBytes()
+      val jsonString = objectContent.toString(StandardCharsets.UTF_8)
+      telemetryClient.trackEvent("hmpps-audit-mohamad", mapOf("json file" to jsonString))
     } catch (e: Exception) {
       telemetryClient.trackEvent("hmpps-audit-mohamad", mapOf("errorMessage" to (e.message ?: "Unknown error")))
     }
