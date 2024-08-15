@@ -14,9 +14,9 @@ import java.util.Base64
 
 @Service
 class AuditS3Client(
-    private val s3Client: S3Client,
-    private val objectMapper: ObjectMapper,
-    @Value("\${aws.s3.auditBucketName}") private val bucketName: String,
+  private val s3Client: S3Client,
+  private val objectMapper: ObjectMapper,
+  @Value("\${aws.s3.auditBucketName}") private val bucketName: String,
 ) {
 
   fun save(auditEvent: HMPPSAuditListener.AuditEvent) {
@@ -33,7 +33,7 @@ class AuditS3Client(
       .contentMD5(md5Base64)
       .build()
 
-      s3Client.putObject(putObjectRequest, RequestBody.fromBytes(jsonBytes))
+    s3Client.putObject(putObjectRequest, RequestBody.fromBytes(jsonBytes))
   }
 
   private fun generateFilename(auditEvent: HMPPSAuditListener.AuditEvent, auditEventJsonString: String): String {
