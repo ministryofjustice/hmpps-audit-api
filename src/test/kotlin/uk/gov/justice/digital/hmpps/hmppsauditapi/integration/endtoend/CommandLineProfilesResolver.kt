@@ -8,7 +8,11 @@ import org.springframework.test.context.ActiveProfilesResolver
  */
 class CommandLineProfilesResolver : ActiveProfilesResolver {
   override fun resolve(testClass: Class<*>): Array<String> {
-    val cmdProfiles = System.getProperty("spring.profiles.active")?.split(",") ?: listOf("test")
-    return cmdProfiles.toTypedArray()
+    val cmdProfiles = System.getProperty("spring.profiles.active")
+      ?.split(",")
+      ?.filter { it.isNotBlank() }
+      ?: listOf("test")
+
+    return if (cmdProfiles.isEmpty()) arrayOf("test") else cmdProfiles.toTypedArray()
   }
 }
