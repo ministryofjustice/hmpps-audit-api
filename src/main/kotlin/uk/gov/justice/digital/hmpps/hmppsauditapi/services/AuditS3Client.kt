@@ -59,7 +59,11 @@ class AuditS3Client(
       telemetryClient.trackEvent("mohamad-test", mapOf(Pair("parquet file", objectAsString)))
     } catch (e: Exception) {
       telemetryClient.trackEvent("mohamad-test", mapOf(Pair("error", e.message ?: "unknown error")))
-      telemetryClient.trackEvent("mohamad-test", mapOf(Pair("cause", e.printStackTrace(PrintWriter(StringWriter())).toString())))
+
+      val stringWriter = StringWriter()
+      e.printStackTrace(PrintWriter(stringWriter))
+      val stackTraceAsString = stringWriter.toString()
+      telemetryClient.trackEvent("mohamad-test", mapOf("cause" to stackTraceAsString))
     }
   }
 
