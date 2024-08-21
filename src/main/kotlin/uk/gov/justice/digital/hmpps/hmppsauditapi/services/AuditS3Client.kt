@@ -30,7 +30,7 @@ class AuditS3Client(
   private val telemetryClient: TelemetryClient,
   @Value("\${aws.s3.auditBucketName}") private val bucketName: String,
 
-  ) {
+) {
 
   fun save(auditEvent: HMPPSAuditListener.AuditEvent) {
     try {
@@ -55,9 +55,8 @@ class AuditS3Client(
       val objectContent = s3Object.readAllBytes()
       val objectAsString = String(objectContent, StandardCharsets.UTF_8)
       telemetryClient.trackEvent("mohamad-test", mapOf(Pair("parquet file", objectAsString)))
-    }
-    catch (e: Exception) {
-      telemetryClient.trackEvent("mohamad-test", mapOf(Pair("error", e.message?: "unknown error")))
+    } catch (e: Exception) {
+      telemetryClient.trackEvent("mohamad-test", mapOf(Pair("error", e.message ?: "unknown error")))
     }
   }
 
