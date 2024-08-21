@@ -68,7 +68,7 @@ class AuditS3Client(
   }
 
   private fun convertToParquet(auditEvent: HMPPSAuditListener.AuditEvent): ByteArray {
-    val schema = Schema.Parser().parse(javaClass.getResourceAsStream("/audit_event.avsc"))
+    val schema = Schema.Parser().parse(javaClass.getResourceAsStream("/tmp/audit_event.avsc"))
     val record: GenericRecord = GenericData.Record(schema)
     record.put("operationId", auditEvent.operationId)
     record.put("what", auditEvent.what)
