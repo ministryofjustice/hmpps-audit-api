@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditFilterDto
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DataSource.DATABASE
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditS3Client
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
@@ -216,7 +217,7 @@ class AuditServiceTest {
           "Hola T",
         )
 
-        val audits = auditService.findPage(Pageable.unpaged(), auditFilterDto)
+        val audits = auditService.findPage(Pageable.unpaged(), auditFilterDto, DATABASE)
         assertThat(audits).isEqualTo(
           PageImpl(
             listOf(
@@ -327,7 +328,7 @@ class AuditServiceTest {
         "Another Event",
       )
 
-      val audits = auditService.findPage(pageDetails, auditFilterDto)
+      val audits = auditService.findPage(pageDetails, auditFilterDto, DATABASE)
 
       assertThat(audits).isEqualTo(
         PageImpl(

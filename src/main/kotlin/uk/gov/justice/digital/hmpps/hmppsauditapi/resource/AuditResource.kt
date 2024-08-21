@@ -18,10 +18,12 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditFilterDto
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DataSource
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.swagger.StandardApiResponses
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
@@ -63,14 +65,14 @@ class AuditResource(
   @StandardApiResponses
   fun findPage(
     pageable: Pageable = Pageable.unpaged(),
-    @RequestBody @Valid
-    auditFilterDto: AuditFilterDto,
+    @RequestBody @Valid auditFilterDto: AuditFilterDto,
+    @RequestParam(value = "datasource", required = false, defaultValue = "DATABASE") datasource: DataSource,
   ): Page<AuditDto> {
     auditQueueService.sendAuditAuditEvent(
       AuditType.AUDIT_GET_ALL_PAGED.name,
       auditFilterDto,
     )
-    return auditService.findPage(pageable, auditFilterDto)
+    return auditService.findPage(pageable, auditFilterDto, datasource)
   }
 
   @Deprecated("Audit events should be sent via audit queue")

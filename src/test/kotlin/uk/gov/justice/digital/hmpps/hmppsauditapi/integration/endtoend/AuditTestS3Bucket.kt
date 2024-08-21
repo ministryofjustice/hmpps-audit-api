@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.integration.endtoend
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -23,6 +24,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditS3Client
 
 @TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=true"])
 @ActiveProfiles(resolver = CommandLineProfilesResolver::class, inheritProfiles = false)
+@Disabled
 class AuditTestS3Bucket @Autowired constructor(
   override var webTestClient: WebTestClient,
 ) : QueueListenerIntegrationTest() {

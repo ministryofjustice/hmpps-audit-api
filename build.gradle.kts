@@ -20,6 +20,9 @@ dependencies {
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 
   implementation("org.apache.commons:commons-lang3:3.16.0")
+  implementation("org.apache.parquet:parquet-avro:1.14.1")
+  implementation("org.apache.avro:avro:1.12.0")
+  implementation("org.apache.hadoop:hadoop-client:3.4.0")
   implementation("software.amazon.awssdk:s3:2.27.7")
 
   runtimeOnly("com.h2database:h2:2.3.232")
