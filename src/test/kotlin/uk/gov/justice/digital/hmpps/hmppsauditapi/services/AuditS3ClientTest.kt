@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
@@ -30,6 +31,9 @@ class AuditS3ClientTest {
   @Mock
   private lateinit var objectMapper: ObjectMapper
 
+  @Mock
+  private lateinit var telemetryClient: TelemetryClient
+
   private lateinit var auditS3Client: AuditS3Client
 
   @Captor
@@ -40,7 +44,7 @@ class AuditS3ClientTest {
 
   @BeforeEach
   fun setup() {
-    auditS3Client = AuditS3Client(s3Client, "bucketName")
+    auditS3Client = AuditS3Client(s3Client, telemetryClient, "bucketName")
   }
 
   @Test
