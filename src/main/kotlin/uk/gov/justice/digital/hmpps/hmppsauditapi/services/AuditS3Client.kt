@@ -19,6 +19,8 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
 import java.io.ByteArrayOutputStream
+import java.io.PrintWriter
+import java.io.StringWriter
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.time.ZoneId
@@ -57,7 +59,7 @@ class AuditS3Client(
       telemetryClient.trackEvent("mohamad-test", mapOf(Pair("parquet file", objectAsString)))
     } catch (e: Exception) {
       telemetryClient.trackEvent("mohamad-test", mapOf(Pair("error", e.message ?: "unknown error")))
-      telemetryClient.trackEvent("mohamad-test", mapOf(Pair("cause", e.stackTrace.toString())))
+      telemetryClient.trackEvent("mohamad-test", mapOf(Pair("cause", e.printStackTrace(PrintWriter(StringWriter())).toString())))
     }
   }
 
