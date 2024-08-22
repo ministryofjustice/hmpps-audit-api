@@ -7,7 +7,6 @@ import org.apache.avro.generic.GenericRecord
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.parquet.avro.AvroParquetWriter
-import org.apache.parquet.hadoop.ParquetWriter
 import org.apache.parquet.hadoop.metadata.CompressionCodecName
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -17,14 +16,11 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
-import java.io.ByteArrayOutputStream
-import java.io.File
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.nio.file.StandardOpenOption
 import java.security.MessageDigest
 import java.time.ZoneId
 import java.util.Base64
@@ -74,9 +70,8 @@ class AuditS3Client(
   private fun generateFilename(auditEvent: HMPPSAuditListener.AuditEvent): String {
     val whenDateTime = auditEvent.`when`.atZone(ZoneId.systemDefault()).toLocalDateTime()
     return "year=${whenDateTime.year}/month=${whenDateTime.monthValue}/day=${whenDateTime.dayOfMonth}/user=${auditEvent.who}/" +
-            "${UUID.randomUUID()}.parquet"
+      "${UUID.randomUUID()}.parquet"
   }
-
 
   fun convertToParquetBytes(auditEvent: HMPPSAuditListener.AuditEvent, filename: String): ByteArray {
     val schema: Schema = Schema.Parser().parse(javaClass.getResourceAsStream("/audit_event.avsc"))
