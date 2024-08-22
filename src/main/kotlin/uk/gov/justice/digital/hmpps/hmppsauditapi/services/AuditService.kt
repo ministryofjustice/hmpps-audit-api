@@ -12,7 +12,6 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditFilterDto
-import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DataSource
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 
 @Service
@@ -40,7 +39,6 @@ class AuditService(
   fun findPage(
     pageable: Pageable = Pageable.unpaged(),
     auditFilterDto: AuditFilterDto,
-    datasource: DataSource,
   ): Page<AuditDto> {
     with(auditFilterDto) {
       log.info(

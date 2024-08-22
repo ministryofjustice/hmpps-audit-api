@@ -110,7 +110,7 @@ class AuditS3Client(
 
     var record: GenericRecord?
     while (reader.read().also { record = it } != null) {
-      telemetryClient.trackEvent("mohamad-parquet-record", mapOf("record" to record.toString()))
+      telemetryClient.trackEvent("mohamad-test", mapOf("record" to record.toString()))
     }
     reader.close()
   }
