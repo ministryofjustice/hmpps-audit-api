@@ -9,7 +9,6 @@ import org.apache.hadoop.fs.Path
 import org.apache.parquet.avro.AvroParquetWriter
 import org.apache.parquet.hadoop.ParquetWriter
 import org.apache.parquet.hadoop.metadata.CompressionCodecName
-import org.apache.parquet.hadoop.util.HadoopOutputFile
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.core.sync.RequestBody
@@ -19,9 +18,13 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.StandardOpenOption
 import java.security.MessageDigest
 import java.time.ZoneId
 import java.util.Base64
@@ -36,10 +39,10 @@ class AuditS3Client(
 
   fun save(auditEvent: HMPPSAuditListener.AuditEvent) {
     try {
-      val parquetBytes = convertToParquetBytes(auditEvent)
+      val fileName = generateFilename(auditEvent)
+      val parquetBytes = convertToParquetBytes(auditEvent, fileName)
       val md5Digest = MessageDigest.getInstance("MD5").digest(parquetBytes)
       val md5Base64 = Base64.getEncoder().encodeToString(md5Digest)
-      val fileName = generateFilename(auditEvent)
 
       val putObjectRequest = PutObjectRequest.builder()
         .bucket(bucketName)
@@ -71,34 +74,37 @@ class AuditS3Client(
   private fun generateFilename(auditEvent: HMPPSAuditListener.AuditEvent): String {
     val whenDateTime = auditEvent.`when`.atZone(ZoneId.systemDefault()).toLocalDateTime()
     return "year=${whenDateTime.year}/month=${whenDateTime.monthValue}/day=${whenDateTime.dayOfMonth}/user=${auditEvent.who}/" +
-      "${UUID.randomUUID()}.parquet"
+            "${UUID.randomUUID()}.parquet"
   }
 
-  fun convertToParquetBytes(auditEvent: HMPPSAuditListener.AuditEvent): ByteArray {
+
+  fun convertToParquetBytes(auditEvent: HMPPSAuditListener.AuditEvent, filename: String): ByteArray {
     val schema: Schema = Schema.Parser().parse(javaClass.getResourceAsStream("/audit_event.avsc"))
-    val record: GenericRecord = GenericData.Record(schema)
-    record.put("id", auditEvent.id?.toString()) // TODO change filename to UUID
-    record.put("what", auditEvent.what)
-    record.put("when", auditEvent.`when`.toString())
-    record.put("operationId", auditEvent.operationId)
-    record.put("subjectId", auditEvent.subjectId)
-    record.put("subjectType", auditEvent.subjectType)
-    record.put("correlationId", auditEvent.correlationId)
-    record.put("who", auditEvent.who)
-    record.put("service", auditEvent.service)
-    record.put("details", auditEvent.details)
+    val record: GenericRecord = GenericData.Record(schema).apply {
+      put("id", auditEvent.id?.toString())
+      put("what", auditEvent.what)
+      put("when", auditEvent.`when`.toString())
+      put("operationId", auditEvent.operationId)
+      put("subjectId", auditEvent.subjectId)
+      put("subjectType", auditEvent.subjectType)
+      put("correlationId", auditEvent.correlationId)
+      put("who", auditEvent.who)
+      put("service", auditEvent.service)
+      put("details", auditEvent.details)
+    }
+    val tempFilePath = Paths.get(System.getProperty("java.io.tmpdir"), "parquet-${UUID.randomUUID()}.parquet")
+    val outputPath = Path(tempFilePath.toUri())
 
-    val outputFile = HadoopOutputFile.fromPath(Path("/tmp/${UUID.randomUUID()}.parquet"), Configuration())
-    val byteArrayOutputStream = ByteArrayOutputStream()
-
-    val writer: ParquetWriter<GenericRecord> = AvroParquetWriter.builder<GenericRecord>(outputFile)
+    AvroParquetWriter.builder<GenericRecord>(outputPath)
       .withSchema(schema)
       .withCompressionCodec(CompressionCodecName.SNAPPY)
-      .build()
+      .withConf(Configuration())
+      .build().use { writer ->
+        writer.write(record)
+      }
 
-    writer.write(record)
-    writer.close()
-
-    return byteArrayOutputStream.toByteArray()
+    val parquetBytes = Files.readAllBytes(tempFilePath)
+    Files.delete(tempFilePath)
+    return parquetBytes
   }
 }
