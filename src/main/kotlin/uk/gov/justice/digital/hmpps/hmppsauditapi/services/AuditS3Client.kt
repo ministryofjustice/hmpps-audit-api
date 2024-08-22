@@ -25,20 +25,21 @@ import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.time.ZoneId
 import java.util.Base64
+import java.util.UUID
 
 @Service
 class AuditS3Client(
   private val s3Client: S3Client,
   private val telemetryClient: TelemetryClient,
   @Value("\${aws.s3.auditBucketName}") private val bucketName: String,
-
 ) {
 
   fun save(auditEvent: HMPPSAuditListener.AuditEvent) {
     try {
+      val parquetBytes = convertToParquetBytes(auditEvent)
+      val md5Digest = MessageDigest.getInstance("MD5").digest(parquetBytes)
+      val md5Base64 = Base64.getEncoder().encodeToString(md5Digest)
       val fileName = generateFilename(auditEvent)
-      val parquetBytes = convertToParquet(auditEvent)
-      val md5Base64 = generateContentMD5(parquetBytes)
 
       val putObjectRequest = PutObjectRequest.builder()
         .bucket(bucketName)
@@ -67,18 +68,29 @@ class AuditS3Client(
     }
   }
 
-  private fun convertToParquet(auditEvent: HMPPSAuditListener.AuditEvent): ByteArray {
-    val schema = Schema.Parser().parse(javaClass.getResourceAsStream("/tmp/audit_event.avsc"))
+  private fun generateFilename(auditEvent: HMPPSAuditListener.AuditEvent): String {
+    val whenDateTime = auditEvent.`when`.atZone(ZoneId.systemDefault()).toLocalDateTime()
+    return "year=${whenDateTime.year}/month=${whenDateTime.monthValue}/day=${whenDateTime.dayOfMonth}/user=${auditEvent.who}/" +
+      "${UUID.randomUUID()}.parquet"
+  }
+
+  fun convertToParquetBytes(auditEvent: HMPPSAuditListener.AuditEvent): ByteArray {
+    val schema: Schema = Schema.Parser().parse(javaClass.getResourceAsStream("/audit_event.avsc"))
     val record: GenericRecord = GenericData.Record(schema)
-    record.put("operationId", auditEvent.operationId)
+    record.put("id", auditEvent.id?.toString()) // TODO change filename to UUID
     record.put("what", auditEvent.what)
     record.put("when", auditEvent.`when`.toString())
+    record.put("operationId", auditEvent.operationId)
+    record.put("subjectId", auditEvent.subjectId)
+    record.put("subjectType", auditEvent.subjectType)
+    record.put("correlationId", auditEvent.correlationId)
     record.put("who", auditEvent.who)
     record.put("service", auditEvent.service)
     record.put("details", auditEvent.details)
 
+    val outputFile = HadoopOutputFile.fromPath(Path("/tmp/${UUID.randomUUID()}.parquet"), Configuration())
     val byteArrayOutputStream = ByteArrayOutputStream()
-    val outputFile = HadoopOutputFile.fromPath(Path("/tmp/audit_event.parquet"), Configuration())
+
     val writer: ParquetWriter<GenericRecord> = AvroParquetWriter.builder<GenericRecord>(outputFile)
       .withSchema(schema)
       .withCompressionCodec(CompressionCodecName.SNAPPY)
@@ -88,16 +100,5 @@ class AuditS3Client(
     writer.close()
 
     return byteArrayOutputStream.toByteArray()
-  }
-
-  private fun generateContentMD5(parquetBytes: ByteArray): String? {
-    val md5Digest = MessageDigest.getInstance("MD5").digest(parquetBytes)
-    return Base64.getEncoder().encodeToString(md5Digest)
-  }
-
-  private fun generateFilename(auditEvent: HMPPSAuditListener.AuditEvent): String {
-    val whenDateTime = auditEvent.`when`.atZone(ZoneId.systemDefault()).toLocalDateTime()
-    return "year=${whenDateTime.year}/month=${whenDateTime.monthValue}/day=${whenDateTime.dayOfMonth}/user=${auditEvent.who}/" +
-      "${auditEvent.operationId}.parquet"
   }
 }
