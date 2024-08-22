@@ -6,6 +6,7 @@ import org.apache.avro.generic.GenericData
 import org.apache.avro.generic.GenericRecord
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
+import org.apache.parquet.avro.AvroParquetReader
 import org.apache.parquet.avro.AvroParquetWriter
 import org.apache.parquet.hadoop.metadata.CompressionCodecName
 import org.springframework.beans.factory.annotation.Value
@@ -16,9 +17,9 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
+import java.io.File
 import java.io.PrintWriter
 import java.io.StringWriter
-import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.security.MessageDigest
@@ -48,15 +49,7 @@ class AuditS3Client(
 
       s3Client.putObject(putObjectRequest, RequestBody.fromBytes(parquetBytes))
 
-      val getObjectRequest = GetObjectRequest.builder()
-        .bucket(bucketName)
-        .key(fileName)
-        .build()
-
-      val s3Object = s3Client.getObject(getObjectRequest)
-      val objectContent = s3Object.readAllBytes()
-      val objectAsString = String(objectContent, StandardCharsets.UTF_8)
-      telemetryClient.trackEvent("mohamad-test", mapOf(Pair("parquet file", objectAsString)))
+      readParquetFileFromS3(fileName)
     } catch (e: Exception) {
       telemetryClient.trackEvent("mohamad-test", mapOf(Pair("error", e.message ?: "unknown error")))
 
@@ -87,6 +80,7 @@ class AuditS3Client(
       put("service", auditEvent.service)
       put("details", auditEvent.details)
     }
+
     val tempFilePath = Paths.get(System.getProperty("java.io.tmpdir"), "parquet-${UUID.randomUUID()}.parquet")
     val outputPath = Path(tempFilePath.toUri())
 
@@ -101,5 +95,23 @@ class AuditS3Client(
     val parquetBytes = Files.readAllBytes(tempFilePath)
     Files.delete(tempFilePath)
     return parquetBytes
+  }
+
+  private fun readParquetFileFromS3(fileName: String) {
+    val tempFile = File.createTempFile("parquet-temp", ".parquet")
+    tempFile.deleteOnExit()
+    val getObjectRequest = GetObjectRequest.builder()
+      .bucket(bucketName)
+      .key(fileName)
+      .build()
+
+    s3Client.getObject(getObjectRequest, Paths.get(tempFile.toURI()))
+    val reader = AvroParquetReader.builder<GenericRecord>(Path(tempFile.toURI())).build()
+
+    var record: GenericRecord?
+    while (reader.read().also { record = it } != null) {
+      telemetryClient.trackEvent("mohamad-parquet-record", mapOf("record" to record.toString()))
+    }
+    reader.close()
   }
 }
