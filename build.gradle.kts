@@ -2,8 +2,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.3"
-  kotlin("plugin.spring") version "2.0.10"
-  kotlin("plugin.jpa") version "2.0.10"
+  kotlin("plugin.spring") version "2.0.20"
+  kotlin("plugin.jpa") version "2.0.20"
 }
 
 configurations {
@@ -16,16 +16,16 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:4.0.1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:4.3.1")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 
   implementation("org.apache.commons:commons-lang3:3.16.0")
-  implementation("software.amazon.awssdk:s3:2.27.7")
+  implementation("software.amazon.awssdk:s3:2.27.11")
 
   runtimeOnly("com.h2database:h2:2.3.232")
   runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
-  runtimeOnly("org.postgresql:postgresql:42.7.3")
+  runtimeOnly("org.postgresql:postgresql:42.7.4")
 
   testImplementation("org.awaitility:awaitility-kotlin:4.2.2")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.6")
