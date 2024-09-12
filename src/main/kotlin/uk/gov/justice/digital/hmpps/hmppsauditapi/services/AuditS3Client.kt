@@ -20,7 +20,6 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.nio.file.Files
-import java.nio.file.Paths
 import java.security.MessageDigest
 import java.time.ZoneId
 import java.util.Base64
@@ -79,10 +78,8 @@ class AuditS3Client(
       put("details", auditEvent.details)
     }
 
-    val tempFilePath = Paths.get(System.getProperty("java.io.tmpdir"), "parquet-${auditEvent.id}.parquet")
-    val outputPath = Path(tempFilePath.toUri())
-
-    AvroParquetWriter.builder<GenericRecord>(outputPath)
+    val tempFilePath = Path(System.getProperty("java.io.tmpdir"), "parquet-${auditEvent.id}.parquet")
+    AvroParquetWriter.builder<GenericRecord>(tempFilePath)
       .withSchema(schema)
       .withCompressionCodec(CompressionCodecName.SNAPPY)
       .withConf(Configuration())
@@ -90,8 +87,7 @@ class AuditS3Client(
         writer.write(record)
       }
 
-    val parquetBytes = Files.readAllBytes(tempFilePath)
-    Files.delete(tempFilePath)
+    val parquetBytes: ByteArray = Files.readAllBytes(java.nio.file.Path.of(System.getProperty("java.io.tmpdir"), "parquet-${auditEvent.id}.parquet"))
     return parquetBytes
   }
 
