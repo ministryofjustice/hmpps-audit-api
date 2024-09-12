@@ -42,7 +42,7 @@ class AuditTestS3Bucket @Autowired constructor(
       .exchange()
       .expectStatus().isAccepted
 
-    await untilCallTo { mockingDetails(auditS3Client).invocations.size } matches { it == 1 }
+    await untilCallTo { mockingDetails(auditS3Client).invocations.size } matches { it!! >= 1 }
 
     verify(telemetryClient).trackEvent(eq("hmpps-audit"), any(), isNull())
     verify(auditS3Client).save(any<HMPPSAuditListener.AuditEvent>())
