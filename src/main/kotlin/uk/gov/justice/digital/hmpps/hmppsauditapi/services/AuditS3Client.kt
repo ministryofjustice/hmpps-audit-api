@@ -48,9 +48,7 @@ class AuditS3Client(
 
       s3Client.putObject(putObjectRequest, RequestBody.fromBytes(parquetBytes))
 
-      if (System.getProperty("spring.profiles.active").contains("dev")) {
-        readParquetFileFromS3(fileName)
-      }
+      readParquetFileFromS3(fileName)
     } catch (e: Exception) {
       telemetryClient.trackEvent("mohamad-test", mapOf(Pair("error", e.message ?: "unknown error")))
 
