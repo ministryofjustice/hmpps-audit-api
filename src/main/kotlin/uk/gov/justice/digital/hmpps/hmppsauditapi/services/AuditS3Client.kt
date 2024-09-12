@@ -25,7 +25,6 @@ import java.nio.file.Paths
 import java.security.MessageDigest
 import java.time.ZoneId
 import java.util.Base64
-import java.util.UUID
 
 @Service
 class AuditS3Client(
@@ -63,7 +62,7 @@ class AuditS3Client(
   private fun generateFilename(auditEvent: HMPPSAuditListener.AuditEvent): String {
     val whenDateTime = auditEvent.`when`.atZone(ZoneId.systemDefault()).toLocalDateTime()
     return "year=${whenDateTime.year}/month=${whenDateTime.monthValue}/day=${whenDateTime.dayOfMonth}/user=${auditEvent.who}/" +
-      "${UUID.randomUUID()}.parquet"
+      "${auditEvent.id}.parquet"
   }
 
   fun convertToParquetBytes(auditEvent: HMPPSAuditListener.AuditEvent, filename: String): ByteArray {
@@ -81,7 +80,7 @@ class AuditS3Client(
       put("details", auditEvent.details)
     }
 
-    val tempFilePath = Paths.get(System.getProperty("java.io.tmpdir"), "parquet-${UUID.randomUUID()}.parquet")
+    val tempFilePath = Paths.get(System.getProperty("java.io.tmpdir"), "parquet-${auditEvent.id}.parquet")
     val outputPath = Path(tempFilePath.toUri())
 
     AvroParquetWriter.builder<GenericRecord>(outputPath)

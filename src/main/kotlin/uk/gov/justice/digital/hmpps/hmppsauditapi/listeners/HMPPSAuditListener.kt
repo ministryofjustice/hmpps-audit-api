@@ -33,7 +33,7 @@ class HMPPSAuditListener(
     @Id
     @GeneratedValue
     @Hidden
-    val id: UUID? = null,
+    var id: UUID? = null,
     @Schema(description = "Detailed description of the Event", example = "COURT_REGISTER_BUILDING_UPDATE", required = true)
     val what: String,
     @Column(name = "occurred")
