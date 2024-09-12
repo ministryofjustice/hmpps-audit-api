@@ -20,7 +20,6 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.nio.file.Files
-import java.nio.file.Paths
 import java.security.MessageDigest
 import java.time.ZoneId
 import java.util.Base64
@@ -101,12 +100,12 @@ class AuditS3Client(
       .bucket(bucketName)
       .key(fileName)
       .build()
-
-    s3Client.getObject(getObjectRequest, Paths.get(tempFile.toURI()))
+    s3Client.getObject(getObjectRequest, tempFile.toPath())
     val reader = AvroParquetReader.builder<GenericRecord>(Path(tempFile.toURI())).build()
 
     var record: GenericRecord?
-    while (reader.read().also { record = it } != null) {
+    while (true) {
+      record = reader.read()
       telemetryClient.trackEvent("mohamad-test", mapOf("record" to record.toString()))
     }
     reader.close()
