@@ -20,6 +20,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.nio.file.Files
+import java.nio.file.Paths
 import java.security.MessageDigest
 import java.time.ZoneId
 import java.util.Base64
