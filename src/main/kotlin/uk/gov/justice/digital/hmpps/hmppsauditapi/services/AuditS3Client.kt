@@ -97,8 +97,7 @@ class AuditS3Client(
   }
 
   private fun readParquetFileFromS3(fileName: String) {
-    val tempFile = File.createTempFile("parquet-temp", ".parquet")
-    tempFile.deleteOnExit()
+    val tempFile = Files.createTempFile("test-parquet", ".parquet").toFile()
     val getObjectRequest = GetObjectRequest.builder()
       .bucket(bucketName)
       .key(fileName)
