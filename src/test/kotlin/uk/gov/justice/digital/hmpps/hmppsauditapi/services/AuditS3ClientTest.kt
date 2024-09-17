@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
-import com.microsoft.applicationinsights.TelemetryClient
 import org.apache.avro.generic.GenericRecord
 import org.apache.hadoop.fs.Path
 import org.apache.parquet.avro.AvroParquetReader
@@ -30,9 +29,6 @@ class AuditS3ClientTest {
   @Mock
   private lateinit var s3Client: S3Client
 
-  @Mock
-  private lateinit var telemetryClient: TelemetryClient
-
   private lateinit var auditS3Client: AuditS3Client
 
   @Captor
@@ -45,7 +41,7 @@ class AuditS3ClientTest {
 
   @BeforeEach
   fun setup() {
-    auditS3Client = AuditS3Client(s3Client, telemetryClient, "bucketName")
+    auditS3Client = AuditS3Client(s3Client, "bucketName")
   }
 
   @Test
