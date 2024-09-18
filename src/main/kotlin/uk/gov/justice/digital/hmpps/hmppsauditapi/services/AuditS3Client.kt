@@ -60,7 +60,7 @@ class AuditS3Client(
       put("details", auditEvent.details)
     }
 
-    val tempFilePath = Path(System.getProperty("java.io.tmpdir"), "parquet-${auditEvent.id}.parquet")
+    val tempFilePath = Path(System.getProperty("java.io.tmpdir"), "${auditEvent.id}.parquet")
     AvroParquetWriter.builder<GenericRecord>(tempFilePath)
       .withSchema(schema)
       .withCompressionCodec(CompressionCodecName.SNAPPY)
@@ -69,7 +69,9 @@ class AuditS3Client(
         writer.write(record)
       }
 
-    val parquetBytes: ByteArray = Files.readAllBytes(java.nio.file.Path.of(System.getProperty("java.io.tmpdir"), "parquet-${auditEvent.id}.parquet"))
+    val tempFileJavaPath = java.nio.file.Path.of(System.getProperty("java.io.tmpdir"), "${auditEvent.id}.parquet")
+    val parquetBytes: ByteArray = Files.readAllBytes(tempFileJavaPath)
+    Files.delete(tempFileJavaPath)
     return parquetBytes
   }
 }
