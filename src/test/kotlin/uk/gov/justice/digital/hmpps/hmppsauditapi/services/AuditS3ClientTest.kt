@@ -1,17 +1,20 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
+import org.apache.avro.Schema
 import org.apache.avro.generic.GenericRecord
 import org.apache.hadoop.fs.Path
 import org.apache.parquet.avro.AvroParquetReader
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.then
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
@@ -39,9 +42,11 @@ class AuditS3ClientTest {
 
   private val auditEventId = UUID.randomUUID()
 
+  private val schema: Schema = Schema.Parser().parse(javaClass.getResourceAsStream("/audit_event.avsc"))
+
   @BeforeEach
   fun setup() {
-    auditS3Client = AuditS3Client(s3Client, "bucketName")
+    auditS3Client = AuditS3Client(s3Client, schema, "bucketName")
   }
 
   @Test
@@ -66,6 +71,25 @@ class AuditS3ClientTest {
     assertThat(putObjectRequest.bucket()).isEqualTo("bucketName")
     assertThat(putObjectRequest.key()).isEqualTo("year=2020/month=12/day=31/user=testUser/$auditEventId.parquet")
     verifyUploadedFileContents(auditEvent, putObjectRequest)
+  }
+
+  @Test
+  fun `save should throw exception when ID is missing`() {
+    val auditEvent = HMPPSAuditListener.AuditEvent(
+      what = "some event",
+      `when` = LocalDateTime.of(2020, 12, 31, 13, 30).toInstant(ZoneOffset.UTC),
+      operationId = "some operation ID",
+      subjectId = "some subject ID",
+      subjectType = "some subject type",
+      correlationId = "some correlation ID",
+      who = "testUser",
+      service = "some service",
+      details = "some details",
+    )
+
+    val exception = assertThrows<IllegalArgumentException> { auditS3Client.save(auditEvent) }
+    assertThat(exception.message).isEqualTo("ID cannot be null")
+    then(s3Client).shouldHaveNoInteractions()
   }
 
   private fun verifyUploadedFileContents(

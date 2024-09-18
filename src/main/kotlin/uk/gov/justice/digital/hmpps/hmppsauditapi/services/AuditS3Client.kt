@@ -21,6 +21,7 @@ import java.util.Base64
 @Service
 class AuditS3Client(
   private val s3Client: S3Client,
+  private val schema: Schema,
   @Value("\${aws.s3.auditBucketName}") private val bucketName: String,
 ) {
 
@@ -46,9 +47,8 @@ class AuditS3Client(
   }
 
   fun convertToParquetBytes(auditEvent: HMPPSAuditListener.AuditEvent, filename: String): ByteArray {
-    val schema: Schema = Schema.Parser().parse(javaClass.getResourceAsStream("/audit_event.avsc"))
     val record: GenericRecord = GenericData.Record(schema).apply {
-      put("id", auditEvent.id?.toString())
+      put("id", auditEvent.id?.toString() ?: throw IllegalArgumentException("ID cannot be null"))
       put("what", auditEvent.what)
       put("when", auditEvent.`when`.toString())
       put("operationId", auditEvent.operationId)
