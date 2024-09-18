@@ -71,6 +71,8 @@ class AuditS3ClientTest {
     assertThat(putObjectRequest.bucket()).isEqualTo("bucketName")
     assertThat(putObjectRequest.key()).isEqualTo("year=2020/month=12/day=31/user=testUser/$auditEventId.parquet")
     verifyUploadedFileContents(auditEvent, putObjectRequest)
+    val tempFilePath = java.nio.file.Path.of(System.getProperty("java.io.tmpdir"), "${auditEvent.id}.parquet")
+    assertThat(Files.exists(tempFilePath)).isFalse()
   }
 
   @Test
