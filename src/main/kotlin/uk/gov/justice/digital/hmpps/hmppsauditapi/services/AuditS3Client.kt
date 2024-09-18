@@ -1,12 +1,10 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
-import com.microsoft.applicationinsights.TelemetryClient
 import org.apache.avro.Schema
 import org.apache.avro.generic.GenericData
 import org.apache.avro.generic.GenericRecord
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
-import org.apache.parquet.avro.AvroParquetReader
 import org.apache.parquet.avro.AvroParquetWriter
 import org.apache.parquet.hadoop.metadata.CompressionCodecName
 import org.springframework.beans.factory.annotation.Value
