@@ -47,31 +47,32 @@ class AuditS3Client(
   }
 
   fun convertToParquetBytes(auditEvent: HMPPSAuditListener.AuditEvent, filename: String): ByteArray {
-    val record: GenericRecord = GenericData.Record(schema).apply {
-      put("id", auditEvent.id?.toString() ?: throw IllegalArgumentException("ID cannot be null"))
-      put("what", auditEvent.what)
-      put("when", auditEvent.`when`.toString())
-      put("operationId", auditEvent.operationId)
-      put("subjectId", auditEvent.subjectId)
-      put("subjectType", auditEvent.subjectType)
-      put("correlationId", auditEvent.correlationId)
-      put("who", auditEvent.who)
-      put("service", auditEvent.service)
-      put("details", auditEvent.details)
-    }
-
-    val tempFilePath = Path(System.getProperty("java.io.tmpdir"), "${auditEvent.id}.parquet")
-    AvroParquetWriter.builder<GenericRecord>(tempFilePath)
-      .withSchema(schema)
-      .withCompressionCodec(CompressionCodecName.SNAPPY)
-      .withConf(Configuration())
-      .build().use { writer ->
-        writer.write(record)
+    val tempFileJavaPath = java.nio.file.Path.of(System.getProperty("java.io.tmpdir"), "${auditEvent.id}.parquet")
+    try {
+      val record: GenericRecord = GenericData.Record(schema).apply {
+        put("id", auditEvent.id?.toString() ?: throw IllegalArgumentException("ID cannot be null"))
+        put("what", auditEvent.what)
+        put("when", auditEvent.`when`.toString())
+        put("operationId", auditEvent.operationId)
+        put("subjectId", auditEvent.subjectId)
+        put("subjectType", auditEvent.subjectType)
+        put("correlationId", auditEvent.correlationId)
+        put("who", auditEvent.who)
+        put("service", auditEvent.service)
+        put("details", auditEvent.details)
       }
 
-    val tempFileJavaPath = java.nio.file.Path.of(System.getProperty("java.io.tmpdir"), "${auditEvent.id}.parquet")
-    val parquetBytes: ByteArray = Files.readAllBytes(tempFileJavaPath)
-    Files.delete(tempFileJavaPath)
-    return parquetBytes
+      val tempFilePath = Path(System.getProperty("java.io.tmpdir"), "${auditEvent.id}.parquet")
+      AvroParquetWriter.builder<GenericRecord>(tempFilePath)
+        .withSchema(schema)
+        .withCompressionCodec(CompressionCodecName.SNAPPY)
+        .withConf(Configuration())
+        .build().use { writer ->
+          writer.write(record)
+        }
+      return Files.readAllBytes(tempFileJavaPath)
+    } finally {
+      Files.delete(tempFileJavaPath)
+    }
   }
 }
