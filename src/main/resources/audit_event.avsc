@@ -1,0 +1,17 @@
+{
+  "type": "record",
+  "name": "AuditEvent",
+  "namespace": "uk.gov.justice.digital.hmpps.hmppsauditapi.listeners",
+  "fields": [
+    {"name": "id", "type": ["null", "string"], "default": null},
+    {"name": "what", "type": "string"},
+    {"name": "when", "type": "string"},
+    {"name": "operationId", "type": ["null", "string"], "default": null},
+    {"name": "subjectId", "type": ["null", "string"], "default": null},
+    {"name": "subjectType", "type": ["null", "string"], "default": null},
+    {"name": "correlationId", "type": ["null", "string"], "default": null},
+    {"name": "who", "type": ["null", "string"], "default": null},
+    {"name": "service", "type": ["null", "string"], "default": null},
+    {"name": "details", "type": ["null", "string"], "default": null}
+  ]
+}

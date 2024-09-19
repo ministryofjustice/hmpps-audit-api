@@ -13,6 +13,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditFilterDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
+import java.util.UUID
 
 @Service
 class AuditService(
@@ -27,7 +28,8 @@ class AuditService(
 
   fun audit(auditEvent: AuditEvent) {
     telemetryClient.trackEvent("hmpps-audit", auditEvent.asMap())
-    if (saveToS3Bucket && auditEvent.service == "hmpps-audit-poc-ui") {
+    if (saveToS3Bucket) {
+      auditEvent.id = UUID.randomUUID()
       auditS3Client.save(auditEvent)
     } else {
       auditRepository.save(auditEvent)
