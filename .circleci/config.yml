@@ -46,6 +46,7 @@ workflows:
             branches:
               only:
                 - main
+                - sm-HAAR-1742-mu-audit
       - hmpps/deploy_env:
           name: deploy_dev
           env: "dev"
@@ -57,6 +58,7 @@ workflows:
             branches:
               only:
                 - main
+                - sm-HAAR-1742-mu-audit
           requires:
             - validate
             - build_docker
