@@ -34,6 +34,20 @@ workflows:
   version: 2
   build-test-and-deploy:
     jobs:
+      - hmpps/gradle_owasp_dependency_check:
+          jdk_tag: "21.0"
+          slack_channel: hmpps_tech_alerts_security
+          context:
+            - hmpps-common-vars
+      - hmpps/trivy_latest_scan:
+          slack_channel: hmpps_tech_alerts_security
+          context:
+            - hmpps-common-vars
+      - hmpps/veracode_pipeline_scan:
+          slack_channel: hmpps_tech_alerts_security
+          context:
+            - hmpps-common-vars
+            - veracode-credentials
       - validate:
           filters:
             tags:
@@ -45,7 +59,7 @@ workflows:
           filters:
             branches:
               only:
-                - main
+                - trivy-fixes
       - hmpps/deploy_env:
           name: deploy_dev
           env: "dev"
