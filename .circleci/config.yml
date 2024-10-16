@@ -45,7 +45,7 @@ workflows:
           filters:
             branches:
               only:
-                - trivy-fixes
+                - main
       - hmpps/deploy_env:
           name: deploy_dev
           env: "dev"
@@ -102,7 +102,7 @@ workflows:
           filters:
             branches:
               only:
-                - trivy-fixes
+                - main
     jobs:
       - hmpps/gradle_owasp_dependency_check:
           jdk_tag: "21.0"
@@ -125,7 +125,7 @@ workflows:
           filters:
             branches:
               only:
-                - trivy-fixes
+                - main
     jobs:
       - hmpps/veracode_policy_scan:
           slack_channel: hmpps_tech_alerts_security
