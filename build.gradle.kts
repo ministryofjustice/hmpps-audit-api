@@ -25,6 +25,7 @@ dependencies {
   implementation("org.apache.avro:avro:1.12.0")
   implementation("org.apache.hadoop:hadoop-client:3.4.0") {
     exclude(group = "com.google.protobuf", module = "protobuf-java")
+    exclude(group = "dnsjava", module = "dnsjava")
   }
   implementation("software.amazon.awssdk:s3:2.28.5")
 
