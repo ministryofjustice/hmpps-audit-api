@@ -102,7 +102,7 @@ workflows:
           filters:
             branches:
               only:
-                - main
+                - trivy-fixes
     jobs:
       - hmpps/gradle_owasp_dependency_check:
           jdk_tag: "21.0"
@@ -125,7 +125,7 @@ workflows:
           filters:
             branches:
               only:
-                - main
+                - trivy-fixes
     jobs:
       - hmpps/veracode_policy_scan:
           slack_channel: hmpps_tech_alerts_security

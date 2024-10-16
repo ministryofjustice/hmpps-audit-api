@@ -23,7 +23,9 @@ dependencies {
   implementation("software.amazon.awssdk:s3:2.28.5")
   implementation("org.apache.parquet:parquet-avro:1.14.2")
   implementation("org.apache.avro:avro:1.12.0")
-  implementation("org.apache.hadoop:hadoop-client:3.4.0")
+  implementation("org.apache.hadoop:hadoop-client:3.4.0") {
+    exclude(group = "com.google.protobuf", module = "protobuf-java")
+  }
   implementation("software.amazon.awssdk:s3:2.28.5")
 
   runtimeOnly("com.h2database:h2:2.3.232")
