@@ -21,12 +21,15 @@ dependencies {
 
   implementation("org.apache.commons:commons-lang3:3.17.0")
   implementation("software.amazon.awssdk:s3:2.28.5")
-  implementation("org.apache.parquet:parquet-avro:1.14.2")
+  implementation("org.apache.parquet:parquet-avro:1.14.3")
   implementation("org.apache.avro:avro:1.12.0")
   implementation("org.apache.hadoop:hadoop-client:3.4.0") {
     exclude(group = "com.google.protobuf", module = "protobuf-java")
     exclude(group = "org.apache.hadoop.thirdparty", module = "hadoop-shaded-protobuf_3_21")
     exclude(group = "dnsjava", module = "dnsjava")
+    exclude(group = "org.bouncycastle", module = "bcprov-jdk15on")
+    exclude(group = "org.apache.commons", module = "commons-configuration2")
+    exclude(group = "com.google.guava", module = "guava")
   }
   implementation("software.amazon.awssdk:s3:2.28.5")
 
