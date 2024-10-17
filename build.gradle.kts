@@ -29,7 +29,7 @@ dependencies {
     exclude(group = "dnsjava", module = "dnsjava")
     exclude(group = "org.bouncycastle", module = "bcprov-jdk15on")
     exclude(group = "org.apache.commons", module = "commons-configuration2")
-    exclude(group = "com.google.guava", module = "guava")
+    // exclude(group = "com.google.guava", module = "guava")
   }
   implementation("software.amazon.awssdk:s3:2.28.5")
 
