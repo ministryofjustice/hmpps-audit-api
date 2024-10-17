@@ -30,9 +30,9 @@ dependencies {
   implementation("org.apache.parquet:parquet-avro:1.14.2")
   implementation("org.apache.avro:avro:1.12.0")
   implementation("org.apache.hadoop:hadoop-client:3.4.0") {
-    exclude(group = "com.google.protobuf", module = "protobuf-java")
+    // exclude(group = "com.google.protobuf", module = "protobuf-java")
     // exclude(group = "org.apache.hadoop.thirdparty", module = "hadoop-shaded-protobuf_3_21")
-    exclude(group = "dnsjava", module = "dnsjava")
+    // exclude(group = "dnsjava", module = "dnsjava")
     // exclude(group = "org.bouncycastle", module = "bcprov-jdk15on")
     // exclude(group = "com.google.guava", module = "guava")
   }
