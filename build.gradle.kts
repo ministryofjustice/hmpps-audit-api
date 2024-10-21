@@ -34,7 +34,7 @@ dependencies {
   implementation("org.apache.avro:avro:1.12.0")
   implementation("org.apache.hadoop:hadoop-client:3.4.1") {
     exclude(group = "com.google.protobuf", module = "protobuf-java")
-    exclude(group = "org.apache.hadoop.thirdparty", module = "hadoop-shaded-protobuf_3_21")
+    exclude(group = "org.apache.hadoop.thirdparty", module = "hadoop-shaded-protobuf_3_25")
     exclude(group = "dnsjava", module = "dnsjava")
     exclude(group = "org.bouncycastle", module = "bcprov-jdk15on")
     exclude(group = "com.google.guava", module = "guava")
