@@ -25,7 +25,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:4.4.4")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.0.1")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 
   implementation("org.apache.commons:commons-lang3:3.17.0")
