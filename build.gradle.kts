@@ -15,6 +15,10 @@ configurations {
   }
 }
 
+dependencyCheck {
+  suppressionFiles.add("audit-suppressions.xml")
+}
+
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
@@ -27,9 +31,8 @@ dependencies {
   implementation("org.apache.commons:commons-lang3:3.17.0")
   implementation("software.amazon.awssdk:s3:2.28.5")
   implementation("org.apache.parquet:parquet-avro:1.14.3")
-  implementation("org.apache.parquet:parquet-avro:1.14.2")
   implementation("org.apache.avro:avro:1.12.0")
-  implementation("org.apache.hadoop:hadoop-client:3.4.0") {
+  implementation("org.apache.hadoop:hadoop-client:3.4.1") {
     exclude(group = "com.google.protobuf", module = "protobuf-java")
     exclude(group = "org.apache.hadoop.thirdparty", module = "hadoop-shaded-protobuf_3_21")
     exclude(group = "dnsjava", module = "dnsjava")
