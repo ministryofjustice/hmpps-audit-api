@@ -29,3 +29,7 @@ generic-prometheus-alerts:
 
   cron:
     retry_dlqs_schedule: "*/10 7-20 * * 1-5"
+
+hmpps:
+  repository:
+    saveToS3Bucket: true

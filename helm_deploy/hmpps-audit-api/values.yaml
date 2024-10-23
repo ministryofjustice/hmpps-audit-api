@@ -60,3 +60,7 @@ generic-service:
 
 generic-prometheus-alerts:
   targetApplication: hmpps-audit-api
+
+hmpps:
+  repository:
+    saveToS3Bucket: false
