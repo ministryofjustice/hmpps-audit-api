@@ -15,6 +15,10 @@ generic-service:
     OAUTH_ENDPOINT_URL: "http://hmpps-auth.hmpps-auth-dev.svc.cluster.local/auth"
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
 
+  namespace_secrets:
+    s3-output:
+      HMPPS_S3_AUDIT_BUCKET_NAME: "bucket_name"
+
 # CloudPlatform AlertManager receiver to route promethues alerts to slack
 # See https://user-guide.cloud-platform.service.justice.gov.uk/documentation/monitoring-an-app/how-to-create-alarms.html#creating-your-own-custom-alerts
 generic-prometheus-alerts:
@@ -25,3 +29,7 @@ generic-prometheus-alerts:
 
   cron:
     retry_dlqs_schedule: "*/10 7-20 * * 1-5"
+
+hmpps:
+  repository:
+    saveToS3Bucket: true

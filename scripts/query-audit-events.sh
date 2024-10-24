@@ -2,8 +2,8 @@
 
 usage() {
     echo "Usage:"
-    echo "  ./query-audit-events.sh --by-user-date <year> <month> <day> <user>"
-    echo "  ./query-audit-events.sh --by-id <audit-event-id>"
+    echo "  /bin/sh query-audit-events.sh --by-user-date <year> <month> <day> <user>"
+    echo "  /bin/sh query-audit-events.sh --by-id <audit-event-id>"
     exit 1
 }
 
