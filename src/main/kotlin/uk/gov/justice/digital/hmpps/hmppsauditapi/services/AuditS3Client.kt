@@ -8,6 +8,7 @@ import org.apache.hadoop.fs.Path
 import org.apache.parquet.avro.AvroParquetWriter
 import org.apache.parquet.hadoop.metadata.CompressionCodecName
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
@@ -19,6 +20,7 @@ import java.time.ZoneId
 import java.util.Base64
 
 @Service
+@ConditionalOnProperty(name = ["hmpps.repository.saveToS3Bucket"], havingValue = "true")
 class AuditS3Client(
   private val s3Client: S3Client,
   private val schema: Schema,
