@@ -20,7 +20,7 @@ import java.util.UUID
 class AuditService(
   private val telemetryClient: TelemetryClient,
   private val auditRepository: AuditRepository,
-  @Autowired(required = false) private val auditS3Client: AuditS3Client,
+  @Autowired(required = false) private val auditS3Client: AuditS3Client?,
   @Value("\${hmpps.repository.saveToS3Bucket}") private val saveToS3Bucket: Boolean,
 ) {
   private companion object {
@@ -31,7 +31,7 @@ class AuditService(
     telemetryClient.trackEvent("hmpps-audit", auditEvent.asMap())
     if (saveToS3Bucket) {
       auditEvent.id = UUID.randomUUID()
-      auditS3Client.save(auditEvent)
+      auditS3Client!!.save(auditEvent)
     } else {
       auditRepository.save(auditEvent)
     }
