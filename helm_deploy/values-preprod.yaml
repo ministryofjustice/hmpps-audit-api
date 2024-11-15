@@ -12,6 +12,10 @@ generic-service:
     OAUTH_ENDPOINT_URL: "http://hmpps-auth.hmpps-auth-preprod.svc.cluster.local/auth"
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
 
+  namespace_secrets:
+    s3-output:
+      HMPPS_S3_AUDIT_BUCKET_NAME: "bucket_name"
+
 # CloudPlatform AlertManager receiver to route promethues alerts to slack
 generic-prometheus-alerts:
   alertSeverity: hmpps_tech_non_prod
