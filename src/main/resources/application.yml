@@ -81,7 +81,7 @@ aws:
   provider: aws
   region: eu-west-2
   s3:
-    auditBucketName: ${HMPPS_S3_AUDIT_BUCKET_NAME:bob}
+    auditBucketName: ${HMPPS_S3_AUDIT_BUCKET_NAME}:bob
 cloud:
   aws:
     stack:
