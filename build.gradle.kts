@@ -29,8 +29,8 @@ dependencies {
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 
   implementation("org.apache.commons:commons-lang3:3.17.0")
-  implementation("software.amazon.awssdk:s3:2.29.1")
-  implementation("org.apache.parquet:parquet-avro:1.14.3")
+  implementation("software.amazon.awssdk:s3:2.29.15")
+  implementation("org.apache.parquet:parquet-avro:1.14.4")
   implementation("org.apache.avro:avro:1.12.0")
   implementation("org.apache.hadoop:hadoop-client:3.4.1") {
     exclude(group = "com.google.protobuf", module = "protobuf-java")
@@ -39,7 +39,7 @@ dependencies {
     exclude(group = "org.bouncycastle", module = "bcprov-jdk15on")
     exclude(group = "com.google.guava", module = "guava")
   }
-  implementation("software.amazon.awssdk:s3:2.29.1")
+  implementation("software.amazon.awssdk:s3:2.29.15")
 
   runtimeOnly("com.h2database:h2:2.3.232")
   runtimeOnly("org.flywaydb:flyway-core")
