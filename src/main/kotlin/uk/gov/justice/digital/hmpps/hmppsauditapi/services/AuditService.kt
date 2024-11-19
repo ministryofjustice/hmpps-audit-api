@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
 import com.microsoft.applicationinsights.TelemetryClient
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -20,7 +19,7 @@ import java.util.UUID
 class AuditService(
   private val telemetryClient: TelemetryClient,
   private val auditRepository: AuditRepository,
-  @Autowired(required = false) private val auditS3Client: AuditS3Client?,
+  private val auditS3Client: AuditS3Client,
   @Value("\${hmpps.repository.saveToS3Bucket}") private val saveToS3Bucket: Boolean,
 ) {
   private companion object {
@@ -31,7 +30,7 @@ class AuditService(
     telemetryClient.trackEvent("hmpps-audit", auditEvent.asMap())
     if (saveToS3Bucket) {
       auditEvent.id = UUID.randomUUID()
-      auditS3Client!!.save(auditEvent)
+      auditS3Client.save(auditEvent)
     } else {
       auditRepository.save(auditEvent)
     }
