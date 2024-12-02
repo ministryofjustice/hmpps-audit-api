@@ -19,6 +19,8 @@ dependencyCheck {
   suppressionFiles.add("audit-suppressions.xml")
 }
 
+ext["hibernate.version"] = "6.5.3.Final"
+
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
