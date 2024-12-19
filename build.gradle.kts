@@ -27,12 +27,12 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.2.0")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.2.1")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0")
 
   implementation("org.apache.commons:commons-lang3:3.17.0")
-  implementation("software.amazon.awssdk:s3:2.29.23")
-  implementation("org.apache.parquet:parquet-avro:1.14.4")
+  implementation("software.amazon.awssdk:s3:2.29.35")
+  implementation("org.apache.parquet:parquet-avro:1.15.0")
   implementation("org.apache.avro:avro:1.12.0")
   implementation("org.apache.hadoop:hadoop-client:3.4.1") {
     exclude(group = "com.google.protobuf", module = "protobuf-java")
@@ -58,15 +58,13 @@ dependencies {
   testImplementation("javax.xml.bind:jaxb-api:2.3.1")
 }
 
-java {
-  toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+kotlin {
+  jvmToolchain(21)
 }
 
 tasks {
   withType<KotlinCompile> {
-    kotlinOptions {
-      compilerOptions.jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
-    }
+    compilerOptions.jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
   }
 }
 
