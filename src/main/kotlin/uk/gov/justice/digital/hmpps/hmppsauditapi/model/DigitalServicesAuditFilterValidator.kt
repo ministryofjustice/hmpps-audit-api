@@ -4,7 +4,7 @@ import jakarta.validation.ConstraintValidator
 import jakarta.validation.ConstraintValidatorContext
 import java.time.Instant
 
-class AuditFilterValidator : ConstraintValidator<ValidDigitalServicesAuditFilter, DigitalServicesAuditFilterDto> {
+class DigitalServicesAuditFilterValidator : ConstraintValidator<ValidDigitalServicesAuditFilter, DigitalServicesAuditFilterDto> {
 
   override fun isValid(dto: DigitalServicesAuditFilterDto?, context: ConstraintValidatorContext): Boolean {
     if (dto == null) return false

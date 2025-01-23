@@ -23,7 +23,7 @@ import java.util.stream.Stream
 @Import(IntegrationTest.SqsConfig::class, JwtAuthHelper::class, S3TestConfig::class)
 @ActiveProfiles(resolver = CommandLineProfilesResolver::class)
 @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
-class AuditFilterValidatorTest {
+class DigitalServicesAuditFilterValidatorTest {
 
   @TestInstance(TestInstance.Lifecycle.PER_CLASS)
   @Nested
