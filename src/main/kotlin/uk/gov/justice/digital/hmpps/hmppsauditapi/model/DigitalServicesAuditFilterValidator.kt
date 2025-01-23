@@ -30,21 +30,21 @@ class DigitalServicesAuditFilterValidator : ConstraintValidator<ValidDigitalServ
         .addConstraintViolation()
     }
 
-    if (dto.endDateTime != null && dto.endDateTime!!.isAfter(now)) {
+    if (dto.endDateTime?.isAfter(now) == true) {
       isValid = false
       context.buildConstraintViolationWithTemplate("endDateTime must not be in the future")
         .addPropertyNode("endDateTime")
         .addConstraintViolation()
     }
 
-    if (dto.startDateTime != null && dto.startDateTime!!.isAfter(now)) {
+    if (dto.startDateTime?.isAfter(now) == true) {
       isValid = false
       context.buildConstraintViolationWithTemplate("startDateTime must not be in the future")
         .addPropertyNode("startDateTime")
         .addConstraintViolation()
     }
 
-    if (dto.startDateTime != null && dto.endDateTime != null && dto.startDateTime!!.isAfter(dto.endDateTime)) {
+    if (dto.startDateTime != null && dto.endDateTime != null && dto.startDateTime.isAfter(dto.endDateTime)) {
       isValid = false
       context.buildConstraintViolationWithTemplate("startDateTime must be before endDateTime")
         .addPropertyNode("startDateTime")
