@@ -34,32 +34,32 @@ class AuditFilterValidatorTest {
 
     private fun validBaseAuditFilterDto() =
       listOf(
-        BaseAuditFilterDto(
+        DigitalServicesAuditFilterDto(
           startDateTime = Instant.now().minusSeconds(3600),
           endDateTime = Instant.now(),
           subjectId = "test-subject",
           subjectType = "USER_ID",
         ),
-        BaseAuditFilterDto(
+        DigitalServicesAuditFilterDto(
           startDateTime = Instant.now().minusSeconds(3600),
           subjectId = "test-subject",
           subjectType = "USER_ID",
         ),
-        BaseAuditFilterDto(
+        DigitalServicesAuditFilterDto(
           endDateTime = Instant.now(),
           subjectId = "test-subject",
           subjectType = "USER_ID",
         ),
-        BaseAuditFilterDto(
+        DigitalServicesAuditFilterDto(
           startDateTime = Instant.now().minusSeconds(3600),
           endDateTime = Instant.now(),
           who = "who",
         ),
-        BaseAuditFilterDto(
+        DigitalServicesAuditFilterDto(
           startDateTime = Instant.now().minusSeconds(3600),
           who = "who",
         ),
-        BaseAuditFilterDto(
+        DigitalServicesAuditFilterDto(
           endDateTime = Instant.now(),
           who = "who",
         ),
@@ -68,7 +68,7 @@ class AuditFilterValidatorTest {
     private fun invalidBaseAuditFilterDto() =
       Stream.of(
         Arguments.of(
-          BaseAuditFilterDto(),
+          DigitalServicesAuditFilterDto(),
           mapOf(
             "startDateTime" to "startDateTime must be provided if endDateTime is null",
             "endDateTime" to "endDateTime must be provided if startDateTime is null",
@@ -77,7 +77,7 @@ class AuditFilterValidatorTest {
         ),
 
         Arguments.of(
-          BaseAuditFilterDto(
+          DigitalServicesAuditFilterDto(
             startDateTime = Instant.now().minusSeconds(3600),
             endDateTime = Instant.now().plusSeconds(3600),
             who = "someone",
@@ -86,15 +86,15 @@ class AuditFilterValidatorTest {
         ),
 
         Arguments.of(
-          BaseAuditFilterDto(
-            startDateTime = Instant.now().plusSeconds(10),
+          DigitalServicesAuditFilterDto(
+            startDateTime = Instant.now().plusSeconds(100),
             who = "someone",
           ),
           mapOf("startDateTime" to "startDateTime must not be in the future"),
         ),
 
         Arguments.of(
-          BaseAuditFilterDto(
+          DigitalServicesAuditFilterDto(
             startDateTime = Instant.now().plusSeconds(3600),
             endDateTime = Instant.now(),
             who = "someone",
@@ -103,7 +103,7 @@ class AuditFilterValidatorTest {
         ),
 
         Arguments.of(
-          BaseAuditFilterDto(
+          DigitalServicesAuditFilterDto(
             startDateTime = Instant.now().minusSeconds(10),
             endDateTime = Instant.now().minusSeconds(1),
             subjectId = "test-subject",
@@ -111,7 +111,7 @@ class AuditFilterValidatorTest {
           mapOf("subjectType" to "Both subjectId and subjectType must be populated together or left null"),
         ),
         Arguments.of(
-          BaseAuditFilterDto(
+          DigitalServicesAuditFilterDto(
             startDateTime = Instant.now().minusSeconds(10),
             endDateTime = Instant.now().minusSeconds(1),
             subjectType = "PERSON",
@@ -119,7 +119,7 @@ class AuditFilterValidatorTest {
           mapOf("subjectId" to "Both subjectId and subjectType must be populated together or left null"),
         ),
         Arguments.of(
-          BaseAuditFilterDto(
+          DigitalServicesAuditFilterDto(
             startDateTime = Instant.now().minusSeconds(10),
             endDateTime = Instant.now().minusSeconds(1),
           ),
@@ -129,15 +129,15 @@ class AuditFilterValidatorTest {
 
     @ParameterizedTest
     @MethodSource("validBaseAuditFilterDto")
-    internal fun `should be valid`(baseAuditFilterDto: BaseAuditFilterDto) {
-      val violations = validator.validate(baseAuditFilterDto)
+    internal fun `should be valid`(digitalServicesAuditFilterDto: DigitalServicesAuditFilterDto) {
+      val violations = validator.validate(digitalServicesAuditFilterDto)
       assertThat(violations).isEmpty()
     }
 
     @ParameterizedTest
     @MethodSource("invalidBaseAuditFilterDto")
-    internal fun `should be invalid`(baseAuditFilterDto: BaseAuditFilterDto, expectedErrorMessages: Map<String, String>) {
-      val errorMessages: Map<String, String> = validator.validate(baseAuditFilterDto).map { it.propertyPath.toString() to it.message }.toMap()
+    internal fun `should be invalid`(digitalServicesAuditFilterDto: DigitalServicesAuditFilterDto, expectedErrorMessages: Map<String, String>) {
+      val errorMessages: Map<String, String> = validator.validate(digitalServicesAuditFilterDto).map { it.propertyPath.toString() to it.message }.toMap()
       assertThat(errorMessages).containsExactlyInAnyOrderEntriesOf(expectedErrorMessages)
     }
   }

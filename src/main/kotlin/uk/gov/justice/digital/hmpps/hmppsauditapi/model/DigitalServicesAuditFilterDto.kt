@@ -4,8 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Size
 import java.time.Instant
 
-@ValidBaseAuditFilter
-open class BaseAuditFilterDto(
+@ValidDigitalServicesAuditFilter
+open class DigitalServicesAuditFilterDto(
   @Schema(
     required = false,
     description = "The start date and time to filter the audit events",
