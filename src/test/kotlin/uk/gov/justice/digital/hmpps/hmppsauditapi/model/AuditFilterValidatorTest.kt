@@ -80,7 +80,7 @@ class AuditFilterValidatorTest {
           BaseAuditFilterDto(
             startDateTime = Instant.now().minusSeconds(3600),
             endDateTime = Instant.now().plusSeconds(3600),
-            who = "someone"
+            who = "someone",
           ),
           mapOf("endDateTime" to "endDateTime must not be in the future"),
         ),
@@ -88,7 +88,7 @@ class AuditFilterValidatorTest {
         Arguments.of(
           BaseAuditFilterDto(
             startDateTime = Instant.now().plusSeconds(10),
-            who = "someone"
+            who = "someone",
           ),
           mapOf("startDateTime" to "startDateTime must not be in the future"),
         ),
@@ -97,7 +97,7 @@ class AuditFilterValidatorTest {
           BaseAuditFilterDto(
             startDateTime = Instant.now().plusSeconds(3600),
             endDateTime = Instant.now(),
-            who = "someone"
+            who = "someone",
           ),
           mapOf("startDateTime" to "startDateTime must be before endDateTime"),
         ),
@@ -123,8 +123,8 @@ class AuditFilterValidatorTest {
             startDateTime = Instant.now().minusSeconds(10),
             endDateTime = Instant.now().minusSeconds(1),
           ),
-          mapOf("who" to "If who is null then subjectId and subjectType must be populated")
-        )
+          mapOf("who" to "If who is null then subjectId and subjectType must be populated"),
+        ),
       )
 
     @ParameterizedTest
@@ -137,7 +137,7 @@ class AuditFilterValidatorTest {
     @ParameterizedTest
     @MethodSource("invalidBaseAuditFilterDto")
     internal fun `should be invalid`(baseAuditFilterDto: BaseAuditFilterDto, expectedErrorMessages: Map<String, String>) {
-      val errorMessages : Map<String, String> = validator.validate(baseAuditFilterDto).map { it.propertyPath.toString() to it.message }.toMap()
+      val errorMessages: Map<String, String> = validator.validate(baseAuditFilterDto).map { it.propertyPath.toString() to it.message }.toMap()
       assertThat(errorMessages).containsExactlyInAnyOrderEntriesOf(expectedErrorMessages)
     }
   }
