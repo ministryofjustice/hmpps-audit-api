@@ -38,7 +38,5 @@ class S3TestConfig {
   @Bean
   @Profile("circleci")
   @Primary
-  fun s3ClientCircleCi(): S3Client {
-    return Mockito.mock(S3Client::class.java)
-  }
+  fun s3ClientCircleCi(): S3Client = Mockito.mock(S3Client::class.java)
 }

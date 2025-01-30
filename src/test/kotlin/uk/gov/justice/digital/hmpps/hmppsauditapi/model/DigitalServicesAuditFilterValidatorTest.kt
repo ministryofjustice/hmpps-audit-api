@@ -32,100 +32,98 @@ class DigitalServicesAuditFilterValidatorTest {
     @Autowired
     private lateinit var validator: Validator
 
-    private fun validBaseAuditFilterDto() =
-      listOf(
+    private fun validBaseAuditFilterDto() = listOf(
+      DigitalServicesAuditFilterDto(
+        startDateTime = Instant.now().minusSeconds(3600),
+        endDateTime = Instant.now(),
+        subjectId = "test-subject",
+        subjectType = "USER_ID",
+      ),
+      DigitalServicesAuditFilterDto(
+        startDateTime = Instant.now().minusSeconds(3600),
+        subjectId = "test-subject",
+        subjectType = "USER_ID",
+      ),
+      DigitalServicesAuditFilterDto(
+        endDateTime = Instant.now(),
+        subjectId = "test-subject",
+        subjectType = "USER_ID",
+      ),
+      DigitalServicesAuditFilterDto(
+        startDateTime = Instant.now().minusSeconds(3600),
+        endDateTime = Instant.now(),
+        who = "who",
+      ),
+      DigitalServicesAuditFilterDto(
+        startDateTime = Instant.now().minusSeconds(3600),
+        who = "who",
+      ),
+      DigitalServicesAuditFilterDto(
+        endDateTime = Instant.now(),
+        who = "who",
+      ),
+    )
+
+    private fun invalidBaseAuditFilterDto() = Stream.of(
+      Arguments.of(
+        DigitalServicesAuditFilterDto(),
+        mapOf(
+          "startDateTime" to "startDateTime must be provided if endDateTime is null",
+          "endDateTime" to "endDateTime must be provided if startDateTime is null",
+          "who" to "If who is null then subjectId and subjectType must be populated",
+        ),
+      ),
+
+      Arguments.of(
         DigitalServicesAuditFilterDto(
           startDateTime = Instant.now().minusSeconds(3600),
+          endDateTime = Instant.now().plusSeconds(3600),
+          who = "someone",
+        ),
+        mapOf("endDateTime" to "endDateTime must not be in the future"),
+      ),
+
+      Arguments.of(
+        DigitalServicesAuditFilterDto(
+          startDateTime = Instant.now().plusSeconds(100),
+          who = "someone",
+        ),
+        mapOf("startDateTime" to "startDateTime must not be in the future"),
+      ),
+
+      Arguments.of(
+        DigitalServicesAuditFilterDto(
+          startDateTime = Instant.now().plusSeconds(3600),
           endDateTime = Instant.now(),
+          who = "someone",
+        ),
+        mapOf("startDateTime" to "startDateTime must be before endDateTime"),
+      ),
+
+      Arguments.of(
+        DigitalServicesAuditFilterDto(
+          startDateTime = Instant.now().minusSeconds(10),
+          endDateTime = Instant.now().minusSeconds(1),
           subjectId = "test-subject",
-          subjectType = "USER_ID",
         ),
+        mapOf("subjectType" to "Both subjectId and subjectType must be populated together or left null"),
+      ),
+      Arguments.of(
         DigitalServicesAuditFilterDto(
-          startDateTime = Instant.now().minusSeconds(3600),
-          subjectId = "test-subject",
-          subjectType = "USER_ID",
+          startDateTime = Instant.now().minusSeconds(10),
+          endDateTime = Instant.now().minusSeconds(1),
+          subjectType = "PERSON",
         ),
+        mapOf("subjectId" to "Both subjectId and subjectType must be populated together or left null"),
+      ),
+      Arguments.of(
         DigitalServicesAuditFilterDto(
-          endDateTime = Instant.now(),
-          subjectId = "test-subject",
-          subjectType = "USER_ID",
+          startDateTime = Instant.now().minusSeconds(10),
+          endDateTime = Instant.now().minusSeconds(1),
         ),
-        DigitalServicesAuditFilterDto(
-          startDateTime = Instant.now().minusSeconds(3600),
-          endDateTime = Instant.now(),
-          who = "who",
-        ),
-        DigitalServicesAuditFilterDto(
-          startDateTime = Instant.now().minusSeconds(3600),
-          who = "who",
-        ),
-        DigitalServicesAuditFilterDto(
-          endDateTime = Instant.now(),
-          who = "who",
-        ),
-      )
-
-    private fun invalidBaseAuditFilterDto() =
-      Stream.of(
-        Arguments.of(
-          DigitalServicesAuditFilterDto(),
-          mapOf(
-            "startDateTime" to "startDateTime must be provided if endDateTime is null",
-            "endDateTime" to "endDateTime must be provided if startDateTime is null",
-            "who" to "If who is null then subjectId and subjectType must be populated",
-          ),
-        ),
-
-        Arguments.of(
-          DigitalServicesAuditFilterDto(
-            startDateTime = Instant.now().minusSeconds(3600),
-            endDateTime = Instant.now().plusSeconds(3600),
-            who = "someone",
-          ),
-          mapOf("endDateTime" to "endDateTime must not be in the future"),
-        ),
-
-        Arguments.of(
-          DigitalServicesAuditFilterDto(
-            startDateTime = Instant.now().plusSeconds(100),
-            who = "someone",
-          ),
-          mapOf("startDateTime" to "startDateTime must not be in the future"),
-        ),
-
-        Arguments.of(
-          DigitalServicesAuditFilterDto(
-            startDateTime = Instant.now().plusSeconds(3600),
-            endDateTime = Instant.now(),
-            who = "someone",
-          ),
-          mapOf("startDateTime" to "startDateTime must be before endDateTime"),
-        ),
-
-        Arguments.of(
-          DigitalServicesAuditFilterDto(
-            startDateTime = Instant.now().minusSeconds(10),
-            endDateTime = Instant.now().minusSeconds(1),
-            subjectId = "test-subject",
-          ),
-          mapOf("subjectType" to "Both subjectId and subjectType must be populated together or left null"),
-        ),
-        Arguments.of(
-          DigitalServicesAuditFilterDto(
-            startDateTime = Instant.now().minusSeconds(10),
-            endDateTime = Instant.now().minusSeconds(1),
-            subjectType = "PERSON",
-          ),
-          mapOf("subjectId" to "Both subjectId and subjectType must be populated together or left null"),
-        ),
-        Arguments.of(
-          DigitalServicesAuditFilterDto(
-            startDateTime = Instant.now().minusSeconds(10),
-            endDateTime = Instant.now().minusSeconds(1),
-          ),
-          mapOf("who" to "If who is null then subjectId and subjectType must be populated"),
-        ),
-      )
+        mapOf("who" to "If who is null then subjectId and subjectType must be populated"),
+      ),
+    )
 
     @ParameterizedTest
     @MethodSource("validBaseAuditFilterDto")

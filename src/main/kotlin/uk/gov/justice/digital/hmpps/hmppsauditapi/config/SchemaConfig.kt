@@ -8,7 +8,5 @@ import org.springframework.context.annotation.Configuration
 class SchemaConfig {
 
   @Bean
-  fun schema(): Schema {
-    return Schema.Parser().parse(javaClass.getResourceAsStream("/audit_event.avsc"))
-  }
+  fun schema(): Schema = Schema.Parser().parse(javaClass.getResourceAsStream("/audit_event.avsc"))
 }

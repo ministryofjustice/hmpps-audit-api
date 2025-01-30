@@ -33,10 +33,9 @@ class AuditResourceTest : IntegrationTest() {
   @TestInstance(PER_CLASS)
   @Nested
   inner class SecureGetEndpoints {
-    private fun secureEndpointsGet() =
-      listOf(
-        "/audit",
-      )
+    private fun secureEndpointsGet() = listOf(
+      "/audit",
+    )
 
     @ParameterizedTest
     @MethodSource("secureEndpointsGet")
@@ -122,10 +121,9 @@ class AuditResourceTest : IntegrationTest() {
   @TestInstance(PER_CLASS)
   @Nested
   inner class securePostEndpoints {
-    private fun secureEndpointsPost() =
-      listOf(
-        "/audit",
-      )
+    private fun secureEndpointsPost() = listOf(
+      "/audit",
+    )
 
     @ParameterizedTest
     @MethodSource("secureEndpointsPost")
@@ -443,8 +441,6 @@ class AuditResourceTest : IntegrationTest() {
       verify(auditRepository).findAll(Sort.by(DESC, "when"))
     }
 
-    private fun String.loadJson(): String {
-      return AuditResourceTest::class.java.getResource("$this.json").readText()
-    }
+    private fun String.loadJson(): String = AuditResourceTest::class.java.getResource("$this.json").readText()
   }
 }

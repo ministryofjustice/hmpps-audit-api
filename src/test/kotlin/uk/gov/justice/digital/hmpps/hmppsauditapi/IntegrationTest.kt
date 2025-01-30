@@ -72,22 +72,20 @@ abstract class IntegrationTest {
     fun outboundQueueSqsClient(
       hmppsSqsProperties: HmppsSqsProperties,
       @Qualifier("auditqueue-sqs-dlq-client") outboundQueueSqsDlqClient: SqsAsyncClient,
-    ): SqsAsyncClient =
-      with(hmppsSqsProperties) {
-        val config = queues["auditqueue"]
-          ?: throw MissingQueueException("HmppsSqsProperties config for auditqueue not found")
-        hmppsQueueFactory.createSqsAsyncClient(config, hmppsSqsProperties, outboundQueueSqsDlqClient)
-      }
+    ): SqsAsyncClient = with(hmppsSqsProperties) {
+      val config = queues["auditqueue"]
+        ?: throw MissingQueueException("HmppsSqsProperties config for auditqueue not found")
+      hmppsQueueFactory.createSqsAsyncClient(config, hmppsSqsProperties, outboundQueueSqsDlqClient)
+    }
 
     @Bean("auditusersqueue-sqs-client")
     fun outboundAuditUsersQueueSqsClient(
       hmppsSqsProperties: HmppsSqsProperties,
       @Qualifier("auditusersqueue-sqs-dlq-client") outboundAuditUsersQueueSqsClient: SqsAsyncClient,
-    ): SqsAsyncClient =
-      with(hmppsSqsProperties) {
-        val config = queues["auditusersqueue"]
-          ?: throw MissingQueueException("HmppsSqsProperties config for auditusersqueue not found")
-        hmppsQueueFactory.createSqsAsyncClient(config, hmppsSqsProperties, outboundAuditUsersQueueSqsClient)
-      }
+    ): SqsAsyncClient = with(hmppsSqsProperties) {
+      val config = queues["auditusersqueue"]
+        ?: throw MissingQueueException("HmppsSqsProperties config for auditusersqueue not found")
+      hmppsQueueFactory.createSqsAsyncClient(config, hmppsSqsProperties, outboundAuditUsersQueueSqsClient)
+    }
   }
 }
