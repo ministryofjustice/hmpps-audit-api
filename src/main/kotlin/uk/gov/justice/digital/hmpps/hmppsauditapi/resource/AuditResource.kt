@@ -94,13 +94,11 @@ class AuditResource(
     return if (traceParentElements.size == 4) traceParentElements[1] else null
   }
 
-  private fun String.jsonString(): String? {
-    return try {
-      jacksonObjectMapper().readTree(trim())
-      ifBlank { null }
-    } catch (e: IOException) {
-      "{\"details\":\"$this\"}"
-    }
+  private fun String.jsonString(): String? = try {
+    jacksonObjectMapper().readTree(trim())
+    ifBlank { null }
+  } catch (e: IOException) {
+    "{\"details\":\"$this\"}"
   }
 }
 

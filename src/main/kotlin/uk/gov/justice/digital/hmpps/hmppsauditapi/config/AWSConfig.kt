@@ -16,10 +16,8 @@ class AWSConfig {
   private lateinit var region: String
 
   @Bean
-  fun s3Client(): S3Client {
-    return S3Client.builder()
-      .region(Region.of(region))
-      .credentialsProvider(DefaultCredentialsProvider.create())
-      .build()
-  }
+  fun s3Client(): S3Client = S3Client.builder()
+    .region(Region.of(region))
+    .credentialsProvider(DefaultCredentialsProvider.create())
+    .build()
 }

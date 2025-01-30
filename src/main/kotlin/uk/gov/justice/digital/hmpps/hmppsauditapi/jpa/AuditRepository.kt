@@ -11,7 +11,9 @@ import java.time.Instant
 import java.util.UUID
 
 @Repository
-interface AuditRepository : PagingAndSortingRepository<AuditEvent, UUID>, CrudRepository<AuditEvent, UUID> {
+interface AuditRepository :
+  PagingAndSortingRepository<AuditEvent, UUID>,
+  CrudRepository<AuditEvent, UUID> {
 
   @Query(
     """
