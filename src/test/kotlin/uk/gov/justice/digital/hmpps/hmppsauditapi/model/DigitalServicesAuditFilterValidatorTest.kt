@@ -93,8 +93,8 @@ class DigitalServicesAuditFilterValidatorTest {
 
       Arguments.of(
         DigitalServicesAuditFilterDto(
-          startDateTime = Instant.now().plusSeconds(999999),
-          endDateTime = Instant.now(),
+          startDateTime = Instant.now().minusSeconds(999),
+          endDateTime = Instant.now().minusSeconds(9999),
           who = "someone",
         ),
         mapOf("startDateTime" to "startDateTime must be before endDateTime"),
