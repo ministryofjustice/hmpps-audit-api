@@ -77,7 +77,7 @@ class DigitalServicesAuditFilterValidatorTest {
       Arguments.of(
         DigitalServicesAuditFilterDto(
           startDateTime = Instant.now().minusSeconds(3600),
-          endDateTime = Instant.now().plusSeconds(3600),
+          endDateTime = Instant.now().plusSeconds(999999),
           who = "someone",
         ),
         mapOf("endDateTime" to "endDateTime must not be in the future"),
@@ -85,7 +85,7 @@ class DigitalServicesAuditFilterValidatorTest {
 
       Arguments.of(
         DigitalServicesAuditFilterDto(
-          startDateTime = Instant.now().plusSeconds(100),
+          startDateTime = Instant.now().plusSeconds(999999),
           who = "someone",
         ),
         mapOf("startDateTime" to "startDateTime must not be in the future"),
@@ -93,7 +93,7 @@ class DigitalServicesAuditFilterValidatorTest {
 
       Arguments.of(
         DigitalServicesAuditFilterDto(
-          startDateTime = Instant.now().plusSeconds(3600),
+          startDateTime = Instant.now().plusSeconds(999999),
           endDateTime = Instant.now(),
           who = "someone",
         ),
