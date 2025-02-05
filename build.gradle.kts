@@ -31,7 +31,7 @@ dependencies {
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.4")
 
   implementation("org.apache.commons:commons-lang3:3.17.0")
-  implementation("software.amazon.awssdk:s3:2.30.9")
+  implementation("software.amazon.awssdk:s3:2.30.13")
   implementation("org.apache.parquet:parquet-avro:1.15.0")
   implementation("org.apache.avro:avro:1.12.0")
   implementation("org.apache.hadoop:hadoop-client:3.4.1") {
@@ -40,6 +40,10 @@ dependencies {
     exclude(group = "dnsjava", module = "dnsjava")
     exclude(group = "org.bouncycastle", module = "bcprov-jdk15on")
     exclude(group = "com.google.guava", module = "guava")
+    exclude(group = "org.eclipse.jetty", module = "jetty-servlet")
+    exclude(group = "org.eclipse.jetty", module = "jetty-webapp")
+    exclude(group = "org.eclipse.jetty.websocket", module = "websocket-common")
+    exclude(group = "org.eclipse.jetty.websocket", module = "websocket-client")
   }
 
   runtimeOnly("com.h2database:h2:2.3.232")
