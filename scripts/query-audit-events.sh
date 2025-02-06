@@ -12,6 +12,8 @@ if [ "$#" -lt 2 ]; then
 fi
 
 FLAG=$1
+DATABASE_NAME="audit_dev_glue_catalog_database"
+TABLE_NAME="audit_event"
 
 case "$FLAG" in
     --by-id)
@@ -19,7 +21,7 @@ case "$FLAG" in
             usage
         fi
         ID=$2
-        QUERY="SELECT * FROM audit_event WHERE id = '$ID' AND NOT (year = '2024' AND month = '8');"
+        QUERY="SELECT * FROM $DATABASE_NAME.$TABLE_NAME WHERE id = '$ID' AND NOT (year = '2024' AND month = '8');"
         ;;
 
     --by-user-date)
@@ -30,7 +32,7 @@ case "$FLAG" in
         MONTH=$3
         DAY=$4
         USER=$5
-        QUERY="SELECT * FROM audit_event WHERE year = '$YEAR' AND month = '$MONTH' AND day = '$DAY' AND user = '$USER';"
+        QUERY="SELECT * FROM $DATABASE_NAME.$TABLE_NAME WHERE year = '$YEAR' AND month = '$MONTH' AND day = '$DAY' AND user = '$USER';"
         ;;
 
     *)
@@ -38,9 +40,8 @@ case "$FLAG" in
         ;;
 esac
 
-S3_BUCKET_NAME=$(aws s3api list-buckets --query "Buckets[?starts_with(Name, 'cloud-platform')].Name | [0]" --output text)
+S3_BUCKET_NAME="bucket-name"
 OUTPUT_LOCATION="s3://$S3_BUCKET_NAME/query_results/"
-DATABASE="audit_dev"
 
 echo "Bucket name: $S3_BUCKET_NAME"
 echo "Output location: $OUTPUT_LOCATION"
@@ -48,7 +49,7 @@ echo "Query: $QUERY"
 
 QUERY_EXECUTION_ID=$(aws athena start-query-execution \
     --query-string "$QUERY" \
-    --query-execution-context Database=$DATABASE \
+    --query-execution-context Database=$DATABASE_NAME \
     --result-configuration OutputLocation=$OUTPUT_LOCATION \
     --output text --query 'QueryExecutionId')
 
