@@ -2,35 +2,51 @@
 
 usage() {
     echo "Usage:"
-    echo "  /bin/sh query-audit-events.sh --by-user-date <year> <month> <day> <user>"
-    echo "  /bin/sh query-audit-events.sh --by-id <audit-event-id>"
+    echo "  /bin/sh query-audit-events.sh --s3-bucket <s3-bucket-name> --by-user-date <year> <month> <day> <user>"
+    echo "  /bin/sh query-audit-events.sh --s3-bucket <s3-bucket-name> --by-id <audit-event-id>"
     exit 1
 }
 
-if [ "$#" -lt 2 ]; then
+if [ "$#" -lt 4 ]; then
     usage
 fi
 
+if [ "$1" != "--s3-bucket" ]; then
+    usage
+fi
+
+S3_BUCKET_NAME=$2
+shift 2
+
+if ! aws s3 ls "s3://$S3_BUCKET_NAME" > /dev/null 2>&1; then
+    echo "Error: S3 bucket '$S3_BUCKET_NAME' does not exist or is not accessible."
+    exit 1
+fi
+
+DATABASE_NAME="audit_dev_glue_catalog_database"
+TABLE_NAME="audit_event"
+
 FLAG=$1
+shift
 
 case "$FLAG" in
     --by-id)
-        if [ "$#" -ne 2 ]; then
+        if [ "$#" -ne 1 ]; then
             usage
         fi
-        ID=$2
-        QUERY="SELECT * FROM audit_event WHERE id = '$ID' AND NOT (year = '2024' AND month = '8');"
+        ID=$1
+        QUERY="SELECT * FROM $DATABASE_NAME.$TABLE_NAME WHERE id = '$ID' AND NOT (year = '2024' AND month = '8');"
         ;;
 
     --by-user-date)
-        if [ "$#" -ne 5 ]; then
+        if [ "$#" -ne 4 ]; then
             usage
         fi
-        YEAR=$2
-        MONTH=$3
-        DAY=$4
-        USER=$5
-        QUERY="SELECT * FROM audit_event WHERE year = '$YEAR' AND month = '$MONTH' AND day = '$DAY' AND user = '$USER';"
+        YEAR=$1
+        MONTH=$2
+        DAY=$3
+        USER=$4
+        QUERY="SELECT * FROM $DATABASE_NAME.$TABLE_NAME WHERE year = '$YEAR' AND month = '$MONTH' AND day = '$DAY' AND user = '$USER';"
         ;;
 
     *)
@@ -38,9 +54,7 @@ case "$FLAG" in
         ;;
 esac
 
-S3_BUCKET_NAME=$(aws s3api list-buckets --query "Buckets[?starts_with(Name, 'cloud-platform')].Name | [0]" --output text)
 OUTPUT_LOCATION="s3://$S3_BUCKET_NAME/query_results/"
-DATABASE="audit_dev"
 
 echo "Bucket name: $S3_BUCKET_NAME"
 echo "Output location: $OUTPUT_LOCATION"
@@ -48,7 +62,7 @@ echo "Query: $QUERY"
 
 QUERY_EXECUTION_ID=$(aws athena start-query-execution \
     --query-string "$QUERY" \
-    --query-execution-context Database=$DATABASE \
+    --query-execution-context Database=$DATABASE_NAME \
     --result-configuration OutputLocation=$OUTPUT_LOCATION \
     --output text --query 'QueryExecutionId')
 
