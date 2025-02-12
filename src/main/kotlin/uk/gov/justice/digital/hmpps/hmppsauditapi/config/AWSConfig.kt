@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.services.athena.AthenaClient
 import software.amazon.awssdk.services.s3.S3Client
 
 @Configuration
@@ -19,5 +20,10 @@ class AWSConfig {
   fun s3Client(): S3Client = S3Client.builder()
     .region(Region.of(region))
     .credentialsProvider(DefaultCredentialsProvider.create())
+    .build()
+
+  @Bean
+  fun athenaClient(): AthenaClient = AthenaClient.builder()
+    .region(Region.of(region))
     .build()
 }

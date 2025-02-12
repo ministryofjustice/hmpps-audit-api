@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "7.0.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "7.1.0"
   kotlin("plugin.spring") version "2.1.10"
   kotlin("plugin.jpa") version "2.1.10"
 }
@@ -32,7 +32,10 @@ dependencies {
 
   implementation("org.apache.commons:commons-lang3:3.17.0")
   implementation("software.amazon.awssdk:s3:2.30.13")
+  implementation("software.amazon.awssdk:athena:2.30.13")
   implementation("org.apache.parquet:parquet-avro:1.15.0")
+  implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.10")
+  implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.10")
   implementation("org.apache.avro:avro:1.12.0")
   implementation("org.apache.hadoop:hadoop-client:3.4.1") {
     exclude(group = "com.google.protobuf", module = "protobuf-java")

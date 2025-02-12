@@ -16,6 +16,7 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.then
 import software.amazon.awssdk.core.sync.RequestBody
+import software.amazon.awssdk.services.athena.AthenaClient
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
@@ -32,6 +33,9 @@ class AuditS3ClientTest {
   @Mock
   private lateinit var s3Client: S3Client
 
+  @Mock
+  private lateinit var athenaClient: AthenaClient
+
   private lateinit var auditS3Client: AuditS3Client
 
   @Captor
@@ -46,7 +50,15 @@ class AuditS3ClientTest {
 
   @BeforeEach
   fun setup() {
-    auditS3Client = AuditS3Client(s3Client, schema, "bucketName")
+    auditS3Client = AuditS3Client(
+      s3Client,
+      schema,
+      athenaClient,
+      "databaseName",
+      "workGroupName",
+      "outputLocation",
+      "bucketName",
+    )
   }
 
   @Test

@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditFilterDto
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesAuditFilterDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.swagger.StandardApiResponses
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
@@ -52,6 +53,26 @@ class AuditResource(
       "",
     )
     return auditService.findAll()
+  }
+
+  @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_read')") // TODO which roles?
+  @Operation(
+    summary = "Get audit events for staff member",
+    description = "Get audit events given who, or subject ID and subject type, role required is ROLE_AUDIT",
+    security = [SecurityRequirement(name = "ROLE_AUDIT")],
+  )
+  @StandardApiResponses
+  @GetMapping("/query")
+  fun findAuditEventsForStaffMember(
+    pageable: Pageable = Pageable.unpaged(),
+    @RequestBody @Valid
+    auditFilterDto: DigitalServicesAuditFilterDto,
+  ): List<AuditDto> {
+    auditQueueService.sendAuditAuditEvent(
+      AuditType.AUDIT_GET_ALL_PAGED.name,
+      auditFilterDto,
+    )
+    return auditService.queryS3Bucket(auditFilterDto)
   }
 
   @PreAuthorize("hasRole('ROLE_AUDIT')")
