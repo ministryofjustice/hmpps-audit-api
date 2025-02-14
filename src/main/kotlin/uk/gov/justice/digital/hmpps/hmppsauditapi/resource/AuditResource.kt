@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -29,9 +28,6 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
 import java.io.IOException
 import java.time.Instant
 import java.util.UUID
-
-// This is a hack to get around the fact that springdocs responses cannot contain generics
-class AuditDtoPage : PageImpl<AuditDto>(mutableListOf<AuditDto>())
 
 @RestController
 @RequestMapping("/audit", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -62,18 +58,18 @@ class AuditResource(
     security = [SecurityRequirement(name = "ROLE_AUDIT")],
   )
   @StandardApiResponses
-  @GetMapping("/query")
+  @PostMapping("/query")
   fun findAuditEventsForStaffMember(
     pageable: Pageable = Pageable.unpaged(),
     @RequestBody @Valid
     auditFilterDto: DigitalServicesAuditFilterDto,
   ): List<AuditDto> {
     auditQueueService.sendAuditAuditEvent(
-      AuditType.AUDIT_GET_ALL_PAGED.name,
+      AuditType.AUDIT_GET_BY_USER.name,
       auditFilterDto,
     )
     return auditService.queryS3Bucket(auditFilterDto)
-  }
+  } // TODO test
 
   @PreAuthorize("hasRole('ROLE_AUDIT')")
   @Operation(
