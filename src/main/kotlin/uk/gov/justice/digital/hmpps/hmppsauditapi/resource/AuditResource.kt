@@ -69,7 +69,7 @@ class AuditResource(
       auditFilterDto,
     )
     return auditService.queryS3Bucket(auditFilterDto)
-  } // TODO test
+  }
 
   @PreAuthorize("hasRole('ROLE_AUDIT')")
   @Operation(
