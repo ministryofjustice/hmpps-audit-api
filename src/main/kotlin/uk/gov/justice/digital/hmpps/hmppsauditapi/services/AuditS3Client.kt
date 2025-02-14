@@ -134,7 +134,7 @@ class AuditS3Client(
         QueryExecutionState.SUCCEEDED -> return
         QueryExecutionState.FAILED, QueryExecutionState.CANCELLED ->
           throw RuntimeException("Query failed or was cancelled: $queryExecutionId")
-        else -> Thread.sleep(5000) // Wait before retrying
+        else -> Thread.sleep(5000)
       }
     }
   }
@@ -154,7 +154,7 @@ class AuditS3Client(
 
       val columnNames = response.resultSet().resultSetMetadata().columnInfo().map { it.name() }
 
-      response.resultSet().rows().drop(1).forEach { row ->
+      response.resultSet().rows().forEach { row ->
         val values = row.data().map { it.varCharValue() ?: "" }
         val resultMap = columnNames.zip(values).toMap()
 
