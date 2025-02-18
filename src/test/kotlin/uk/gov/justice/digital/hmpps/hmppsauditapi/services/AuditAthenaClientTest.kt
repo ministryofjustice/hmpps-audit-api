@@ -28,6 +28,7 @@ import software.amazon.awssdk.services.athena.model.StartQueryExecutionResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesAuditFilterDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import java.time.Instant
+import java.time.LocalDate
 import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
@@ -51,7 +52,7 @@ class AuditAthenaClientTest {
   private lateinit var auditAthenaClient: AuditAthenaClient
 
   private val startQueryExecutionRequest: StartQueryExecutionRequest = StartQueryExecutionRequest.builder()
-    .queryString("SELECT * FROM databaseName.audit_event WHERE `when` >= '-1000000000-01-01T00:00:00Z' AND `when` <= '-1000000000-01-01T00:00:30Z' AND who = 'someone' AND subjectId = 'subjectId' AND subjectType = 'subjectType';")
+    .queryString("SELECT * FROM databaseName.audit_event WHERE DATE(`when`) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND who = 'someone' AND subjectId = 'subjectId' AND subjectType = 'subjectType';")
     .queryExecutionContext(QueryExecutionContext.builder().database(databaseName).build())
     .resultConfiguration(ResultConfiguration.builder().outputLocation(outputLocation).build())
     .workGroup(workGroupName)
@@ -64,7 +65,7 @@ class AuditAthenaClientTest {
     val expectedAuditDto = AuditDto(
       id = UUID.randomUUID(),
       what = "READ_USER",
-      `when` = Instant.parse("2024-02-14T12:34:56Z"),
+      `when` = Instant.parse("2025-01-14T12:34:56Z"),
       operationId = "op-123",
       subjectId = "sub-456",
       subjectType = "User",
@@ -134,8 +135,8 @@ class AuditAthenaClientTest {
     // When
     val results = auditAthenaClient.queryEvents(
       DigitalServicesAuditFilterDto(
-        startDateTime = Instant.MIN,
-        endDateTime = Instant.MIN.plusSeconds(30),
+        startDate = LocalDate.of(2025, 1, 1),
+        endDate = LocalDate.of(2025, 1, 31),
         who = "someone",
         subjectId = "subjectId",
         subjectType = "subjectType",

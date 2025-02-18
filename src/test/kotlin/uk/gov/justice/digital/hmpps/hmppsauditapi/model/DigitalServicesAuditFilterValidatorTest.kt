@@ -16,7 +16,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.IntegrationTest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.helper.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.hmppsauditapi.integration.S3TestConfig
 import uk.gov.justice.digital.hmpps.hmppsauditapi.integration.endtoend.CommandLineProfilesResolver
-import java.time.Instant
+import java.time.LocalDate
 import java.util.stream.Stream
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -34,32 +34,32 @@ class DigitalServicesAuditFilterValidatorTest {
 
     private fun validBaseAuditFilterDto() = listOf(
       DigitalServicesAuditFilterDto(
-        startDateTime = Instant.now().minusSeconds(3600),
-        endDateTime = Instant.now(),
+        startDate = LocalDate.now().minusDays(1),
+        endDate = LocalDate.now(),
         subjectId = "test-subject",
         subjectType = "USER_ID",
       ),
       DigitalServicesAuditFilterDto(
-        startDateTime = Instant.now().minusSeconds(3600),
+        startDate = LocalDate.now(),
         subjectId = "test-subject",
         subjectType = "USER_ID",
       ),
       DigitalServicesAuditFilterDto(
-        endDateTime = Instant.now(),
+        endDate = LocalDate.now(),
         subjectId = "test-subject",
         subjectType = "USER_ID",
       ),
       DigitalServicesAuditFilterDto(
-        startDateTime = Instant.now().minusSeconds(3600),
-        endDateTime = Instant.now(),
+        startDate = LocalDate.now().minusDays(1),
+        endDate = LocalDate.now(),
         who = "who",
       ),
       DigitalServicesAuditFilterDto(
-        startDateTime = Instant.now().minusSeconds(3600),
+        startDate = LocalDate.now().minusDays(1),
         who = "who",
       ),
       DigitalServicesAuditFilterDto(
-        endDateTime = Instant.now(),
+        endDate = LocalDate.now(),
         who = "who",
       ),
     )
@@ -76,8 +76,8 @@ class DigitalServicesAuditFilterValidatorTest {
 
       Arguments.of(
         DigitalServicesAuditFilterDto(
-          startDateTime = Instant.now().minusSeconds(3600),
-          endDateTime = Instant.now().plusSeconds(999999),
+          startDate = LocalDate.now(),
+          endDate = LocalDate.now().plusDays(1),
           who = "someone",
         ),
         mapOf("endDateTime" to "endDateTime must not be in the future"),
@@ -85,7 +85,7 @@ class DigitalServicesAuditFilterValidatorTest {
 
       Arguments.of(
         DigitalServicesAuditFilterDto(
-          startDateTime = Instant.now().plusSeconds(999999),
+          startDate = LocalDate.now().plusDays(1),
           who = "someone",
         ),
         mapOf("startDateTime" to "startDateTime must not be in the future"),
@@ -93,8 +93,8 @@ class DigitalServicesAuditFilterValidatorTest {
 
       Arguments.of(
         DigitalServicesAuditFilterDto(
-          startDateTime = Instant.now().minusSeconds(999),
-          endDateTime = Instant.now().minusSeconds(9999),
+          startDate = LocalDate.now(),
+          endDate = LocalDate.now().minusDays(1),
           who = "someone",
         ),
         mapOf("startDateTime" to "startDateTime must be before endDateTime"),
@@ -102,24 +102,24 @@ class DigitalServicesAuditFilterValidatorTest {
 
       Arguments.of(
         DigitalServicesAuditFilterDto(
-          startDateTime = Instant.now().minusSeconds(10),
-          endDateTime = Instant.now().minusSeconds(1),
+          startDate = LocalDate.now().minusDays(1),
+          endDate = LocalDate.now(),
           subjectId = "test-subject",
         ),
         mapOf("subjectType" to "Both subjectId and subjectType must be populated together or left null"),
       ),
       Arguments.of(
         DigitalServicesAuditFilterDto(
-          startDateTime = Instant.now().minusSeconds(10),
-          endDateTime = Instant.now().minusSeconds(1),
+          startDate = LocalDate.now().minusDays(1),
+          endDate = LocalDate.now(),
           subjectType = "PERSON",
         ),
         mapOf("subjectId" to "Both subjectId and subjectType must be populated together or left null"),
       ),
       Arguments.of(
         DigitalServicesAuditFilterDto(
-          startDateTime = Instant.now().minusSeconds(10),
-          endDateTime = Instant.now().minusSeconds(1),
+          startDate = LocalDate.now().minusDays(1),
+          endDate = LocalDate.now(),
         ),
         mapOf("who" to "If who is null then subjectId and subjectType must be populated"),
       ),

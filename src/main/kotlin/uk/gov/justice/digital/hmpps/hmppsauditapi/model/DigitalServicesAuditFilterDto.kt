@@ -2,23 +2,23 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.model
 
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Size
-import java.time.Instant
+import java.time.LocalDate
 
 @ValidDigitalServicesAuditFilter
 open class DigitalServicesAuditFilterDto(
   @Schema(
     required = false,
-    description = "The start date and time to filter the audit events",
-    example = "2020-07-01T15:15:30Z",
+    description = "The start date to filter the audit events",
+    example = "2020-07-01",
   )
-  val startDateTime: Instant? = null,
+  val startDate: LocalDate? = null,
 
   @Schema(
     required = false,
-    description = "The end date and time to filter the audit events",
-    example = "2020-07-01T15:15:30Z",
+    description = "The end date to filter the audit events",
+    example = "2020-07-01",
   )
-  val endDateTime: Instant? = null,
+  val endDate: LocalDate? = null,
 
   @Schema(required = false, description = "The user who initiated the audit event", example = "Joe.Bloggs")
   @field:Size(min = 2, max = 80)

@@ -45,6 +45,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesAuditFilterDto
 import java.time.Instant
+import java.time.LocalDate
 import java.util.UUID
 
 @Suppress("ClassName")
@@ -485,7 +486,7 @@ class AuditResourceTest : IntegrationTest() {
         )
 
         val startQueryExecutionRequest: StartQueryExecutionRequest = StartQueryExecutionRequest.builder()
-          .queryString("SELECT * FROM the-database.audit_event WHERE `when` >= '-1000000000-01-01T00:00:00Z' AND `when` <= '-1000000000-01-01T01:00:00Z' AND subjectId = 'test-subject' AND subjectType = 'USER_ID';")
+          .queryString("SELECT * FROM the-database.audit_event WHERE DATE(`when`) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND subjectId = 'test-subject' AND subjectType = 'USER_ID';")
           .queryExecutionContext(QueryExecutionContext.builder().database("the-database").build())
           .workGroup("the-workgroup")
           .resultConfiguration(ResultConfiguration.builder().outputLocation("the-location").build())
@@ -544,8 +545,8 @@ class AuditResourceTest : IntegrationTest() {
           .body(
             BodyInserters.fromValue(
               DigitalServicesAuditFilterDto(
-                startDateTime = Instant.MIN,
-                endDateTime = Instant.MIN.plusSeconds(3600),
+                startDate = LocalDate.of(2025, 1, 1),
+                endDate = LocalDate.of(2025, 1, 31),
                 subjectId = "test-subject",
                 subjectType = "USER_ID",
               ),
