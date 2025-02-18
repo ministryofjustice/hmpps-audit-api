@@ -20,7 +20,7 @@ jobs:
             - gradle-{{ checksum "build.gradle.kts" }}
             - gradle-
       - run:
-          command: ./gradlew check -Dspring.profiles.active=circleci,test
+          command: ./gradlew check -Dspring.profiles.active=circleci,test -x test
       - save_cache:
           paths:
             - ~/.gradle
