@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
+import com.microsoft.applicationinsights.TelemetryClient
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -39,9 +40,12 @@ class AuditAthenaClientTest {
   @Mock
   private lateinit var athenaClient: AthenaClient
 
+  @Mock
+  private lateinit var telemetryClient: TelemetryClient
+
   @BeforeEach
   fun setup() {
-    auditAthenaClient = AuditAthenaClient(athenaClient, databaseName, workGroupName, outputLocation)
+    auditAthenaClient = AuditAthenaClient(telemetryClient = telemetryClient, athenaClient, databaseName, workGroupName, outputLocation)
   }
 
   private lateinit var auditAthenaClient: AuditAthenaClient

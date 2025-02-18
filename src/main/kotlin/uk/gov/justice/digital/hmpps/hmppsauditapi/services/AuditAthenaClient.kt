@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
+import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.services.athena.AthenaClient
@@ -7,6 +8,7 @@ import software.amazon.awssdk.services.athena.model.GetQueryExecutionRequest
 import software.amazon.awssdk.services.athena.model.GetQueryResultsRequest
 import software.amazon.awssdk.services.athena.model.QueryExecutionState
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesAuditFilterDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import java.time.Instant
@@ -14,6 +16,7 @@ import java.util.UUID
 
 @Service
 class AuditAthenaClient(
+  private val telemetryClient: TelemetryClient,
   private val athenaClient: AthenaClient,
   @Value("\${aws.athena.database}") private val databaseName: String,
   @Value("\${aws.athena.workgroup}") private val workGroup: String,
@@ -51,6 +54,7 @@ class AuditAthenaClient(
       .resultConfiguration { it.outputLocation(outputLocation) }
       .build()
 
+    telemetryClient.trackEvent("mohamad", mapOf("query" to request.queryString()))
     val response = athenaClient.startQueryExecution(request)
     return response.queryExecutionId()
   }
