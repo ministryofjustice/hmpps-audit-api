@@ -35,8 +35,13 @@ class AuditAthenaClient(
   private fun buildAthenaQuery(filter: DigitalServicesAuditFilterDto): String {
     val conditions = mutableListOf<String>()
 
-    filter.startDateTime?.let { conditions.add("`when` >= '$it'") }
-    filter.endDateTime?.let { conditions.add("`when` <= '$it'") }
+    if (filter.startDateTime != null && filter.endDateTime != null) {
+      conditions.add("CAST(`when` AS DATE) BETWEEN DATE '${filter.startDateTime}' AND DATE '${filter.endDateTime}'")
+    } else if (filter.startDateTime != null) {
+      conditions.add("CAST(`when` AS DATE) >= DATE '${filter.startDateTime}'")
+    } else if (filter.endDateTime != null) {
+      conditions.add("CAST(`when` AS DATE) <= DATE '${filter.endDateTime}'")
+    }
     filter.who?.let { conditions.add("who = '$it'") }
     filter.subjectId?.let { conditions.add("subjectId = '$it'") }
     filter.subjectType?.let { conditions.add("subjectType = '$it'") }
