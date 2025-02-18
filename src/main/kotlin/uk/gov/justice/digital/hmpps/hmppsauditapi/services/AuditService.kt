@@ -21,6 +21,7 @@ class AuditService(
   private val telemetryClient: TelemetryClient,
   private val auditRepository: AuditRepository,
   private val auditS3Client: AuditS3Client,
+  private val auditAthenaClient: AuditAthenaClient,
   @Value("\${hmpps.repository.saveToS3Bucket}") private val saveToS3Bucket: Boolean,
 ) {
   private companion object {
@@ -70,7 +71,7 @@ class AuditService(
     }
   }
 
-  fun queryS3Bucket(auditFilterDto: DigitalServicesAuditFilterDto): List<AuditDto> = auditS3Client.queryEvents(auditFilterDto)
+  fun queryS3Bucket(auditFilterDto: DigitalServicesAuditFilterDto): List<AuditDto> = auditAthenaClient.queryEvents(auditFilterDto)
 }
 
 private fun AuditEvent.asMap(): Map<String, String> {
