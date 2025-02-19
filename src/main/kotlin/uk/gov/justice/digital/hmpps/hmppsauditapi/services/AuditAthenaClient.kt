@@ -36,11 +36,11 @@ class AuditAthenaClient(
     val conditions = mutableListOf<String>()
 
     if (filter.startDate != null && filter.endDate != null) {
-      conditions.add("DATE(`when`) BETWEEN DATE '${filter.startDate}' AND DATE '${filter.endDate}'")
+      conditions.add("DATE(\"when\") BETWEEN DATE '${filter.startDate}' AND DATE '${filter.endDate}'")
     } else if (filter.startDate != null) {
-      conditions.add("DATE(`when`) >= DATE '${filter.startDate}'")
+      conditions.add("DATE(\"when\") >= DATE '${filter.startDate}'")
     } else if (filter.endDate != null) {
-      conditions.add("DATE(`when`) <= DATE '${filter.endDate}'")
+      conditions.add("DATE(\"when\") <= DATE '${filter.endDate}'")
     }
     filter.who?.let { conditions.add("who = '$it'") }
     filter.subjectId?.let { conditions.add("subjectId = '$it'") }
