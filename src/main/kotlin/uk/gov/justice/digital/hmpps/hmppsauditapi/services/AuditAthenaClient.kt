@@ -95,7 +95,7 @@ class AuditAthenaClient(
 
       val columnNames = response.resultSet().resultSetMetadata().columnInfo().map { it.name() }
 
-      response.resultSet().rows().forEach { row ->
+      response.resultSet().rows().drop(1).forEach { row ->
         val values = row.data().map { it.varCharValue() ?: "" }
         val resultMap = columnNames.zip(values).toMap()
 
