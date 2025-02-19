@@ -61,6 +61,7 @@ class AuditAthenaClient(
 
     telemetryClient.trackEvent("mohamad", mapOf("query" to request.queryString()))
     val response = athenaClient.startQueryExecution(request)
+    telemetryClient.trackEvent("mohamad", mapOf("query-id" to response.queryExecutionId()))
     return response.queryExecutionId()
   }
 
