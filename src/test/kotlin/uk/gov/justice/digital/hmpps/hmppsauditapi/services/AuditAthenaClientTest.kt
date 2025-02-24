@@ -133,7 +133,7 @@ class AuditAthenaClientTest {
     )
 
     // When
-    val results = auditAthenaClient.queryEvents(
+    val results = auditAthenaClient.triggerQuery(
       DigitalServicesAuditFilterDto(
         startDate = LocalDate.of(2025, 1, 1),
         endDate = LocalDate.of(2025, 1, 31),
@@ -168,7 +168,7 @@ class AuditAthenaClientTest {
 
     // Then
     org.junit.jupiter.api.assertThrows<RuntimeException> {
-      auditAthenaClient.queryEvents(DigitalServicesAuditFilterDto())
+      auditAthenaClient.triggerQuery(DigitalServicesAuditFilterDto())
     }
   }
 

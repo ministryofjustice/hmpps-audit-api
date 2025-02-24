@@ -10,6 +10,7 @@ import software.amazon.awssdk.services.athena.model.QueryExecutionState
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesAuditFilterDto
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesAuditQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import java.time.Instant
 import java.util.UUID
@@ -23,13 +24,16 @@ class AuditAthenaClient(
   @Value("\${aws.athena.outputLocation}") private val outputLocation: String,
 ) {
 
-  fun queryEvents(filter: DigitalServicesAuditFilterDto): List<AuditDto> {
+  fun triggerQuery(filter: DigitalServicesAuditFilterDto): DigitalServicesAuditQueryResponse {
     val query = buildAthenaQuery(filter)
-
     val queryExecutionId = startAthenaQuery(query)
-    waitForQueryCompletion(queryExecutionId)
 
-    return fetchQueryResults(queryExecutionId)
+    return DigitalServicesAuditQueryResponse(
+      queryId = UUID.fromString(queryExecutionId),
+      queryState = QueryExecutionState.QUEUED,
+    )
+    // waitForQueryCompletion(queryExecutionId)
+    // return fetchQueryResults(queryExecutionId)
   }
 
   private fun buildAthenaQuery(filter: DigitalServicesAuditFilterDto): String {

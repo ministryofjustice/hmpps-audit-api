@@ -13,6 +13,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditFilterDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesAuditFilterDto
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesAuditQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import java.util.UUID
 
@@ -71,7 +72,7 @@ class AuditService(
     }
   }
 
-  fun queryS3Bucket(auditFilterDto: DigitalServicesAuditFilterDto): List<AuditDto> = auditAthenaClient.queryEvents(auditFilterDto)
+  fun triggerQuery(auditFilterDto: DigitalServicesAuditFilterDto): DigitalServicesAuditQueryResponse = auditAthenaClient.triggerQuery(auditFilterDto)
 }
 
 private fun AuditEvent.asMap(): Map<String, String> {
