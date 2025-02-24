@@ -5,7 +5,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import java.util.UUID
 
 data class DigitalServicesAuditQueryResponse(
-  val queryId: UUID,
+  val queryExecutionId: UUID,
   val queryState: QueryExecutionState,
-  val results: List<AuditDto>? = null,
+  var results: List<AuditDto>? = null,
 )

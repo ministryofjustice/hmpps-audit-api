@@ -29,11 +29,9 @@ class AuditAthenaClient(
     val queryExecutionId = startAthenaQuery(query)
 
     return DigitalServicesAuditQueryResponse(
-      queryId = UUID.fromString(queryExecutionId),
+      queryExecutionId = UUID.fromString(queryExecutionId),
       queryState = QueryExecutionState.QUEUED,
     )
-    // waitForQueryCompletion(queryExecutionId)
-    // return fetchQueryResults(queryExecutionId)
   }
 
   private fun buildAthenaQuery(filter: DigitalServicesAuditFilterDto): String {
@@ -69,19 +67,18 @@ class AuditAthenaClient(
     return response.queryExecutionId()
   }
 
-  private fun waitForQueryCompletion(queryExecutionId: String) {
-    while (true) {
-      val status = athenaClient.getQueryExecution(
-        GetQueryExecutionRequest.builder().queryExecutionId(queryExecutionId).build(),
-      ).queryExecution().status().state()
-
-      when (status) {
-        QueryExecutionState.SUCCEEDED -> return
-        QueryExecutionState.FAILED, QueryExecutionState.CANCELLED ->
-          throw RuntimeException("Query failed or was cancelled: $queryExecutionId")
-        else -> Thread.sleep(5000)
-      }
+  fun getQueryResults(queryExecutionId: String): DigitalServicesAuditQueryResponse {
+    val queryState = athenaClient.getQueryExecution(
+      GetQueryExecutionRequest.builder().queryExecutionId(queryExecutionId).build(),
+    ).queryExecution().status().state()
+    val response = DigitalServicesAuditQueryResponse(
+      queryExecutionId = UUID.fromString(queryExecutionId),
+      queryState = queryState,
+    )
+    if (queryState == QueryExecutionState.SUCCEEDED) {
+      response.results = fetchQueryResults(queryExecutionId)
     }
+    return response
   }
 
   private fun fetchQueryResults(queryExecutionId: String): List<AuditDto> {

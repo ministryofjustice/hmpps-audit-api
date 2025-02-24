@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
@@ -61,9 +62,7 @@ class AuditResource(
   @StandardApiResponses
   @PostMapping("/query")
   fun startQueryForAuditEventsForStaffMember(
-    pageable: Pageable = Pageable.unpaged(),
-    @RequestBody @Valid
-    auditFilterDto: DigitalServicesAuditFilterDto,
+    @RequestBody @Valid auditFilterDto: DigitalServicesAuditFilterDto,
   ): DigitalServicesAuditQueryResponse {
     auditQueueService.sendAuditAuditEvent(
       AuditType.AUDIT_GET_BY_USER.name,
@@ -79,17 +78,15 @@ class AuditResource(
     security = [SecurityRequirement(name = "ROLE_AUDIT")],
   )
   @StandardApiResponses
-  @PostMapping("/query")
-  fun findAuditEventsForStaffMember(
-    pageable: Pageable = Pageable.unpaged(),
-    @RequestBody @Valid
-    auditFilterDto: DigitalServicesAuditFilterDto,
+  @GetMapping("/query/{queryExecutionId}")
+  fun getDigitalServicesAuditQueryResults(
+    @PathVariable queryExecutionId: UUID,
   ): DigitalServicesAuditQueryResponse {
     auditQueueService.sendAuditAuditEvent(
       AuditType.AUDIT_GET_BY_USER.name,
-      auditFilterDto,
+      queryExecutionId,
     )
-    return auditService.triggerQuery(auditFilterDto)
+    return auditService.getQueryResults(queryExecutionId.toString())
   }
 
   @PreAuthorize("hasRole('ROLE_AUDIT')")

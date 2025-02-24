@@ -73,6 +73,7 @@ class AuditService(
   }
 
   fun triggerQuery(auditFilterDto: DigitalServicesAuditFilterDto): DigitalServicesAuditQueryResponse = auditAthenaClient.triggerQuery(auditFilterDto)
+  fun getQueryResults(queryExecutionId: String): DigitalServicesAuditQueryResponse = auditAthenaClient.getQueryResults(queryExecutionId)
 }
 
 private fun AuditEvent.asMap(): Map<String, String> {
