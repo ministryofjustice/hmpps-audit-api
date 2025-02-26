@@ -43,7 +43,7 @@ import software.amazon.awssdk.services.athena.model.StartQueryExecutionResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.IntegrationTest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
-import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesAuditFilterDto
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
 import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
@@ -544,7 +544,7 @@ class AuditResourceTest : IntegrationTest() {
           .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
           .body(
             BodyInserters.fromValue(
-              DigitalServicesAuditFilterDto(
+              DigitalServicesQueryRequest(
                 startDate = LocalDate.of(2025, 1, 1),
                 endDate = LocalDate.of(2025, 1, 31),
                 subjectId = "test-subject",

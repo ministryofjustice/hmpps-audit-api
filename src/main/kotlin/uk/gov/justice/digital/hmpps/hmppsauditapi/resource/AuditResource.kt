@@ -22,8 +22,8 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditFilterDto
-import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesAuditFilterDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesAuditQueryResponse
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.swagger.StandardApiResponses
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
@@ -62,7 +62,7 @@ class AuditResource(
   @StandardApiResponses
   @PostMapping("/query")
   fun startQueryForAuditEventsForStaffMember(
-    @RequestBody @Valid auditFilterDto: DigitalServicesAuditFilterDto,
+    @RequestBody @Valid auditFilterDto: DigitalServicesQueryRequest,
   ): DigitalServicesAuditQueryResponse {
     auditQueueService.sendAuditAuditEvent(
       AuditType.AUDIT_GET_BY_USER.name,
