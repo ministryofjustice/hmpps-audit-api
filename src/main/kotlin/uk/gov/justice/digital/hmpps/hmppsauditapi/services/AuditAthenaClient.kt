@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
-import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.services.athena.AthenaClient
@@ -8,23 +7,21 @@ import software.amazon.awssdk.services.athena.model.GetQueryExecutionRequest
 import software.amazon.awssdk.services.athena.model.GetQueryResultsRequest
 import software.amazon.awssdk.services.athena.model.QueryExecutionState
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
-import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
-import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesAuditFilterDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesAuditQueryResponse
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import java.time.Instant
 import java.util.UUID
 
 @Service
 class AuditAthenaClient(
-  private val telemetryClient: TelemetryClient,
   private val athenaClient: AthenaClient,
   @Value("\${aws.athena.database}") private val databaseName: String,
   @Value("\${aws.athena.workgroup}") private val workGroup: String,
   @Value("\${aws.athena.outputLocation}") private val outputLocation: String,
 ) {
 
-  fun triggerQuery(filter: DigitalServicesAuditFilterDto): DigitalServicesAuditQueryResponse {
+  fun triggerQuery(filter: DigitalServicesQueryRequest): DigitalServicesAuditQueryResponse {
     val query = buildAthenaQuery(filter)
     val queryExecutionId = startAthenaQuery(query)
 
@@ -34,7 +31,21 @@ class AuditAthenaClient(
     )
   }
 
-  private fun buildAthenaQuery(filter: DigitalServicesAuditFilterDto): String {
+  fun getQueryResults(queryExecutionId: String): DigitalServicesAuditQueryResponse {
+    val queryState = athenaClient.getQueryExecution(
+      GetQueryExecutionRequest.builder().queryExecutionId(queryExecutionId).build(),
+    ).queryExecution().status().state()
+    val response = DigitalServicesAuditQueryResponse(
+      queryExecutionId = UUID.fromString(queryExecutionId),
+      queryState = queryState,
+    )
+    if (queryState == QueryExecutionState.SUCCEEDED) {
+      response.results = fetchQueryResults(queryExecutionId)
+    }
+    return response
+  }
+
+  private fun buildAthenaQuery(filter: DigitalServicesQueryRequest): String {
     val conditions = mutableListOf<String>()
 
     if (filter.startDate != null && filter.endDate != null) {
@@ -61,24 +72,8 @@ class AuditAthenaClient(
       .resultConfiguration { it.outputLocation(outputLocation) }
       .build()
 
-    telemetryClient.trackEvent("mohamad", mapOf("query" to request.queryString()))
     val response = athenaClient.startQueryExecution(request)
-    telemetryClient.trackEvent("mohamad", mapOf("query-id" to response.queryExecutionId()))
     return response.queryExecutionId()
-  }
-
-  fun getQueryResults(queryExecutionId: String): DigitalServicesAuditQueryResponse {
-    val queryState = athenaClient.getQueryExecution(
-      GetQueryExecutionRequest.builder().queryExecutionId(queryExecutionId).build(),
-    ).queryExecution().status().state()
-    val response = DigitalServicesAuditQueryResponse(
-      queryExecutionId = UUID.fromString(queryExecutionId),
-      queryState = queryState,
-    )
-    if (queryState == QueryExecutionState.SUCCEEDED) {
-      response.results = fetchQueryResults(queryExecutionId)
-    }
-    return response
   }
 
   private fun fetchQueryResults(queryExecutionId: String): List<AuditDto> {
@@ -101,7 +96,7 @@ class AuditAthenaClient(
         val resultMap = columnNames.zip(values).toMap()
 
         val auditDto = AuditDto(
-          id = UUID.fromString(resultMap["id"] ?: throw IllegalArgumentException("Missing ID")),
+          id = UUID.fromString(resultMap["id"]),
           what = resultMap["what"] ?: "",
           `when` = Instant.parse(resultMap["when"] ?: throw IllegalArgumentException("Missing timestamp")),
           operationId = resultMap["operationId"],

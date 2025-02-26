@@ -1,13 +1,17 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
-import com.microsoft.applicationinsights.TelemetryClient
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
+import org.mockito.BDDMockito.given
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.whenever
 import software.amazon.awssdk.services.athena.AthenaClient
 import software.amazon.awssdk.services.athena.model.ColumnInfo
 import software.amazon.awssdk.services.athena.model.Datum
@@ -25,44 +29,104 @@ import software.amazon.awssdk.services.athena.model.ResultSetMetadata
 import software.amazon.awssdk.services.athena.model.Row
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionResponse
-import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesAuditFilterDto
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesAuditQueryResponse
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
+import java.util.stream.Stream
 
 @ExtendWith(MockitoExtension::class)
 class AuditAthenaClientTest {
-
   private val databaseName = "databaseName"
   private val workGroupName = "workGroupName"
   private val outputLocation = "outputLocation"
+  private val queryExecutionId = "a4ab5455-dfe1-46f2-917d-5135b7dadae3"
 
   @Mock
   private lateinit var athenaClient: AthenaClient
 
-  @Mock
-  private lateinit var telemetryClient: TelemetryClient
-
   @BeforeEach
   fun setup() {
-    auditAthenaClient = AuditAthenaClient(telemetryClient = telemetryClient, athenaClient, databaseName, workGroupName, outputLocation)
+    auditAthenaClient = AuditAthenaClient(athenaClient, databaseName, workGroupName, outputLocation)
   }
 
   private lateinit var auditAthenaClient: AuditAthenaClient
 
-  private val startQueryExecutionRequest: StartQueryExecutionRequest = StartQueryExecutionRequest.builder()
-    .queryString("SELECT * FROM databaseName.audit_event WHERE DATE(`when`) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND who = 'someone' AND subjectId = 'subjectId' AND subjectType = 'subjectType';")
-    .queryExecutionContext(QueryExecutionContext.builder().database(databaseName).build())
-    .resultConfiguration(ResultConfiguration.builder().outputLocation(outputLocation).build())
-    .workGroup(workGroupName)
-    .build()
+  @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+  @Nested
+  inner class TriggerQuery {
+    private val startQueryExecutionRequestBuilder: StartQueryExecutionRequest.Builder = StartQueryExecutionRequest.builder()
+      .queryExecutionContext(QueryExecutionContext.builder().database(databaseName).build())
+      .resultConfiguration(ResultConfiguration.builder().outputLocation(outputLocation).build())
+      .workGroup(workGroupName)
 
-  @Test
-  fun `queryEvents should return results from Athena`() {
-    // Given
-    val queryExecutionId = "test-query-id"
-    val expectedAuditDto = AuditDto(
+    @ParameterizedTest
+    @MethodSource("triggerQueryParameters")
+    fun triggerQuery(digitalServicesQueryRequest: DigitalServicesQueryRequest, expectedQuery: String) {
+      // Given
+      given(athenaClient.startQueryExecution(startQueryExecutionRequestBuilder.queryString(expectedQuery).build()))
+        .willReturn(StartQueryExecutionResponse.builder().queryExecutionId(queryExecutionId).build())
+
+      // When
+      val response: DigitalServicesAuditQueryResponse = auditAthenaClient.triggerQuery(digitalServicesQueryRequest)
+
+      // Then
+      assertThat(response.queryExecutionId).isEqualTo(UUID.fromString(queryExecutionId))
+      assertThat(response.queryState).isEqualTo(QueryExecutionState.QUEUED)
+    }
+
+    private fun triggerQueryParameters(): Stream<Arguments> = Stream.of(
+      Arguments.of(
+        DigitalServicesQueryRequest(
+          startDate = LocalDate.of(2025, 1, 1),
+          endDate = LocalDate.of(2025, 1, 31),
+          who = "someone",
+          subjectId = "subjectId",
+          subjectType = "subjectType",
+        ),
+        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND who = 'someone' AND subjectId = 'subjectId' AND subjectType = 'subjectType';",
+      ),
+      Arguments.of(
+        DigitalServicesQueryRequest(
+          startDate = LocalDate.of(2025, 1, 1),
+          endDate = LocalDate.of(2025, 1, 31),
+          subjectId = "subjectId",
+          subjectType = "subjectType",
+        ),
+        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND subjectId = 'subjectId' AND subjectType = 'subjectType';",
+      ),
+      Arguments.of(
+        DigitalServicesQueryRequest(
+          startDate = LocalDate.of(2025, 1, 1),
+          subjectId = "subjectId",
+          subjectType = "subjectType",
+        ),
+        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) >= DATE '2025-01-01' AND subjectId = 'subjectId' AND subjectType = 'subjectType';",
+      ),
+      Arguments.of(
+        DigitalServicesQueryRequest(
+          endDate = LocalDate.of(2025, 1, 31),
+          subjectId = "subjectId",
+          subjectType = "subjectType",
+        ),
+        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) <= DATE '2025-01-31' AND subjectId = 'subjectId' AND subjectType = 'subjectType';",
+      ),
+      Arguments.of(
+        DigitalServicesQueryRequest(
+          startDate = LocalDate.of(2025, 1, 1),
+          endDate = LocalDate.of(2025, 1, 31),
+          who = "someone",
+        ),
+        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND who = 'someone';",
+      ),
+    )
+  }
+
+  @Nested
+  inner class GetQueryResults {
+    private val expectedAuditDto = AuditDto(
       id = UUID.randomUUID(),
       what = "READ_USER",
       `when` = Instant.parse("2025-01-14T12:34:56Z"),
@@ -74,25 +138,7 @@ class AuditAthenaClientTest {
       service = "auth-service",
       details = "some details",
     )
-    val getQueryExecutionRequest: GetQueryExecutionRequest = GetQueryExecutionRequest.builder().queryExecutionId("test-query-id").build()
-    val getQueryResultsRequest: GetQueryResultsRequest = GetQueryResultsRequest.builder().queryExecutionId("test-query-id").build()
-
-    whenever(athenaClient.startQueryExecution(startQueryExecutionRequest)).thenReturn(
-      StartQueryExecutionResponse.builder().queryExecutionId(queryExecutionId).build(),
-    )
-
-    whenever(athenaClient.getQueryExecution(getQueryExecutionRequest)).thenReturn(
-      GetQueryExecutionResponse.builder()
-        .queryExecution(
-          QueryExecution.builder().status(
-            QueryExecutionStatus.builder().state(
-              QueryExecutionState.SUCCEEDED,
-            ).build(),
-          ).build(),
-        ).build(),
-    )
-
-    val resultSet = ResultSet.builder()
+    private val resultSet = ResultSet.builder()
       .resultSetMetadata(
         ResultSetMetadata.builder()
           .columnInfo(
@@ -112,6 +158,18 @@ class AuditAthenaClientTest {
       .rows(
         listOf(
           Row.builder().data(
+            Datum.builder().varCharValue("id").build(),
+            Datum.builder().varCharValue("what").build(),
+            Datum.builder().varCharValue("when").build(),
+            Datum.builder().varCharValue("operationId").build(),
+            Datum.builder().varCharValue("subjectId").build(),
+            Datum.builder().varCharValue("subjectType").build(),
+            Datum.builder().varCharValue("correlationId").build(),
+            Datum.builder().varCharValue("who").build(),
+            Datum.builder().varCharValue("service").build(),
+            Datum.builder().varCharValue("details").build(),
+          ).build(),
+          Row.builder().data(
             Datum.builder().varCharValue(expectedAuditDto.id.toString()).build(),
             Datum.builder().varCharValue(expectedAuditDto.what).build(),
             Datum.builder().varCharValue(expectedAuditDto.`when`.toString()).build(),
@@ -125,50 +183,36 @@ class AuditAthenaClientTest {
           ).build(),
         ),
       ).build()
-
-    whenever(athenaClient.getQueryResults(getQueryResultsRequest)).thenReturn(
-      GetQueryResultsResponse.builder()
-        .resultSet(resultSet)
-        .build(),
-    )
-
-    // When
-    val results = auditAthenaClient.triggerQuery(
-      DigitalServicesAuditFilterDto(
-        startDate = LocalDate.of(2025, 1, 1),
-        endDate = LocalDate.of(2025, 1, 31),
-        who = "someone",
-        subjectId = "subjectId",
-        subjectType = "subjectType",
-      ),
-    )
-
-    // Then
-    assertThat(results).hasSize(1)
-    assertThat(results[0]).isEqualTo(expectedAuditDto)
-  }
-
-  @Test
-  fun `queryEvents should throw exception if query fails`() {
-    // Given
-    val getQueryExecutionRequest: GetQueryExecutionRequest = GetQueryExecutionRequest.builder().queryExecutionId("test-query-id").build()
-    val queryExecutionId = "test-query-id"
-    whenever(athenaClient.startQueryExecution(startQueryExecutionRequest)).thenReturn(
-      StartQueryExecutionResponse.builder().queryExecutionId(queryExecutionId).build(),
-    )
-    whenever(athenaClient.getQueryExecution(getQueryExecutionRequest)).thenReturn(
-      GetQueryExecutionResponse.builder().queryExecution(
+    private val getQueryExecutionResponse = GetQueryExecutionResponse.builder()
+      .queryExecution(
         QueryExecution.builder().status(
-          QueryExecutionStatus.builder()
-            .state(QueryExecutionState.FAILED)
-            .build(),
+          QueryExecutionStatus.builder().state(
+            QueryExecutionState.SUCCEEDED,
+          ).build(),
         ).build(),
-      ).build(),
-    )
+      ).build()
+    private val getQueryExecutionRequest: GetQueryExecutionRequest = GetQueryExecutionRequest.builder().queryExecutionId(queryExecutionId).build()
+    private val getQueryResultsRequest: GetQueryResultsRequest = GetQueryResultsRequest.builder().queryExecutionId(queryExecutionId).build()
+    private val getQueryResultsResponse = GetQueryResultsResponse.builder().resultSet(resultSet).build()
 
-    // Then
-    org.junit.jupiter.api.assertThrows<RuntimeException> {
-      auditAthenaClient.triggerQuery(DigitalServicesAuditFilterDto())
+    @Test
+    fun getQueryResults() {
+      // Given
+      given(athenaClient.getQueryExecution(getQueryExecutionRequest)).willReturn(getQueryExecutionResponse)
+      given(athenaClient.getQueryExecution(getQueryExecutionRequest)).willReturn(getQueryExecutionResponse)
+      given(athenaClient.getQueryResults(getQueryResultsRequest)).willReturn(getQueryResultsResponse)
+
+      // When
+      val digitalServicesAuditQueryResponse = auditAthenaClient.getQueryResults(queryExecutionId)
+
+      // Then
+      assertThat(digitalServicesAuditQueryResponse).isEqualTo(
+        DigitalServicesAuditQueryResponse(
+          queryExecutionId = UUID.fromString(queryExecutionId),
+          queryState = QueryExecutionState.SUCCEEDED,
+          results = listOf(expectedAuditDto),
+        ),
+      )
     }
   }
 
