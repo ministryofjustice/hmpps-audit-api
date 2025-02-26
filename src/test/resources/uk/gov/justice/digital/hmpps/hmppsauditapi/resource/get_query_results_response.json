@@ -1,0 +1,18 @@
+{
+  "queryExecutionId": "b1231f6e-9653-4b3f-9507-793730932daf",
+  "queryState": "SUCCEEDED",
+  "results": [
+    {
+      "id": "cebcfc92-bdd6-4c3c-be50-a33fb08a9853",
+      "what": "READ_USER",
+      "when": "2024-02-14T12:34:56Z",
+      "operationId": "op-123",
+      "subjectId": "sub-456",
+      "subjectType": "User",
+      "correlationId": "corr-789",
+      "who": "test-user",
+      "service": "auth-service",
+      "details": "some details"
+    }
+  ]
+}

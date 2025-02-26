@@ -1,8 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 
-import com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -13,39 +10,18 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.check
-import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.Direction.DESC
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyInserters
-import software.amazon.awssdk.services.athena.AthenaClient
-import software.amazon.awssdk.services.athena.model.ColumnInfo
-import software.amazon.awssdk.services.athena.model.Datum
-import software.amazon.awssdk.services.athena.model.GetQueryExecutionRequest
-import software.amazon.awssdk.services.athena.model.GetQueryExecutionResponse
-import software.amazon.awssdk.services.athena.model.GetQueryResultsRequest
-import software.amazon.awssdk.services.athena.model.GetQueryResultsResponse
-import software.amazon.awssdk.services.athena.model.QueryExecution
-import software.amazon.awssdk.services.athena.model.QueryExecutionContext
-import software.amazon.awssdk.services.athena.model.QueryExecutionState.SUCCEEDED
-import software.amazon.awssdk.services.athena.model.QueryExecutionStatus
-import software.amazon.awssdk.services.athena.model.ResultConfiguration
-import software.amazon.awssdk.services.athena.model.ResultSet
-import software.amazon.awssdk.services.athena.model.ResultSetMetadata
-import software.amazon.awssdk.services.athena.model.Row
-import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
-import software.amazon.awssdk.services.athena.model.StartQueryExecutionResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.IntegrationTest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
-import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
 import java.time.Instant
-import java.time.LocalDate
 import java.util.UUID
 
 @Suppress("ClassName")
@@ -53,9 +29,6 @@ class AuditResourceTest : IntegrationTest() {
 
   @MockBean
   private lateinit var auditRepository: AuditRepository
-
-  @Autowired
-  private lateinit var athenaClient: AthenaClient
 
   @TestInstance(PER_CLASS)
   @Nested
@@ -467,100 +440,6 @@ class AuditResourceTest : IntegrationTest() {
 
       verify(auditRepository).findAll(Sort.by(DESC, "when"))
     }
-
-    @Nested
-    inner class findAuditEntriesForStaffMember {
-      @Test
-      fun `find all audit entries`() {
-        val expectedAuditDto = AuditDto(
-          id = UUID.randomUUID(),
-          what = "READ_USER",
-          `when` = Instant.parse("2024-02-14T12:34:56Z"),
-          operationId = "op-123",
-          subjectId = "sub-456",
-          subjectType = "User",
-          correlationId = "corr-789",
-          who = "test-user",
-          service = "auth-service",
-          details = "some details",
-        )
-
-        val startQueryExecutionRequest: StartQueryExecutionRequest = StartQueryExecutionRequest.builder()
-          .queryString("SELECT * FROM the-database.audit_event WHERE DATE(`when`) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND subjectId = 'test-subject' AND subjectType = 'USER_ID';")
-          .queryExecutionContext(QueryExecutionContext.builder().database("the-database").build())
-          .workGroup("the-workgroup")
-          .resultConfiguration(ResultConfiguration.builder().outputLocation("the-location").build())
-          .build()
-        val startQueryExecutionResponse: StartQueryExecutionResponse = StartQueryExecutionResponse.builder()
-          .queryExecutionId("query-execution-id").build()
-        val getQueryExecutionRequest: GetQueryExecutionRequest = GetQueryExecutionRequest.builder().queryExecutionId("query-execution-id").build()
-        given(athenaClient.startQueryExecution(startQueryExecutionRequest)).willReturn(startQueryExecutionResponse)
-        given(athenaClient.getQueryExecution(getQueryExecutionRequest)).willReturn(
-          GetQueryExecutionResponse.builder()
-            .queryExecution(QueryExecution.builder().status(QueryExecutionStatus.builder().state(SUCCEEDED).build()).build()).build(),
-        )
-
-        val resultSet = ResultSet.builder()
-          .resultSetMetadata(
-            ResultSetMetadata.builder()
-              .columnInfo(
-                columnInfo("id"),
-                columnInfo("what"),
-                columnInfo("when"),
-                columnInfo("operationId"),
-                columnInfo("subjectId"),
-                columnInfo("subjectType"),
-                columnInfo("correlationId"),
-                columnInfo("who"),
-                columnInfo("service"),
-                columnInfo("details"),
-              )
-              .build(),
-          )
-          .rows(
-            listOf(
-              Row.builder().data(
-                Datum.builder().varCharValue(expectedAuditDto.id.toString()).build(),
-                Datum.builder().varCharValue(expectedAuditDto.what).build(),
-                Datum.builder().varCharValue(expectedAuditDto.`when`.toString()).build(),
-                Datum.builder().varCharValue(expectedAuditDto.operationId).build(),
-                Datum.builder().varCharValue(expectedAuditDto.subjectId).build(),
-                Datum.builder().varCharValue(expectedAuditDto.subjectType).build(),
-                Datum.builder().varCharValue(expectedAuditDto.correlationId).build(),
-                Datum.builder().varCharValue(expectedAuditDto.who).build(),
-                Datum.builder().varCharValue(expectedAuditDto.service).build(),
-                Datum.builder().varCharValue(expectedAuditDto.details).build(),
-              ).build(),
-            ),
-          ).build()
-        val getQueryResultsRequest: GetQueryResultsRequest = GetQueryResultsRequest.builder().queryExecutionId("query-execution-id").build()
-        whenever(athenaClient.getQueryResults(getQueryResultsRequest)).thenReturn(
-          GetQueryResultsResponse.builder()
-            .resultSet(resultSet)
-            .build(),
-        )
-
-        webTestClient.post().uri("/audit/query")
-          .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
-          .body(
-            BodyInserters.fromValue(
-              DigitalServicesQueryRequest(
-                startDate = LocalDate.of(2025, 1, 1),
-                endDate = LocalDate.of(2025, 1, 31),
-                subjectId = "test-subject",
-                subjectType = "USER_ID",
-              ),
-            ),
-          )
-          .exchange()
-          .expectStatus().isOk
-          .expectBody().json(
-            jacksonObjectMapper().registerModule(JavaTimeModule()).disable(WRITE_DATES_AS_TIMESTAMPS)
-              .writeValueAsString(listOf(expectedAuditDto)),
-          )
-      }
-    }
-    private fun String.loadJson(): String = AuditResourceTest::class.java.getResource("$this.json")!!.readText()
-    private fun columnInfo(name: String): ColumnInfo = ColumnInfo.builder().name(name).type("string").build()
   }
+  private fun String.loadJson(): String = AuditResourceTest::class.java.getResource("$this.json")!!.readText()
 }

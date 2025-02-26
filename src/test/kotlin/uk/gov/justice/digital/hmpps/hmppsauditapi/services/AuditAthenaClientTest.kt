@@ -29,8 +29,8 @@ import software.amazon.awssdk.services.athena.model.ResultSetMetadata
 import software.amazon.awssdk.services.athena.model.Row
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionResponse
-import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesAuditQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import java.time.Instant
 import java.time.LocalDate
@@ -70,7 +70,7 @@ class AuditAthenaClientTest {
         .willReturn(StartQueryExecutionResponse.builder().queryExecutionId(queryExecutionId).build())
 
       // When
-      val response: DigitalServicesAuditQueryResponse = auditAthenaClient.triggerQuery(digitalServicesQueryRequest)
+      val response: DigitalServicesQueryResponse = auditAthenaClient.triggerQuery(digitalServicesQueryRequest)
 
       // Then
       assertThat(response.queryExecutionId).isEqualTo(UUID.fromString(queryExecutionId))
@@ -207,7 +207,7 @@ class AuditAthenaClientTest {
 
       // Then
       assertThat(digitalServicesAuditQueryResponse).isEqualTo(
-        DigitalServicesAuditQueryResponse(
+        DigitalServicesQueryResponse(
           queryExecutionId = UUID.fromString(queryExecutionId),
           queryState = QueryExecutionState.SUCCEEDED,
           results = listOf(expectedAuditDto),

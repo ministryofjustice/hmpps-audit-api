@@ -7,8 +7,8 @@ import software.amazon.awssdk.services.athena.model.GetQueryExecutionRequest
 import software.amazon.awssdk.services.athena.model.GetQueryResultsRequest
 import software.amazon.awssdk.services.athena.model.QueryExecutionState
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
-import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesAuditQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import java.time.Instant
 import java.util.UUID
@@ -21,21 +21,21 @@ class AuditAthenaClient(
   @Value("\${aws.athena.outputLocation}") private val outputLocation: String,
 ) {
 
-  fun triggerQuery(filter: DigitalServicesQueryRequest): DigitalServicesAuditQueryResponse {
+  fun triggerQuery(filter: DigitalServicesQueryRequest): DigitalServicesQueryResponse {
     val query = buildAthenaQuery(filter)
     val queryExecutionId = startAthenaQuery(query)
 
-    return DigitalServicesAuditQueryResponse(
+    return DigitalServicesQueryResponse(
       queryExecutionId = UUID.fromString(queryExecutionId),
       queryState = QueryExecutionState.QUEUED,
     )
   }
 
-  fun getQueryResults(queryExecutionId: String): DigitalServicesAuditQueryResponse {
+  fun getQueryResults(queryExecutionId: String): DigitalServicesQueryResponse {
     val queryState = athenaClient.getQueryExecution(
       GetQueryExecutionRequest.builder().queryExecutionId(queryExecutionId).build(),
     ).queryExecution().status().state()
-    val response = DigitalServicesAuditQueryResponse(
+    val response = DigitalServicesQueryResponse(
       queryExecutionId = UUID.fromString(queryExecutionId),
       queryState = queryState,
     )
