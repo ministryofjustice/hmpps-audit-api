@@ -2,17 +2,17 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.model
 
 import jakarta.validation.ConstraintValidator
 import jakarta.validation.ConstraintValidatorContext
-import java.time.Instant
+import java.time.LocalDate
 
-class DigitalServicesAuditFilterValidator : ConstraintValidator<ValidDigitalServicesAuditFilter, DigitalServicesAuditFilterDto> {
+class DigitalServicesQueryRequestValidator : ConstraintValidator<ValidDigitalServicesQueryRequest, DigitalServicesQueryRequest> {
 
-  override fun isValid(dto: DigitalServicesAuditFilterDto?, context: ConstraintValidatorContext): Boolean {
+  override fun isValid(dto: DigitalServicesQueryRequest?, context: ConstraintValidatorContext): Boolean {
     if (dto == null) return false
     context.disableDefaultConstraintViolation()
-    val now = Instant.now()
+    val now = LocalDate.now()
     var isValid = true
 
-    if (dto.startDateTime == null && dto.endDateTime == null) {
+    if (dto.startDate == null && dto.endDate == null) {
       isValid = false
       context.buildConstraintViolationWithTemplate("startDateTime must be provided if endDateTime is null")
         .addPropertyNode("startDateTime")
@@ -30,21 +30,21 @@ class DigitalServicesAuditFilterValidator : ConstraintValidator<ValidDigitalServ
         .addConstraintViolation()
     }
 
-    if (dto.endDateTime?.isAfter(now) == true) {
+    if (dto.endDate?.isAfter(now) == true) {
       isValid = false
       context.buildConstraintViolationWithTemplate("endDateTime must not be in the future")
         .addPropertyNode("endDateTime")
         .addConstraintViolation()
     }
 
-    if (dto.startDateTime?.isAfter(now) == true) {
+    if (dto.startDate?.isAfter(now) == true) {
       isValid = false
       context.buildConstraintViolationWithTemplate("startDateTime must not be in the future")
         .addPropertyNode("startDateTime")
         .addConstraintViolation()
     }
 
-    if (dto.startDateTime != null && dto.endDateTime != null && dto.startDateTime.isAfter(dto.endDateTime)) {
+    if (dto.startDate != null && dto.endDate != null && dto.startDate.isAfter(dto.endDate)) {
       isValid = false
       context.buildConstraintViolationWithTemplate("startDateTime must be before endDateTime")
         .addPropertyNode("startDateTime")

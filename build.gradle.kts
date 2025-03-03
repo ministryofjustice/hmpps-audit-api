@@ -32,6 +32,7 @@ dependencies {
 
   implementation("org.apache.commons:commons-lang3:3.17.0")
   implementation("software.amazon.awssdk:s3:2.30.19")
+  implementation("software.amazon.awssdk:athena:2.30.13")
   implementation("org.apache.parquet:parquet-avro:1.15.0")
   implementation("org.apache.avro:avro:1.12.0")
   implementation("org.apache.hadoop:hadoop-client:3.4.1") {

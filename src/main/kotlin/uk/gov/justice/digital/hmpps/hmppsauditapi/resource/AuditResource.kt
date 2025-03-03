@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -28,9 +27,6 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
 import java.io.IOException
 import java.time.Instant
 import java.util.UUID
-
-// This is a hack to get around the fact that springdocs responses cannot contain generics
-class AuditDtoPage : PageImpl<AuditDto>(mutableListOf<AuditDto>())
 
 @RestController
 @RequestMapping("/audit", produces = [MediaType.APPLICATION_JSON_VALUE])

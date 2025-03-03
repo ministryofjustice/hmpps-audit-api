@@ -27,7 +27,7 @@ class AuditS3Client(
 
   fun save(auditEvent: HMPPSAuditListener.AuditEvent) {
     val fileName = generateFilename(auditEvent)
-    val parquetBytes = convertToParquetBytes(auditEvent, fileName)
+    val parquetBytes = convertToParquetBytes(auditEvent)
     val md5Digest = MessageDigest.getInstance("MD5").digest(parquetBytes)
     val md5Base64 = Base64.getEncoder().encodeToString(md5Digest)
 
@@ -46,7 +46,7 @@ class AuditS3Client(
       "${auditEvent.id}.parquet"
   }
 
-  fun convertToParquetBytes(auditEvent: HMPPSAuditListener.AuditEvent, filename: String): ByteArray {
+  private fun convertToParquetBytes(auditEvent: HMPPSAuditListener.AuditEvent): ByteArray {
     val tempFileJavaPath = java.nio.file.Path.of(System.getProperty("java.io.tmpdir"), "${auditEvent.id}.parquet")
     try {
       val record: GenericRecord = GenericData.Record(schema).apply {

@@ -17,6 +17,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditFilterDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
+import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditAthenaClient
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditS3Client
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
 import java.time.Instant
@@ -26,12 +27,14 @@ class AuditServiceTest {
   private val telemetryClient: TelemetryClient = mock()
   private val auditRepository: AuditRepository = mock()
   private val auditS3Client: AuditS3Client = mock()
+  private val auditAthenaClient: AuditAthenaClient = mock()
   private val saveToS3Bucket = false
   private var auditService =
     AuditService(
       telemetryClient,
       auditRepository,
       auditS3Client,
+      auditAthenaClient,
       saveToS3Bucket,
     )
 
@@ -370,7 +373,7 @@ class AuditServiceTest {
 
     @Test
     fun `save audit event to database when saveToS3Bucket is false`() {
-      auditService = AuditService(telemetryClient, auditRepository, auditS3Client, false)
+      auditService = AuditService(telemetryClient, auditRepository, auditS3Client, auditAthenaClient, false)
 
       auditService.audit(
         auditEvent,
@@ -381,7 +384,7 @@ class AuditServiceTest {
 
     @Test
     fun `save audit event to S3 bucket when saveToS3Bucket is true`() {
-      auditService = AuditService(telemetryClient, auditRepository, auditS3Client, true)
+      auditService = AuditService(telemetryClient, auditRepository, auditS3Client, auditAthenaClient, true)
 
       auditService.audit(
         auditEvent,

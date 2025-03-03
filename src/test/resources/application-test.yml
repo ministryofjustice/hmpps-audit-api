@@ -7,6 +7,10 @@ management.endpoint:
 
 aws:
   provider: localstack
+  athena:
+    database: "the-database"
+    workgroup: "the-workgroup"
+    outputLocation: "the-location"
   s3:
     auditBucketName: "hmpps-audit-bucket"
 

@@ -440,7 +440,6 @@ class AuditResourceTest : IntegrationTest() {
 
       verify(auditRepository).findAll(Sort.by(DESC, "when"))
     }
-
-    private fun String.loadJson(): String = AuditResourceTest::class.java.getResource("$this.json").readText()
   }
+  private fun String.loadJson(): String = AuditResourceTest::class.java.getResource("$this.json")!!.readText()
 }

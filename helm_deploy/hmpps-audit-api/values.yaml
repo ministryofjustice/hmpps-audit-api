@@ -55,6 +55,12 @@ generic-service:
       HMPPS_SQS_QUEUES_AUDITUSERSQUEUE_DLQ_NAME: "sqs_queue_name"
     s3-output:
       HMPPS_S3_AUDIT_BUCKET_NAME: "bucket_name"
+    glue-database-name:
+      HMPPS_GLUE_DATABASE_NAME: "database_name"
+    athena-workgroup-secret:
+      HMPPS_ATHENA_WORKGROUP_NAME: "workgroup_name"
+    athena-output-location-secret:
+      HMPPS_ATHENA_OUTPUT_LOCATION: "output_location"
 
   allowlist:
     groups:

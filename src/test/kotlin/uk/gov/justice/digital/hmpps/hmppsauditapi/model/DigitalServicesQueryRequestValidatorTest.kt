@@ -16,14 +16,14 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.IntegrationTest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.helper.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.hmppsauditapi.integration.S3TestConfig
 import uk.gov.justice.digital.hmpps.hmppsauditapi.integration.endtoend.CommandLineProfilesResolver
-import java.time.Instant
+import java.time.LocalDate
 import java.util.stream.Stream
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(IntegrationTest.SqsConfig::class, JwtAuthHelper::class, S3TestConfig::class)
 @ActiveProfiles(resolver = CommandLineProfilesResolver::class)
 @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
-class DigitalServicesAuditFilterValidatorTest {
+class DigitalServicesQueryRequestValidatorTest {
 
   @TestInstance(TestInstance.Lifecycle.PER_CLASS)
   @Nested
@@ -33,40 +33,40 @@ class DigitalServicesAuditFilterValidatorTest {
     private lateinit var validator: Validator
 
     private fun validBaseAuditFilterDto() = listOf(
-      DigitalServicesAuditFilterDto(
-        startDateTime = Instant.now().minusSeconds(3600),
-        endDateTime = Instant.now(),
+      DigitalServicesQueryRequest(
+        startDate = LocalDate.now().minusDays(1),
+        endDate = LocalDate.now(),
         subjectId = "test-subject",
         subjectType = "USER_ID",
       ),
-      DigitalServicesAuditFilterDto(
-        startDateTime = Instant.now().minusSeconds(3600),
+      DigitalServicesQueryRequest(
+        startDate = LocalDate.now(),
         subjectId = "test-subject",
         subjectType = "USER_ID",
       ),
-      DigitalServicesAuditFilterDto(
-        endDateTime = Instant.now(),
+      DigitalServicesQueryRequest(
+        endDate = LocalDate.now(),
         subjectId = "test-subject",
         subjectType = "USER_ID",
       ),
-      DigitalServicesAuditFilterDto(
-        startDateTime = Instant.now().minusSeconds(3600),
-        endDateTime = Instant.now(),
+      DigitalServicesQueryRequest(
+        startDate = LocalDate.now().minusDays(1),
+        endDate = LocalDate.now(),
         who = "who",
       ),
-      DigitalServicesAuditFilterDto(
-        startDateTime = Instant.now().minusSeconds(3600),
+      DigitalServicesQueryRequest(
+        startDate = LocalDate.now().minusDays(1),
         who = "who",
       ),
-      DigitalServicesAuditFilterDto(
-        endDateTime = Instant.now(),
+      DigitalServicesQueryRequest(
+        endDate = LocalDate.now(),
         who = "who",
       ),
     )
 
     private fun invalidBaseAuditFilterDto() = Stream.of(
       Arguments.of(
-        DigitalServicesAuditFilterDto(),
+        DigitalServicesQueryRequest(),
         mapOf(
           "startDateTime" to "startDateTime must be provided if endDateTime is null",
           "endDateTime" to "endDateTime must be provided if startDateTime is null",
@@ -75,51 +75,51 @@ class DigitalServicesAuditFilterValidatorTest {
       ),
 
       Arguments.of(
-        DigitalServicesAuditFilterDto(
-          startDateTime = Instant.now().minusSeconds(3600),
-          endDateTime = Instant.now().plusSeconds(999999),
+        DigitalServicesQueryRequest(
+          startDate = LocalDate.now(),
+          endDate = LocalDate.now().plusDays(1),
           who = "someone",
         ),
         mapOf("endDateTime" to "endDateTime must not be in the future"),
       ),
 
       Arguments.of(
-        DigitalServicesAuditFilterDto(
-          startDateTime = Instant.now().plusSeconds(999999),
+        DigitalServicesQueryRequest(
+          startDate = LocalDate.now().plusDays(1),
           who = "someone",
         ),
         mapOf("startDateTime" to "startDateTime must not be in the future"),
       ),
 
       Arguments.of(
-        DigitalServicesAuditFilterDto(
-          startDateTime = Instant.now().minusSeconds(999),
-          endDateTime = Instant.now().minusSeconds(9999),
+        DigitalServicesQueryRequest(
+          startDate = LocalDate.now(),
+          endDate = LocalDate.now().minusDays(1),
           who = "someone",
         ),
         mapOf("startDateTime" to "startDateTime must be before endDateTime"),
       ),
 
       Arguments.of(
-        DigitalServicesAuditFilterDto(
-          startDateTime = Instant.now().minusSeconds(10),
-          endDateTime = Instant.now().minusSeconds(1),
+        DigitalServicesQueryRequest(
+          startDate = LocalDate.now().minusDays(1),
+          endDate = LocalDate.now(),
           subjectId = "test-subject",
         ),
         mapOf("subjectType" to "Both subjectId and subjectType must be populated together or left null"),
       ),
       Arguments.of(
-        DigitalServicesAuditFilterDto(
-          startDateTime = Instant.now().minusSeconds(10),
-          endDateTime = Instant.now().minusSeconds(1),
+        DigitalServicesQueryRequest(
+          startDate = LocalDate.now().minusDays(1),
+          endDate = LocalDate.now(),
           subjectType = "PERSON",
         ),
         mapOf("subjectId" to "Both subjectId and subjectType must be populated together or left null"),
       ),
       Arguments.of(
-        DigitalServicesAuditFilterDto(
-          startDateTime = Instant.now().minusSeconds(10),
-          endDateTime = Instant.now().minusSeconds(1),
+        DigitalServicesQueryRequest(
+          startDate = LocalDate.now().minusDays(1),
+          endDate = LocalDate.now(),
         ),
         mapOf("who" to "If who is null then subjectId and subjectType must be populated"),
       ),
@@ -127,15 +127,15 @@ class DigitalServicesAuditFilterValidatorTest {
 
     @ParameterizedTest
     @MethodSource("validBaseAuditFilterDto")
-    internal fun `should be valid`(digitalServicesAuditFilterDto: DigitalServicesAuditFilterDto) {
-      val violations = validator.validate(digitalServicesAuditFilterDto)
+    internal fun `should be valid`(digitalServicesQueryRequest: DigitalServicesQueryRequest) {
+      val violations = validator.validate(digitalServicesQueryRequest)
       assertThat(violations).isEmpty()
     }
 
     @ParameterizedTest
     @MethodSource("invalidBaseAuditFilterDto")
-    internal fun `should be invalid`(digitalServicesAuditFilterDto: DigitalServicesAuditFilterDto, expectedErrorMessages: Map<String, String>) {
-      val errorMessages: Map<String, String> = validator.validate(digitalServicesAuditFilterDto).map { it.propertyPath.toString() to it.message }.toMap()
+    internal fun `should be invalid`(digitalServicesQueryRequest: DigitalServicesQueryRequest, expectedErrorMessages: Map<String, String>) {
+      val errorMessages: Map<String, String> = validator.validate(digitalServicesQueryRequest).map { it.propertyPath.toString() to it.message }.toMap()
       assertThat(errorMessages).containsExactlyInAnyOrderEntriesOf(expectedErrorMessages)
     }
   }
