@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
-import com.microsoft.applicationinsights.TelemetryClient
 import org.apache.avro.Schema
 import org.apache.avro.generic.GenericData
 import org.apache.avro.generic.GenericRecord
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Service
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
-import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
 import java.nio.file.Files
 import java.security.MessageDigest
@@ -24,12 +22,10 @@ import java.util.Base64
 class AuditS3Client(
   private val s3Client: S3Client,
   private val schema: Schema,
-  private val telemetryClient: TelemetryClient,
   @Value("\${aws.s3.auditBucketName}") private val bucketName: String,
 ) {
 
   fun save(auditEvent: HMPPSAuditListener.AuditEvent) {
-    telemetryClient.trackEvent("mohamad", mapOf("save attempt" to bucketName))
     val fileName = generateFilename(auditEvent)
     val parquetBytes = convertToParquetBytes(auditEvent)
     val md5Digest = MessageDigest.getInstance("MD5").digest(parquetBytes)
@@ -41,8 +37,7 @@ class AuditS3Client(
       .contentMD5(md5Base64)
       .build()
 
-    val putObjectResponse = s3Client.putObject(putObjectRequest, RequestBody.fromBytes(parquetBytes))
-    telemetryClient.trackEvent("mohamad", mapOf("putObjectResponse" to putObjectResponse.toString()))
+    s3Client.putObject(putObjectRequest, RequestBody.fromBytes(parquetBytes))
   }
 
   private fun generateFilename(auditEvent: HMPPSAuditListener.AuditEvent): String {

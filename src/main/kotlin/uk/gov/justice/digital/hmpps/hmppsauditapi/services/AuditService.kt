@@ -31,7 +31,6 @@ class AuditService(
 
   fun audit(auditEvent: AuditEvent) {
     telemetryClient.trackEvent("hmpps-audit", auditEvent.asMap())
-    telemetryClient.trackEvent("mohamad", mapOf("saveToS3Bucket" to saveToS3Bucket.toString()))
     if (saveToS3Bucket) {
       auditEvent.id = UUID.randomUUID()
       auditS3Client.save(auditEvent)
