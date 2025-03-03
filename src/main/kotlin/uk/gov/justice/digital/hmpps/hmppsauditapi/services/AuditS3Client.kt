@@ -29,6 +29,7 @@ class AuditS3Client(
 ) {
 
   fun save(auditEvent: HMPPSAuditListener.AuditEvent) {
+    telemetryClient.trackEvent("mohamad", mapOf("save attempt" to bucketName))
     val fileName = generateFilename(auditEvent)
     val parquetBytes = convertToParquetBytes(auditEvent)
     val md5Digest = MessageDigest.getInstance("MD5").digest(parquetBytes)
@@ -41,7 +42,7 @@ class AuditS3Client(
       .build()
 
     val putObjectResponse = s3Client.putObject(putObjectRequest, RequestBody.fromBytes(parquetBytes))
-    telemetryClient.trackEvent("mohamad", mapOf("size" to putObjectResponse.toString()))
+    telemetryClient.trackEvent("mohamad", mapOf("putObjectResponse" to putObjectResponse.toString()))
   }
 
   private fun generateFilename(auditEvent: HMPPSAuditListener.AuditEvent): String {
