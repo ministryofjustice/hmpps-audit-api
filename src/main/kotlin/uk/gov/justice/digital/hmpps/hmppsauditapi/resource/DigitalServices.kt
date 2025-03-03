@@ -25,7 +25,7 @@ class DigitalServices(
   private val auditQueueService: AuditQueueService,
 ) {
 
-  @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_read')") // TODO which roles?
+  @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_read')")
   @Operation(
     summary = "Trigger query to get audit events for staff member",
     description = "Trigger query to get audit events given who, or subject ID and subject type, role required is ROLE_AUDIT",
@@ -43,7 +43,7 @@ class DigitalServices(
     return auditService.triggerQuery(auditFilterDto)
   }
 
-  @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_read')") // TODO which roles?
+  @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_read')")
   @Operation(
     summary = "Get audit events for staff member",
     description = "Get audit events given who, or subject ID and subject type, role required is ROLE_AUDIT",
