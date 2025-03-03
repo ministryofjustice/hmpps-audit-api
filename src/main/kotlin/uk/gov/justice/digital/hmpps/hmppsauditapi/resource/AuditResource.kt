@@ -85,6 +85,14 @@ class AuditResource(
     auditQueueService.sendAuditEvent(cleansedAuditEvent)
   }
 
+  @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_read')")
+  @PostMapping("/test")
+  fun testAuditEvent(
+    @RequestBody auditEvent: AuditEvent,
+  ) {
+    auditService.audit(auditEvent)
+  }
+
   private fun String.traceId(): String? {
     val traceParentElements = split("-")
     return if (traceParentElements.size == 4) traceParentElements[1] else null
