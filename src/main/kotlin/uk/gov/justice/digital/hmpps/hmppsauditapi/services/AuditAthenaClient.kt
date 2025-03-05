@@ -71,7 +71,7 @@ class AuditAthenaClient(
       val queryStatus = athenaClient.getQueryExecution(
         GetQueryExecutionRequest.builder()
           .queryExecutionId(queryExecutionId)
-          .build()
+          .build(),
       ).queryExecution().status().state()
 
       when (queryStatus) {
