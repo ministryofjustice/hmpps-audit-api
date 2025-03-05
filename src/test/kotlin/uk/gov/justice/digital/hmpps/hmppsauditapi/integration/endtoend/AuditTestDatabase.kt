@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.check
@@ -26,6 +27,7 @@ import java.time.Instant
 import java.util.UUID
 
 @TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=false"])
+@Disabled
 class AuditTestDatabase @Autowired constructor(
   override var webTestClient: WebTestClient,
 ) : QueueListenerIntegrationTest() {

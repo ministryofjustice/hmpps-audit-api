@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
-import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.services.athena.AthenaClient
@@ -8,7 +7,6 @@ import software.amazon.awssdk.services.athena.model.GetQueryExecutionRequest
 import software.amazon.awssdk.services.athena.model.GetQueryResultsRequest
 import software.amazon.awssdk.services.athena.model.QueryExecutionState
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
-import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
@@ -18,7 +16,6 @@ import java.util.UUID
 @Service
 class AuditAthenaClient(
   private val athenaClient: AthenaClient,
-  private val telemetryClient: TelemetryClient,
   @Value("\${aws.athena.database}") private val databaseName: String,
   @Value("\${aws.athena.workgroup}") private val workGroup: String,
   @Value("\${aws.athena.outputLocation}") private val outputLocation: String,
@@ -101,7 +98,6 @@ class AuditAthenaClient(
 
     val whereClause = if (conditions.isNotEmpty()) "WHERE ${conditions.joinToString(" AND ")}" else ""
     val query = "SELECT * FROM $databaseName.audit_event $whereClause;"
-    telemetryClient.trackEvent("mohamad", mapOf("query" to query))
     return query
   }
 

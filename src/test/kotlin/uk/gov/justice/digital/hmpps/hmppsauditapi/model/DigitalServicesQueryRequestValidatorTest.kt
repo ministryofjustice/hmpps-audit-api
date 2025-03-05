@@ -1,18 +1,20 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.model
 
-import jakarta.validation.Validator
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import org.springframework.beans.factory.annotation.Autowired
+import org.mockito.Mockito.mock
+import jakarta.validation.ConstraintValidatorContext
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsauditapi.IntegrationTest
+import uk.gov.justice.digital.hmpps.hmppsauditapi.exception.FieldValidationException
 import uk.gov.justice.digital.hmpps.hmppsauditapi.helper.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.hmppsauditapi.integration.S3TestConfig
 import uk.gov.justice.digital.hmpps.hmppsauditapi.integration.endtoend.CommandLineProfilesResolver
@@ -25,12 +27,12 @@ import java.util.stream.Stream
 @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
 class DigitalServicesQueryRequestValidatorTest {
 
+  private val validator = DigitalServicesQueryRequestValidator()
+  private val mockContext = mock(ConstraintValidatorContext::class.java)
+
   @TestInstance(TestInstance.Lifecycle.PER_CLASS)
   @Nested
   inner class AuditFilterCases {
-
-    @Autowired
-    private lateinit var validator: Validator
 
     private fun validBaseAuditFilterDto() = listOf(
       DigitalServicesQueryRequest(
@@ -70,7 +72,7 @@ class DigitalServicesQueryRequestValidatorTest {
         mapOf(
           "startDateTime" to "startDateTime must be provided if endDateTime is null",
           "endDateTime" to "endDateTime must be provided if startDateTime is null",
-          "who" to "If who is null then subjectId and subjectType must be populated",
+          "who" to "If 'who' is null, then 'subjectId' and 'subjectType' must be populated",
         ),
       ),
 
@@ -121,22 +123,24 @@ class DigitalServicesQueryRequestValidatorTest {
           startDate = LocalDate.now().minusDays(1),
           endDate = LocalDate.now(),
         ),
-        mapOf("who" to "If who is null then subjectId and subjectType must be populated"),
+        mapOf("who" to "If 'who' is null, then 'subjectId' and 'subjectType' must be populated"),
       ),
     )
 
     @ParameterizedTest
     @MethodSource("validBaseAuditFilterDto")
     internal fun `should be valid`(digitalServicesQueryRequest: DigitalServicesQueryRequest) {
-      val violations = validator.validate(digitalServicesQueryRequest)
-      assertThat(violations).isEmpty()
+      assertThat(validator.isValid(digitalServicesQueryRequest, mockContext)).isTrue()
     }
 
     @ParameterizedTest
     @MethodSource("invalidBaseAuditFilterDto")
     internal fun `should be invalid`(digitalServicesQueryRequest: DigitalServicesQueryRequest, expectedErrorMessages: Map<String, String>) {
-      val errorMessages: Map<String, String> = validator.validate(digitalServicesQueryRequest).map { it.propertyPath.toString() to it.message }.toMap()
-      assertThat(errorMessages).containsExactlyInAnyOrderEntriesOf(expectedErrorMessages)
+      assertThatThrownBy { validator.isValid(digitalServicesQueryRequest, mockContext) }
+        .isInstanceOf(FieldValidationException::class.java)
+        .hasMessage("Validation failed")
+        .extracting { (it as FieldValidationException).errors }
+        .isEqualTo(expectedErrorMessages)
     }
   }
 }

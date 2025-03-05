@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import uk.gov.justice.digital.hmpps.hmppsauditapi.exception.FieldValidationException
 
 @RestControllerAdvice
 class HmppsAuditApiExceptionHandler {
@@ -20,6 +21,19 @@ class HmppsAuditApiExceptionHandler {
           status = BAD_REQUEST,
           userMessage = "Validation failure: ${e.message}",
           developerMessage = e.message,
+        ),
+      )
+  }
+
+  @ExceptionHandler(FieldValidationException::class)
+  fun handleFieldValidationException(e: FieldValidationException): ResponseEntity<ValidationErrorResponse> {
+    log.info("Field validation exception: {}", e.errors)
+    return ResponseEntity
+      .status(BAD_REQUEST)
+      .body(
+        ValidationErrorResponse(
+          status = BAD_REQUEST.value(),
+          errors = e.errors,
         ),
       )
   }
@@ -45,3 +59,8 @@ data class ErrorResponse(
   ) :
     this(status.value(), errorCode, userMessage, developerMessage, moreInfo)
 }
+
+data class ValidationErrorResponse(
+  val status: Int,
+  val errors: Map<String, String>,
+)
