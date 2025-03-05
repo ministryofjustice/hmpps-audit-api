@@ -43,6 +43,15 @@ class AuditAthenaClientTest {
   private val workGroupName = "workGroupName"
   private val outputLocation = "outputLocation"
   private val queryExecutionId = "a4ab5455-dfe1-46f2-917d-5135b7dadae3"
+  private val updatePartitionsQueryExecutionId = "d9906078-2776-46cc-bcfe-3f91cfbc181b"
+  private val successfulQueryExecutionResponse = GetQueryExecutionResponse.builder()
+    .queryExecution(
+      QueryExecution.builder().status(
+        QueryExecutionStatus.builder().state(
+          QueryExecutionState.SUCCEEDED,
+        ).build(),
+      ).build(),
+    ).build()
 
   @Mock
   private lateinit var athenaClient: AthenaClient
@@ -66,6 +75,11 @@ class AuditAthenaClientTest {
     @MethodSource("triggerQueryParameters")
     fun triggerQuery(digitalServicesQueryRequest: DigitalServicesQueryRequest, expectedQuery: String) {
       // Given
+      val updatePartitionsQuery = "MSCK REPAIR TABLE $databaseName.audit_event;"
+      given(athenaClient.startQueryExecution(startQueryExecutionRequestBuilder.queryString(updatePartitionsQuery).build()))
+        .willReturn(StartQueryExecutionResponse.builder().queryExecutionId(updatePartitionsQueryExecutionId).build())
+      given(athenaClient.getQueryExecution(GetQueryExecutionRequest.builder().queryExecutionId(updatePartitionsQueryExecutionId).build()))
+        .willReturn(successfulQueryExecutionResponse)
       given(athenaClient.startQueryExecution(startQueryExecutionRequestBuilder.queryString(expectedQuery).build()))
         .willReturn(StartQueryExecutionResponse.builder().queryExecutionId(queryExecutionId).build())
 
@@ -183,14 +197,6 @@ class AuditAthenaClientTest {
           ).build(),
         ),
       ).build()
-    private val getQueryExecutionResponse = GetQueryExecutionResponse.builder()
-      .queryExecution(
-        QueryExecution.builder().status(
-          QueryExecutionStatus.builder().state(
-            QueryExecutionState.SUCCEEDED,
-          ).build(),
-        ).build(),
-      ).build()
     private val getQueryExecutionRequest: GetQueryExecutionRequest = GetQueryExecutionRequest.builder().queryExecutionId(queryExecutionId).build()
     private val getQueryResultsRequest: GetQueryResultsRequest = GetQueryResultsRequest.builder().queryExecutionId(queryExecutionId).build()
     private val getQueryResultsResponse = GetQueryResultsResponse.builder().resultSet(resultSet).build()
@@ -198,8 +204,8 @@ class AuditAthenaClientTest {
     @Test
     fun getQueryResults() {
       // Given
-      given(athenaClient.getQueryExecution(getQueryExecutionRequest)).willReturn(getQueryExecutionResponse)
-      given(athenaClient.getQueryExecution(getQueryExecutionRequest)).willReturn(getQueryExecutionResponse)
+      given(athenaClient.getQueryExecution(getQueryExecutionRequest)).willReturn(successfulQueryExecutionResponse)
+      given(athenaClient.getQueryExecution(getQueryExecutionRequest)).willReturn(successfulQueryExecutionResponse)
       given(athenaClient.getQueryResults(getQueryResultsRequest)).willReturn(getQueryResultsResponse)
 
       // When

@@ -91,6 +91,12 @@ class DigitalServicesTest : IntegrationTest() {
         ).build(),
       ),
     ).build()
+  private val updatePartitionsStartQueryExecutionRequest: StartQueryExecutionRequest = StartQueryExecutionRequest.builder()
+    .queryString("MSCK REPAIR TABLE the-database.audit_event;")
+    .queryExecutionContext(QueryExecutionContext.builder().database("the-database").build())
+    .workGroup("the-workgroup")
+    .resultConfiguration(ResultConfiguration.builder().outputLocation("the-location").build())
+    .build()
   private val startQueryExecutionRequest: StartQueryExecutionRequest = StartQueryExecutionRequest.builder()
     .queryString("SELECT * FROM the-database.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND subjectId = 'test-subject' AND subjectType = 'USER_ID';")
     .queryExecutionContext(QueryExecutionContext.builder().database("the-database").build())
@@ -98,9 +104,12 @@ class DigitalServicesTest : IntegrationTest() {
     .resultConfiguration(ResultConfiguration.builder().outputLocation("the-location").build())
     .build()
   private final val queryExecutionId = "b1231f6e-9653-4b3f-9507-793730932daf"
+  private final val updatePartitionsQueryExecutionId = "7e73c8a0-dcef-4ef2-b43d-60c53421f1c4"
   private val startQueryExecutionResponse: StartQueryExecutionResponse = StartQueryExecutionResponse.builder().queryExecutionId(queryExecutionId).build()
+  private val updatePartitionsStartQueryExecutionResponse: StartQueryExecutionResponse = StartQueryExecutionResponse.builder().queryExecutionId(updatePartitionsQueryExecutionId).build()
   private final val getQueryExecutionRequest: GetQueryExecutionRequest = GetQueryExecutionRequest.builder().queryExecutionId(queryExecutionId).build()
-  private final val getQueryExecutionResponse = GetQueryExecutionResponse.builder()
+  private final val updatePartitionsGetQueryExecutionRequest: GetQueryExecutionRequest = GetQueryExecutionRequest.builder().queryExecutionId(updatePartitionsQueryExecutionId).build()
+  private final val successfulGetQueryExecutionResponse = GetQueryExecutionResponse.builder()
     .queryExecution(QueryExecution.builder().status(QueryExecutionStatus.builder().state(SUCCEEDED).build()).build())
     .build()
   private final val getQueryResultsRequest: GetQueryResultsRequest = GetQueryResultsRequest.builder().queryExecutionId(queryExecutionId).build()
@@ -108,7 +117,9 @@ class DigitalServicesTest : IntegrationTest() {
 
   @Test
   fun startQuery() {
+    given(athenaClient.startQueryExecution(updatePartitionsStartQueryExecutionRequest)).willReturn(updatePartitionsStartQueryExecutionResponse)
     given(athenaClient.startQueryExecution(startQueryExecutionRequest)).willReturn(startQueryExecutionResponse)
+    given(athenaClient.getQueryExecution(updatePartitionsGetQueryExecutionRequest)).willReturn(successfulGetQueryExecutionResponse)
 
     webTestClient.post().uri("/audit/query")
       .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
@@ -143,7 +154,7 @@ class DigitalServicesTest : IntegrationTest() {
 
   @Test
   fun getQueryResults() {
-    given(athenaClient.getQueryExecution(getQueryExecutionRequest)).willReturn(getQueryExecutionResponse)
+    given(athenaClient.getQueryExecution(getQueryExecutionRequest)).willReturn(successfulGetQueryExecutionResponse)
     given(athenaClient.getQueryResults(getQueryResultsRequest)).willReturn(getQueryResultsResponse)
 
     webTestClient.get().uri("/audit/query/{queryExecutionId}", queryExecutionId)

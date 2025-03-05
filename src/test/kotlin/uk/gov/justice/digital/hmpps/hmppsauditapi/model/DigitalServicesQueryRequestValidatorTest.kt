@@ -134,10 +134,7 @@ class DigitalServicesQueryRequestValidatorTest {
     @ParameterizedTest
     @MethodSource("invalidBaseAuditFilterDto")
     internal fun `should be invalid`(digitalServicesQueryRequest: DigitalServicesQueryRequest, expectedErrors: Map<String, String>) {
-      val violations = validator.validate(digitalServicesQueryRequest)
-
-      val actualErrors = violations.associate { it.propertyPath.toString() to it.message }
-
+      val actualErrors: Map<String, String> = validator.validate(digitalServicesQueryRequest).associate { it.propertyPath.toString() to it.message }
       assertThat(actualErrors).containsExactlyInAnyOrderEntriesOf(expectedErrors)
     }
   }

@@ -97,8 +97,8 @@ class AuditAthenaClient(
     filter.subjectType?.let { conditions.add("subjectType = '$it'") }
 
     val whereClause = if (conditions.isNotEmpty()) "WHERE ${conditions.joinToString(" AND ")}" else ""
-    val query = "SELECT * FROM $databaseName.audit_event $whereClause;"
-    return query
+
+    return "SELECT * FROM $databaseName.audit_event $whereClause;"
   }
 
   private fun startAthenaQuery(query: String): String {
