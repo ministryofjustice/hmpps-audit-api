@@ -25,6 +25,8 @@ class AuditAthenaClient(
 ) {
 
   fun triggerQuery(filter: DigitalServicesQueryRequest): DigitalServicesQueryResponse {
+    updateAthenaPartitions()
+
     val query = buildAthenaQuery(filter)
     val queryExecutionId = startAthenaQuery(query)
 
@@ -46,6 +48,41 @@ class AuditAthenaClient(
       response.results = fetchQueryResults(queryExecutionId)
     }
     return response
+  }
+
+  private fun updateAthenaPartitions() {
+    val repairTableQuery = "MSCK REPAIR TABLE $databaseName.audit_event;"
+
+    val request = StartQueryExecutionRequest.builder()
+      .queryString(repairTableQuery)
+      .queryExecutionContext { it.database(databaseName) }
+      .workGroup(workGroup)
+      .resultConfiguration { it.outputLocation(outputLocation) }
+      .build()
+
+    val response = athenaClient.startQueryExecution(request)
+    val queryExecutionId = response.queryExecutionId()
+
+    waitForQueryToComplete(queryExecutionId)
+  }
+
+  private fun waitForQueryToComplete(queryExecutionId: String) {
+    while (true) {
+      val queryStatus = athenaClient.getQueryExecution(
+        GetQueryExecutionRequest.builder()
+          .queryExecutionId(queryExecutionId)
+          .build()
+      ).queryExecution().status().state()
+
+      when (queryStatus) {
+        QueryExecutionState.SUCCEEDED -> return
+        QueryExecutionState.FAILED, QueryExecutionState.CANCELLED ->
+          throw RuntimeException("Athena query to update partitions failed with state: $queryStatus")
+        else -> {
+          Thread.sleep(2000)
+        }
+      }
+    }
   }
 
   private fun buildAthenaQuery(filter: DigitalServicesQueryRequest): String {
