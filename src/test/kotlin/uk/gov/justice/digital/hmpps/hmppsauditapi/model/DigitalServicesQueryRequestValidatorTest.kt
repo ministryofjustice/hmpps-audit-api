@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.model
 
+import jakarta.validation.ConstraintValidatorContext
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
@@ -8,7 +9,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito.mock
-import jakarta.validation.ConstraintValidatorContext
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.test.annotation.DirtiesContext
