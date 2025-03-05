@@ -128,6 +128,20 @@ class DigitalServicesTest : IntegrationTest() {
   }
 
   @Test
+  fun invalidQuery() {
+    webTestClient.post().uri("/audit/query")
+      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
+      .body(
+        BodyInserters.fromValue(
+          DigitalServicesQueryRequest(),
+        ),
+      )
+      .exchange()
+      .expectStatus().isBadRequest
+      .expectBody().json("start_query_response_invalid".loadJson(), STRICT)
+  }
+
+  @Test
   fun getQueryResults() {
     given(athenaClient.getQueryExecution(getQueryExecutionRequest)).willReturn(getQueryExecutionResponse)
     given(athenaClient.getQueryResults(getQueryResultsRequest)).willReturn(getQueryResultsResponse)

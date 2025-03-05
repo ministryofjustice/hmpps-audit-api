@@ -5,9 +5,9 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
-import uk.gov.justice.digital.hmpps.hmppsauditapi.exception.FieldValidationException
 
 @RestControllerAdvice
 class HmppsAuditApiExceptionHandler {
@@ -25,15 +25,20 @@ class HmppsAuditApiExceptionHandler {
       )
   }
 
-  @ExceptionHandler(FieldValidationException::class)
-  fun handleFieldValidationException(e: FieldValidationException): ResponseEntity<ValidationErrorResponse> {
-    log.info("Field validation exception: {}", e.errors)
+  @ExceptionHandler(MethodArgumentNotValidException::class)
+  fun handleMethodArgumentNotValidException(e: MethodArgumentNotValidException): ResponseEntity<ValidationErrorResponse> {
+    log.info("Validation error: {}", e.message)
+
+    val errors = e.bindingResult.fieldErrors.associate {
+      it.field to it.defaultMessage!!
+    }
+
     return ResponseEntity
       .status(BAD_REQUEST)
       .body(
         ValidationErrorResponse(
           status = BAD_REQUEST.value(),
-          errors = e.errors,
+          errors = errors,
         ),
       )
   }

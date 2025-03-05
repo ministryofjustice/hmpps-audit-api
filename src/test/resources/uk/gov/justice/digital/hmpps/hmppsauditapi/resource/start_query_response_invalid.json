@@ -1,0 +1,8 @@
+{
+  "status": 400,
+  "errors": {
+    "endDateTime": "endDateTime must be provided if startDateTime is null",
+    "who": "If 'who' is null, then 'subjectId' and 'subjectType' must be populated",
+    "startDateTime": "startDateTime must be provided if endDateTime is null"
+  }
+}
