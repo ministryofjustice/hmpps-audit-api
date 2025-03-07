@@ -28,14 +28,12 @@ class AuditServiceTest {
   private val auditRepository: AuditRepository = mock()
   private val auditS3Client: AuditS3Client = mock()
   private val auditAthenaClient: AuditAthenaClient = mock()
-  private val saveToS3Bucket = false
   private var auditService =
     AuditService(
       telemetryClient,
       auditRepository,
       auditS3Client,
       auditAthenaClient,
-      saveToS3Bucket,
     )
 
   @Nested
@@ -372,19 +370,8 @@ class AuditServiceTest {
     )
 
     @Test
-    fun `save audit event to database when saveToS3Bucket is false`() {
-      auditService = AuditService(telemetryClient, auditRepository, auditS3Client, auditAthenaClient, false)
-
-      auditService.audit(
-        auditEvent,
-      )
-
-      verify(auditRepository).save(auditEvent)
-    }
-
-    @Test
-    fun `save audit event to S3 bucket when saveToS3Bucket is true`() {
-      auditService = AuditService(telemetryClient, auditRepository, auditS3Client, auditAthenaClient, true)
+    fun `save audit event to S3 bucket`() {
+      auditService = AuditService(telemetryClient, auditRepository, auditS3Client, auditAthenaClient)
 
       auditService.audit(
         auditEvent,

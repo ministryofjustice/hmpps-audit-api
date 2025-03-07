@@ -12,51 +12,37 @@ class DigitalServicesQueryRequestValidator : ConstraintValidator<ValidDigitalSer
     val now = LocalDate.now()
     var isValid = true
 
-    if (dto.startDate == null && dto.endDate == null) {
+    fun addViolation(field: String, message: String) {
+      context.buildConstraintViolationWithTemplate(message)
+        .addPropertyNode(field)
+        .addConstraintViolation()
       isValid = false
-      context.buildConstraintViolationWithTemplate("startDateTime must be provided if endDateTime is null")
-        .addPropertyNode("startDateTime")
-        .addConstraintViolation()
+    }
 
-      context.buildConstraintViolationWithTemplate("endDateTime must be provided if startDateTime is null")
-        .addPropertyNode("endDateTime")
-        .addConstraintViolation()
+    if (dto.startDate == null && dto.endDate == null) {
+      addViolation("startDate", "startDate must be provided if endDate is null")
+      addViolation("endDate", "endDate must be provided if startDate is null")
     }
 
     if (dto.who == null && dto.subjectId == null && dto.subjectType == null) {
-      isValid = false
-      context.buildConstraintViolationWithTemplate("If who is null then subjectId and subjectType must be populated")
-        .addPropertyNode("who")
-        .addConstraintViolation()
+      addViolation("who", "If 'who' is null, then 'subjectId' and 'subjectType' must be populated")
     }
 
     if (dto.endDate?.isAfter(now) == true) {
-      isValid = false
-      context.buildConstraintViolationWithTemplate("endDateTime must not be in the future")
-        .addPropertyNode("endDateTime")
-        .addConstraintViolation()
+      addViolation("endDate", "endDate must not be in the future")
     }
 
     if (dto.startDate?.isAfter(now) == true) {
-      isValid = false
-      context.buildConstraintViolationWithTemplate("startDateTime must not be in the future")
-        .addPropertyNode("startDateTime")
-        .addConstraintViolation()
+      addViolation("startDate", "startDate must not be in the future")
     }
 
     if (dto.startDate != null && dto.endDate != null && dto.startDate.isAfter(dto.endDate)) {
-      isValid = false
-      context.buildConstraintViolationWithTemplate("startDateTime must be before endDateTime")
-        .addPropertyNode("startDateTime")
-        .addConstraintViolation()
+      addViolation("startDate", "startDate must be before endDate")
     }
 
     if ((dto.subjectId != null && dto.subjectType == null) || (dto.subjectId == null && dto.subjectType != null)) {
-      val propertyNode = if (dto.subjectId == null) "subjectId" else "subjectType"
-      isValid = false
-      context.buildConstraintViolationWithTemplate("Both subjectId and subjectType must be populated together or left null")
-        .addPropertyNode(propertyNode)
-        .addConstraintViolation()
+      val field = if (dto.subjectId == null) "subjectId" else "subjectType"
+      addViolation(field, "Both subjectId and subjectType must be populated together or left null")
     }
 
     return isValid

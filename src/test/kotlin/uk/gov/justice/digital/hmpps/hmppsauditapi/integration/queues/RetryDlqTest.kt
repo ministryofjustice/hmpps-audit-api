@@ -8,12 +8,10 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.springframework.http.MediaType
-import org.springframework.test.context.TestPropertySource
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 
-@TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=false"])
 class RetryDlqTest : QueueListenerIntegrationTest() {
 
   @Nested
@@ -85,7 +83,7 @@ class RetryDlqTest : QueueListenerIntegrationTest() {
       await untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 0 }
       await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
 
-      verify(auditRepository).save(any<AuditEvent>())
+      verify(auditS3Client).save(any<AuditEvent>())
     }
   }
 
@@ -119,7 +117,7 @@ class RetryDlqTest : QueueListenerIntegrationTest() {
       await untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 0 }
       await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
 
-      verify(auditRepository).save(any<AuditEvent>())
+      verify(auditS3Client).save(any<AuditEvent>())
     }
   }
 }

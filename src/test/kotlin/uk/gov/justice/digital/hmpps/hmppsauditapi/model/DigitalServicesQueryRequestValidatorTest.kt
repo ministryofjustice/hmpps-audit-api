@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.model
 
+import jakarta.validation.Validation
 import jakarta.validation.Validator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -7,7 +8,6 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.test.annotation.DirtiesContext
@@ -25,12 +25,11 @@ import java.util.stream.Stream
 @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
 class DigitalServicesQueryRequestValidatorTest {
 
+  private val validator: Validator = Validation.buildDefaultValidatorFactory().validator
+
   @TestInstance(TestInstance.Lifecycle.PER_CLASS)
   @Nested
   inner class AuditFilterCases {
-
-    @Autowired
-    private lateinit var validator: Validator
 
     private fun validBaseAuditFilterDto() = listOf(
       DigitalServicesQueryRequest(
@@ -68,9 +67,9 @@ class DigitalServicesQueryRequestValidatorTest {
       Arguments.of(
         DigitalServicesQueryRequest(),
         mapOf(
-          "startDateTime" to "startDateTime must be provided if endDateTime is null",
-          "endDateTime" to "endDateTime must be provided if startDateTime is null",
-          "who" to "If who is null then subjectId and subjectType must be populated",
+          "startDate" to "startDate must be provided if endDate is null",
+          "endDate" to "endDate must be provided if startDate is null",
+          "who" to "If 'who' is null, then 'subjectId' and 'subjectType' must be populated",
         ),
       ),
 
@@ -80,7 +79,7 @@ class DigitalServicesQueryRequestValidatorTest {
           endDate = LocalDate.now().plusDays(1),
           who = "someone",
         ),
-        mapOf("endDateTime" to "endDateTime must not be in the future"),
+        mapOf("endDate" to "endDate must not be in the future"),
       ),
 
       Arguments.of(
@@ -88,7 +87,7 @@ class DigitalServicesQueryRequestValidatorTest {
           startDate = LocalDate.now().plusDays(1),
           who = "someone",
         ),
-        mapOf("startDateTime" to "startDateTime must not be in the future"),
+        mapOf("startDate" to "startDate must not be in the future"),
       ),
 
       Arguments.of(
@@ -97,7 +96,7 @@ class DigitalServicesQueryRequestValidatorTest {
           endDate = LocalDate.now().minusDays(1),
           who = "someone",
         ),
-        mapOf("startDateTime" to "startDateTime must be before endDateTime"),
+        mapOf("startDate" to "startDate must be before endDate"),
       ),
 
       Arguments.of(
@@ -121,7 +120,7 @@ class DigitalServicesQueryRequestValidatorTest {
           startDate = LocalDate.now().minusDays(1),
           endDate = LocalDate.now(),
         ),
-        mapOf("who" to "If who is null then subjectId and subjectType must be populated"),
+        mapOf("who" to "If 'who' is null, then 'subjectId' and 'subjectType' must be populated"),
       ),
     )
 
@@ -134,9 +133,9 @@ class DigitalServicesQueryRequestValidatorTest {
 
     @ParameterizedTest
     @MethodSource("invalidBaseAuditFilterDto")
-    internal fun `should be invalid`(digitalServicesQueryRequest: DigitalServicesQueryRequest, expectedErrorMessages: Map<String, String>) {
-      val errorMessages: Map<String, String> = validator.validate(digitalServicesQueryRequest).map { it.propertyPath.toString() to it.message }.toMap()
-      assertThat(errorMessages).containsExactlyInAnyOrderEntriesOf(expectedErrorMessages)
+    internal fun `should be invalid`(digitalServicesQueryRequest: DigitalServicesQueryRequest, expectedErrors: Map<String, String>) {
+      val actualErrors: Map<String, String> = validator.validate(digitalServicesQueryRequest).associate { it.propertyPath.toString() to it.message }
+      assertThat(actualErrors).containsExactlyInAnyOrderEntriesOf(expectedErrors)
     }
   }
 }
