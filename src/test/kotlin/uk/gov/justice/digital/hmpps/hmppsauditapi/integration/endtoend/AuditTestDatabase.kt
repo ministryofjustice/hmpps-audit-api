@@ -4,7 +4,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.check
@@ -14,6 +13,7 @@ import org.mockito.kotlin.mockingDetails
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.http.MediaType
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.reactive.server.WebTestClient
@@ -21,16 +21,19 @@ import org.springframework.web.reactive.function.BodyInserters
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
+import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditS3Client
 import java.time.Instant
 import java.util.UUID
 
 @TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=false"])
-@Disabled
 class AuditTestDatabase @Autowired constructor(
   override var webTestClient: WebTestClient,
 ) : QueueListenerIntegrationTest() {
 
   private val basicAuditEvent = AuditEvent(what = "basicAuditEvent", service = "hmpps-audit-poc-ui")
+
+  @SpyBean
+  private lateinit var auditS3Client: AuditS3Client
 
   @Test
   fun `will consume an audit event message`() {
