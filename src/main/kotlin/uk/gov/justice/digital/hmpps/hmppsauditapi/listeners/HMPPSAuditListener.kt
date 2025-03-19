@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.listeners
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.awspring.cloud.sqs.annotation.SqsListener
 import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.media.Schema
@@ -11,6 +12,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.Table
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
+import java.io.IOException
 import java.time.Instant
 import java.util.UUID
 
@@ -23,7 +25,19 @@ class HMPPSAuditListener(
   @SqsListener("auditqueue", factory = "hmppsQueueContainerFactoryProxy")
   fun onAuditEvent(message: String) {
     val auditEvent: AuditEvent = objectMapper.readValue(message, AuditEvent::class.java)
-    auditService.audit(auditEvent)
+
+    val cleansedAuditEvent = auditEvent.copy(
+      details = auditEvent.details?.jsonString(),
+    )
+
+    auditService.audit(cleansedAuditEvent)
+  }
+
+  private fun String.jsonString(): String? = try {
+    jacksonObjectMapper().readTree(trim())
+    ifBlank { null }
+  } catch (e: IOException) {
+    "{\"details\":\"$this\"}"
   }
 
   @Entity(name = "AuditEvent")
