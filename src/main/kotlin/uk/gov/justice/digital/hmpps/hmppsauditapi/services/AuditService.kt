@@ -72,7 +72,7 @@ class AuditService(
     }
   }
 
-  fun triggerQuery(queryRequest: DigitalServicesQueryRequest): DigitalServicesQueryResponse = auditAthenaClient.triggerQuery(queryRequest)
+  fun triggerQuery(queryRequest: DigitalServicesQueryRequest, services: List<String>): DigitalServicesQueryResponse = auditAthenaClient.triggerQuery(queryRequest, services)
   fun getQueryResults(queryExecutionId: String): DigitalServicesQueryResponse = auditAthenaClient.getQueryResults(queryExecutionId)
 }
 

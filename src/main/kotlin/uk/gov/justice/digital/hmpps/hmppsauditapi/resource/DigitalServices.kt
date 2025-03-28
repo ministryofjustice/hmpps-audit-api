@@ -40,7 +40,7 @@ class DigitalServices(
       AuditType.AUDIT_GET_BY_USER.name,
       auditFilterDto,
     )
-    return auditService.triggerQuery(auditFilterDto)
+    return auditService.triggerQuery(auditFilterDto, listOf("hmpps-external-users"))
   }
 
   @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_read')")

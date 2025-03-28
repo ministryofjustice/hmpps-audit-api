@@ -21,10 +21,10 @@ class AuditAthenaClient(
   @Value("\${aws.athena.outputLocation}") private val outputLocation: String,
 ) {
 
-  fun triggerQuery(filter: DigitalServicesQueryRequest): DigitalServicesQueryResponse {
+  fun triggerQuery(filter: DigitalServicesQueryRequest, services: List<String>): DigitalServicesQueryResponse {
     updateAthenaPartitions()
 
-    val query = buildAthenaQuery(filter)
+    val query = buildAthenaQuery(filter, services)
     val queryExecutionId = startAthenaQuery(query)
 
     return DigitalServicesQueryResponse(
@@ -82,7 +82,7 @@ class AuditAthenaClient(
     }
   }
 
-  private fun buildAthenaQuery(filter: DigitalServicesQueryRequest): String {
+  private fun buildAthenaQuery(filter: DigitalServicesQueryRequest, services: List<String>): String {
     val conditions = mutableListOf<String>()
 
     if (filter.startDate != null && filter.endDate != null) {
@@ -95,6 +95,11 @@ class AuditAthenaClient(
     filter.who?.let { conditions.add("who = '$it'") }
     filter.subjectId?.let { conditions.add("subjectId = '$it'") }
     filter.subjectType?.let { conditions.add("subjectType = '$it'") }
+
+    if (services.isNotEmpty()) {
+      val serviceList = services.joinToString(", ") { "'$it'" }
+      conditions.add("service IN ($serviceList)")
+    }
 
     val whereClause = if (conditions.isNotEmpty()) "WHERE ${conditions.joinToString(" AND ")}" else ""
 

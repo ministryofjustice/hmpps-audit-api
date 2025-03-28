@@ -73,7 +73,7 @@ class AuditAthenaClientTest {
 
     @ParameterizedTest
     @MethodSource("triggerQueryParameters")
-    fun triggerQuery(digitalServicesQueryRequest: DigitalServicesQueryRequest, expectedQuery: String) {
+    fun triggerQuery(digitalServicesQueryRequest: DigitalServicesQueryRequest, services: List<String>, expectedQuery: String) {
       // Given
       val updatePartitionsQuery = "MSCK REPAIR TABLE $databaseName.audit_event;"
       given(athenaClient.startQueryExecution(startQueryExecutionRequestBuilder.queryString(updatePartitionsQuery).build()))
@@ -84,7 +84,7 @@ class AuditAthenaClientTest {
         .willReturn(StartQueryExecutionResponse.builder().queryExecutionId(queryExecutionId).build())
 
       // When
-      val response: DigitalServicesQueryResponse = auditAthenaClient.triggerQuery(digitalServicesQueryRequest)
+      val response: DigitalServicesQueryResponse = auditAthenaClient.triggerQuery(digitalServicesQueryRequest, services)
 
       // Then
       assertThat(response.queryExecutionId).isEqualTo(UUID.fromString(queryExecutionId))
@@ -100,6 +100,7 @@ class AuditAthenaClientTest {
           subjectId = "subjectId",
           subjectType = "subjectType",
         ),
+        emptyList<String>(),
         "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND who = 'someone' AND subjectId = 'subjectId' AND subjectType = 'subjectType';",
       ),
       Arguments.of(
@@ -109,6 +110,7 @@ class AuditAthenaClientTest {
           subjectId = "subjectId",
           subjectType = "subjectType",
         ),
+        emptyList<String>(),
         "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND subjectId = 'subjectId' AND subjectType = 'subjectType';",
       ),
       Arguments.of(
@@ -117,6 +119,7 @@ class AuditAthenaClientTest {
           subjectId = "subjectId",
           subjectType = "subjectType",
         ),
+        emptyList<String>(),
         "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) >= DATE '2025-01-01' AND subjectId = 'subjectId' AND subjectType = 'subjectType';",
       ),
       Arguments.of(
@@ -125,6 +128,7 @@ class AuditAthenaClientTest {
           subjectId = "subjectId",
           subjectType = "subjectType",
         ),
+        emptyList<String>(),
         "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) <= DATE '2025-01-31' AND subjectId = 'subjectId' AND subjectType = 'subjectType';",
       ),
       Arguments.of(
@@ -133,7 +137,24 @@ class AuditAthenaClientTest {
           endDate = LocalDate.of(2025, 1, 31),
           who = "someone",
         ),
+        emptyList<String>(),
         "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND who = 'someone';",
+      ),
+      Arguments.of(
+        DigitalServicesQueryRequest(
+          startDate = LocalDate.of(2025, 1, 1),
+          who = "someone",
+        ),
+        listOf("hmpps-manage-users"),
+        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) >= DATE '2025-01-01' AND who = 'someone' AND service IN ('hmpps-manage-users');",
+      ),
+      Arguments.of(
+        DigitalServicesQueryRequest(
+          startDate = LocalDate.of(2025, 1, 1),
+          who = "someone",
+        ),
+        listOf("hmpps-manage-users", "hmpps-external-users"),
+        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) >= DATE '2025-01-01' AND who = 'someone' AND service IN ('hmpps-manage-users', 'hmpps-external-users');",
       ),
     )
   }
