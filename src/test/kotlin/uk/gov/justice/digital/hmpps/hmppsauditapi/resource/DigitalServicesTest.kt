@@ -98,7 +98,7 @@ class DigitalServicesTest : IntegrationTest() {
     .resultConfiguration(ResultConfiguration.builder().outputLocation("the-location").build())
     .build()
   private val startQueryExecutionRequest: StartQueryExecutionRequest = StartQueryExecutionRequest.builder()
-    .queryString("SELECT * FROM the-database.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND subjectId = 'test-subject' AND subjectType = 'USER_ID' AND service IN ('hmpps-external-users');")
+    .queryString("SELECT * FROM the-database.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND subjectId = 'test-subject' AND subjectType = 'USER_ID' AND service IN ('hmpps-manage-users');")
     .queryExecutionContext(QueryExecutionContext.builder().database("the-database").build())
     .workGroup("the-workgroup")
     .resultConfiguration(ResultConfiguration.builder().outputLocation("the-location").build())
