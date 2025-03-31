@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.given
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,6 +29,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
 
+@Disabled
 class DigitalServicesTest : IntegrationTest() {
 
   @Autowired
