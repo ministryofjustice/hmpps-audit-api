@@ -115,7 +115,7 @@ class AuditAthenaClientTest {
         listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS),
         "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND who = 'someone' AND subjectId = 'subjectId' AND subjectType = 'subjectType' AND service IN ('hmpps-manage-users');",
         listOf(HMPPS_MANAGE_USERS),
-        ),
+      ),
 
       // Subject, no who
       Arguments.of(
