@@ -8,6 +8,7 @@ import java.util.UUID
 data class DigitalServicesQueryResponse(
   val queryExecutionId: UUID,
   val queryState: QueryExecutionState,
+  val authorisedServices: List<String>,
   @JsonInclude(JsonInclude.Include.NON_NULL)
   var results: List<AuditDto>? = null,
 )

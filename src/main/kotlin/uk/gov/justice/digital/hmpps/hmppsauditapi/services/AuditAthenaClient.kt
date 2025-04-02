@@ -1,6 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.services.athena.AthenaClient
 import software.amazon.awssdk.services.athena.model.GetQueryExecutionRequest
@@ -13,6 +15,8 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import java.time.Instant
 import java.util.UUID
 
+private const val AUTHORISED_SERVICE_ROLE_PREFIX = "ROLE_QUERY_AUDIT__"
+
 @Service
 class AuditAthenaClient(
   private val athenaClient: AthenaClient,
@@ -21,15 +25,16 @@ class AuditAthenaClient(
   @Value("\${aws.athena.outputLocation}") private val outputLocation: String,
 ) {
 
-  fun triggerQuery(filter: DigitalServicesQueryRequest, services: List<String>): DigitalServicesQueryResponse {
+  fun triggerQuery(filter: DigitalServicesQueryRequest): DigitalServicesQueryResponse {
     updateAthenaPartitions()
-
-    val query = buildAthenaQuery(filter, services)
+    val authorisedServices = getAuthorisedServices()
+    val query = buildAthenaQuery(filter, authorisedServices)
     val queryExecutionId = startAthenaQuery(query)
 
     return DigitalServicesQueryResponse(
       queryExecutionId = UUID.fromString(queryExecutionId),
       queryState = QueryExecutionState.QUEUED,
+      authorisedServices = authorisedServices,
     )
   }
 
@@ -40,6 +45,7 @@ class AuditAthenaClient(
     val response = DigitalServicesQueryResponse(
       queryExecutionId = UUID.fromString(queryExecutionId),
       queryState = queryState,
+      authorisedServices = getAuthorisedServices(),
     )
     if (queryState == QueryExecutionState.SUCCEEDED) {
       response.results = fetchQueryResults(queryExecutionId)
@@ -85,6 +91,10 @@ class AuditAthenaClient(
   private fun buildAthenaQuery(filter: DigitalServicesQueryRequest, services: List<String>): String {
     val conditions = mutableListOf<String>()
 
+    if (services.isEmpty()) {
+      return "SELECT * FROM $databaseName.audit_event WHERE 1 = 0;"
+    }
+
     if (filter.startDate != null && filter.endDate != null) {
       conditions.add("DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '${filter.startDate}' AND DATE '${filter.endDate}'")
     } else if (filter.startDate != null) {
@@ -96,12 +106,10 @@ class AuditAthenaClient(
     filter.subjectId?.let { conditions.add("subjectId = '$it'") }
     filter.subjectType?.let { conditions.add("subjectType = '$it'") }
 
-    if (services.isNotEmpty()) {
-      val serviceList = services.joinToString(", ") { "'$it'" }
-      conditions.add("service IN ($serviceList)")
-    }
+    val serviceList = services.joinToString(", ") { "'$it'" }
+    conditions.add("service IN ($serviceList)")
 
-    val whereClause = if (conditions.isNotEmpty()) "WHERE ${conditions.joinToString(" AND ")}" else ""
+    val whereClause = "WHERE ${conditions.joinToString(" AND ")}"
 
     return "SELECT * FROM $databaseName.audit_event $whereClause;"
   }
@@ -157,5 +165,14 @@ class AuditAthenaClient(
     } while (nextToken != null)
 
     return results
+  }
+
+  private fun getAuthorisedServices(): List<String> {
+    val authentication = SecurityContextHolder.getContext().authentication
+    return authentication?.authorities
+      ?.map(GrantedAuthority::getAuthority)
+      ?.filter { it.startsWith(AUTHORISED_SERVICE_ROLE_PREFIX) }
+      ?.map { it.removePrefix(AUTHORISED_SERVICE_ROLE_PREFIX).lowercase().replace('_', '-') }
+      ?: emptyList()
   }
 }

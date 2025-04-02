@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.given
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,7 +28,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
 
-@Disabled
 class DigitalServicesTest : IntegrationTest() {
 
   @Autowired
@@ -124,7 +122,7 @@ class DigitalServicesTest : IntegrationTest() {
     given(athenaClient.getQueryExecution(updatePartitionsGetQueryExecutionRequest)).willReturn(successfulGetQueryExecutionResponse)
 
     webTestClient.post().uri("/audit/query")
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
+      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT", "ROLE_QUERY_AUDIT__HMPPS_MANAGE_USERS"), scopes = listOf("read")))
       .body(
         BodyInserters.fromValue(
           DigitalServicesQueryRequest(
@@ -143,7 +141,7 @@ class DigitalServicesTest : IntegrationTest() {
   @Test
   fun invalidQuery() {
     webTestClient.post().uri("/audit/query")
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
+      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT", "ROLE_QUERY_AUDIT__HMPPS_MANAGE_USERS"), scopes = listOf("read")))
       .body(
         BodyInserters.fromValue(
           DigitalServicesQueryRequest(),
@@ -160,7 +158,7 @@ class DigitalServicesTest : IntegrationTest() {
     given(athenaClient.getQueryResults(getQueryResultsRequest)).willReturn(getQueryResultsResponse)
 
     webTestClient.get().uri("/audit/query/{queryExecutionId}", queryExecutionId)
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
+      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT", "ROLE_QUERY_AUDIT__HMPPS_MANAGE_USERS"), scopes = listOf("read")))
       .exchange()
       .expectStatus().isOk
       .expectBody().json("get_query_results_response".loadJson(), STRICT)

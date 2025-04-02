@@ -12,6 +12,9 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.BDDMockito.given
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.springframework.security.authentication.TestingAuthenticationToken
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.core.context.SecurityContextHolder
 import software.amazon.awssdk.services.athena.AthenaClient
 import software.amazon.awssdk.services.athena.model.ColumnInfo
 import software.amazon.awssdk.services.athena.model.Datum
@@ -36,6 +39,11 @@ import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
 import java.util.stream.Stream
+
+private const val ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS = "ROLE_QUERY_AUDIT__HMPPS_MANAGE_USERS"
+private const val ROLE_QUERY_AUDIT__HMPPS_EXTERNAL_USERS = "ROLE_QUERY_AUDIT__HMPPS_EXTERNAL_USERS"
+private const val HMPPS_MANAGE_USERS = "hmpps-manage-users"
+private const val HMPPS_EXTERNAL_USERS = "hmpps-external-users"
 
 @ExtendWith(MockitoExtension::class)
 class AuditAthenaClientTest {
@@ -73,8 +81,10 @@ class AuditAthenaClientTest {
 
     @ParameterizedTest
     @MethodSource("triggerQueryParameters")
-    fun triggerQuery(digitalServicesQueryRequest: DigitalServicesQueryRequest, services: List<String>, expectedQuery: String) {
+    fun triggerQuery(digitalServicesQueryRequest: DigitalServicesQueryRequest, roles: List<String>, expectedQuery: String, expectedServices: List<String>) {
       // Given
+      SecurityContextHolder.getContext().authentication = TestingAuthenticationToken("user", "credentials", roles.map { SimpleGrantedAuthority(it) })
+
       val updatePartitionsQuery = "MSCK REPAIR TABLE $databaseName.audit_event;"
       given(athenaClient.startQueryExecution(startQueryExecutionRequestBuilder.queryString(updatePartitionsQuery).build()))
         .willReturn(StartQueryExecutionResponse.builder().queryExecutionId(updatePartitionsQueryExecutionId).build())
@@ -84,14 +94,16 @@ class AuditAthenaClientTest {
         .willReturn(StartQueryExecutionResponse.builder().queryExecutionId(queryExecutionId).build())
 
       // When
-      val response: DigitalServicesQueryResponse = auditAthenaClient.triggerQuery(digitalServicesQueryRequest, services)
+      val response: DigitalServicesQueryResponse = auditAthenaClient.triggerQuery(digitalServicesQueryRequest)
 
       // Then
       assertThat(response.queryExecutionId).isEqualTo(UUID.fromString(queryExecutionId))
       assertThat(response.queryState).isEqualTo(QueryExecutionState.QUEUED)
+      assertThat(response.authorisedServices).containsExactlyInAnyOrderElementsOf(expectedServices)
     }
 
     private fun triggerQueryParameters(): Stream<Arguments> = Stream.of(
+      // All fields
       Arguments.of(
         DigitalServicesQueryRequest(
           startDate = LocalDate.of(2025, 1, 1),
@@ -100,9 +112,12 @@ class AuditAthenaClientTest {
           subjectId = "subjectId",
           subjectType = "subjectType",
         ),
-        emptyList<String>(),
-        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND who = 'someone' AND subjectId = 'subjectId' AND subjectType = 'subjectType';",
-      ),
+        listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS),
+        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND who = 'someone' AND subjectId = 'subjectId' AND subjectType = 'subjectType' AND service IN ('hmpps-manage-users');",
+        listOf(HMPPS_MANAGE_USERS),
+        ),
+
+      // Subject, no who
       Arguments.of(
         DigitalServicesQueryRequest(
           startDate = LocalDate.of(2025, 1, 1),
@@ -110,51 +125,67 @@ class AuditAthenaClientTest {
           subjectId = "subjectId",
           subjectType = "subjectType",
         ),
-        emptyList<String>(),
-        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND subjectId = 'subjectId' AND subjectType = 'subjectType';",
+        listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS, ROLE_QUERY_AUDIT__HMPPS_EXTERNAL_USERS),
+        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND subjectId = 'subjectId' AND subjectType = 'subjectType' AND service IN ('hmpps-manage-users', 'hmpps-external-users');",
+        listOf(HMPPS_MANAGE_USERS, HMPPS_EXTERNAL_USERS),
       ),
+
+      // Subject + endDate, no who, no startDate
       Arguments.of(
         DigitalServicesQueryRequest(
           startDate = LocalDate.of(2025, 1, 1),
           subjectId = "subjectId",
           subjectType = "subjectType",
         ),
-        emptyList<String>(),
-        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) >= DATE '2025-01-01' AND subjectId = 'subjectId' AND subjectType = 'subjectType';",
+        listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS),
+        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) >= DATE '2025-01-01' AND subjectId = 'subjectId' AND subjectType = 'subjectType' AND service IN ('hmpps-manage-users');",
+        listOf(HMPPS_MANAGE_USERS),
       ),
+
+      // Subject + endDate, no who, no startDate
       Arguments.of(
         DigitalServicesQueryRequest(
           endDate = LocalDate.of(2025, 1, 31),
           subjectId = "subjectId",
           subjectType = "subjectType",
         ),
-        emptyList<String>(),
-        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) <= DATE '2025-01-31' AND subjectId = 'subjectId' AND subjectType = 'subjectType';",
+        listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS),
+        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) <= DATE '2025-01-31' AND subjectId = 'subjectId' AND subjectType = 'subjectType' AND service IN ('hmpps-manage-users');",
+        listOf(HMPPS_MANAGE_USERS),
       ),
+
+      // StartDate + endDate + who, no subject
       Arguments.of(
         DigitalServicesQueryRequest(
           startDate = LocalDate.of(2025, 1, 1),
           endDate = LocalDate.of(2025, 1, 31),
           who = "someone",
         ),
-        emptyList<String>(),
-        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND who = 'someone';",
+        listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS),
+        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND who = 'someone' AND service IN ('hmpps-manage-users');",
+        listOf(HMPPS_MANAGE_USERS),
       ),
+
+      // startDate + who, no subject, no endDate
       Arguments.of(
         DigitalServicesQueryRequest(
           startDate = LocalDate.of(2025, 1, 1),
           who = "someone",
         ),
-        listOf("hmpps-manage-users"),
+        listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS),
         "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) >= DATE '2025-01-01' AND who = 'someone' AND service IN ('hmpps-manage-users');",
+        listOf(HMPPS_MANAGE_USERS),
       ),
+
+      // No authorised services
       Arguments.of(
         DigitalServicesQueryRequest(
           startDate = LocalDate.of(2025, 1, 1),
           who = "someone",
         ),
-        listOf("hmpps-manage-users", "hmpps-external-users"),
-        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) >= DATE '2025-01-01' AND who = 'someone' AND service IN ('hmpps-manage-users', 'hmpps-external-users');",
+        emptyList<String>(),
+        "SELECT * FROM databaseName.audit_event WHERE 1 = 0;",
+        emptyList<String>(),
       ),
     )
   }
@@ -225,7 +256,10 @@ class AuditAthenaClientTest {
     @Test
     fun getQueryResults() {
       // Given
-      given(athenaClient.getQueryExecution(getQueryExecutionRequest)).willReturn(successfulQueryExecutionResponse)
+      val authorities = listOf(SimpleGrantedAuthority(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS))
+      SecurityContextHolder.getContext().authentication =
+        TestingAuthenticationToken("user", "credentials", authorities)
+
       given(athenaClient.getQueryExecution(getQueryExecutionRequest)).willReturn(successfulQueryExecutionResponse)
       given(athenaClient.getQueryResults(getQueryResultsRequest)).willReturn(getQueryResultsResponse)
 
@@ -238,6 +272,7 @@ class AuditAthenaClientTest {
           queryExecutionId = UUID.fromString(queryExecutionId),
           queryState = QueryExecutionState.SUCCEEDED,
           results = listOf(expectedAuditDto),
+          authorisedServices = listOf(HMPPS_MANAGE_USERS),
         ),
       )
     }
