@@ -98,7 +98,7 @@ class DigitalServicesTest : IntegrationTest() {
     .resultConfiguration(ResultConfiguration.builder().outputLocation("the-location").build())
     .build()
   private val startQueryExecutionRequest: StartQueryExecutionRequest = StartQueryExecutionRequest.builder()
-    .queryString("SELECT * FROM the-database.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND subjectId = 'test-subject' AND subjectType = 'USER_ID';")
+    .queryString("SELECT * FROM the-database.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND subjectId = 'test-subject' AND subjectType = 'USER_ID' AND service IN ('hmpps-manage-users');")
     .queryExecutionContext(QueryExecutionContext.builder().database("the-database").build())
     .workGroup("the-workgroup")
     .resultConfiguration(ResultConfiguration.builder().outputLocation("the-location").build())
@@ -122,7 +122,7 @@ class DigitalServicesTest : IntegrationTest() {
     given(athenaClient.getQueryExecution(updatePartitionsGetQueryExecutionRequest)).willReturn(successfulGetQueryExecutionResponse)
 
     webTestClient.post().uri("/audit/query")
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
+      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT", "ROLE_QUERY_AUDIT__HMPPS_MANAGE_USERS"), scopes = listOf("read")))
       .body(
         BodyInserters.fromValue(
           DigitalServicesQueryRequest(
@@ -141,7 +141,7 @@ class DigitalServicesTest : IntegrationTest() {
   @Test
   fun invalidQuery() {
     webTestClient.post().uri("/audit/query")
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
+      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT", "ROLE_QUERY_AUDIT__HMPPS_MANAGE_USERS"), scopes = listOf("read")))
       .body(
         BodyInserters.fromValue(
           DigitalServicesQueryRequest(),
@@ -158,7 +158,7 @@ class DigitalServicesTest : IntegrationTest() {
     given(athenaClient.getQueryResults(getQueryResultsRequest)).willReturn(getQueryResultsResponse)
 
     webTestClient.get().uri("/audit/query/{queryExecutionId}", queryExecutionId)
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
+      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT", "ROLE_QUERY_AUDIT__HMPPS_MANAGE_USERS"), scopes = listOf("read")))
       .exchange()
       .expectStatus().isOk
       .expectBody().json("get_query_results_response".loadJson(), STRICT)
