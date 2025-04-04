@@ -5,6 +5,7 @@ import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mockingDetails
@@ -40,7 +41,14 @@ class AuditTestS3Bucket @Autowired constructor(
     await untilCallTo { mockingDetails(auditS3Client).invocations.size } matches { it!! >= 1 }
 
     verify(telemetryClient).trackEvent(eq("hmpps-audit"), any(), isNull())
-    verify(auditS3Client).save(any<HMPPSAuditListener.AuditEvent>())
+    verify(auditS3Client).save(
+      argThat {
+        what == "basicAuditEvent" &&
+          service == "hmpps-audit-poc-ui" &&
+          subjectType == "NOT_APPLICABLE" &&
+          id != null
+      },
+    )
     verifyNoInteractions(auditRepository)
   }
 }

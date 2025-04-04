@@ -44,7 +44,7 @@ class AuditRepositoryTest {
       assertThat(auditEvent.who).isNull()
       assertThat(auditEvent.service).isNull()
       assertThat(auditEvent.subjectId).isNull()
-      assertThat(auditEvent.subjectType).isNull()
+      assertThat(auditEvent.subjectType).isEqualTo("NOT_APPLICABLE")
       assertThat(auditEvent.details).isNull()
     }
 
