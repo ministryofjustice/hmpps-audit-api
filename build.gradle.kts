@@ -1,9 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "7.1.3"
-  kotlin("plugin.spring") version "2.1.10"
-  kotlin("plugin.jpa") version "2.1.10"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.0.0"
+  kotlin("plugin.spring") version "2.1.20"
+  kotlin("plugin.jpa") version "2.1.20"
 }
 
 configurations {
@@ -27,13 +27,13 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.3.2")
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.2")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
 
   implementation("org.apache.commons:commons-lang3:3.17.0")
-  implementation("software.amazon.awssdk:s3:2.30.34")
-  implementation("software.amazon.awssdk:athena:2.30.34")
-  implementation("org.apache.parquet:parquet-avro:1.15.0")
+  implementation("software.amazon.awssdk:s3:2.31.17")
+  implementation("software.amazon.awssdk:athena:2.31.17")
+  implementation("org.apache.parquet:parquet-avro:1.15.1")
   implementation("org.apache.avro:avro:1.12.0")
   implementation("org.apache.hadoop:hadoop-client:3.4.1") {
     exclude(group = "com.google.protobuf", module = "protobuf-java")
