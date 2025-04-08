@@ -31,8 +31,8 @@ dependencies {
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
 
   implementation("org.apache.commons:commons-lang3:3.17.0")
-  implementation("software.amazon.awssdk:s3:2.31.15")
-  implementation("software.amazon.awssdk:athena:2.31.15")
+  implementation("software.amazon.awssdk:s3:2.31.17")
+  implementation("software.amazon.awssdk:athena:2.31.17")
   implementation("org.apache.parquet:parquet-avro:1.15.1")
   implementation("org.apache.avro:avro:1.12.0")
   implementation("org.apache.hadoop:hadoop-client:3.4.1") {
