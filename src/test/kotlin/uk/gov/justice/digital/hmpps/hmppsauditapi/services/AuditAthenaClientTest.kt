@@ -25,6 +25,7 @@ import software.amazon.awssdk.services.athena.model.GetQueryResultsResponse
 import software.amazon.awssdk.services.athena.model.QueryExecution
 import software.amazon.awssdk.services.athena.model.QueryExecutionContext
 import software.amazon.awssdk.services.athena.model.QueryExecutionState
+import software.amazon.awssdk.services.athena.model.QueryExecutionStatistics
 import software.amazon.awssdk.services.athena.model.QueryExecutionStatus
 import software.amazon.awssdk.services.athena.model.ResultConfiguration
 import software.amazon.awssdk.services.athena.model.ResultSet
@@ -52,14 +53,10 @@ class AuditAthenaClientTest {
   private val outputLocation = "outputLocation"
   private val queryExecutionId = "a4ab5455-dfe1-46f2-917d-5135b7dadae3"
   private val updatePartitionsQueryExecutionId = "d9906078-2776-46cc-bcfe-3f91cfbc181b"
-  private val successfulQueryExecutionResponse = GetQueryExecutionResponse.builder()
-    .queryExecution(
-      QueryExecution.builder().status(
-        QueryExecutionStatus.builder().state(
-          QueryExecutionState.SUCCEEDED,
-        ).build(),
-      ).build(),
-    ).build()
+  private val successfulQueryExecutionResponse = GetQueryExecutionResponse.builder().queryExecution(
+    QueryExecution.builder().status(QueryExecutionStatus.builder().state(QueryExecutionState.SUCCEEDED).build())
+      .statistics(QueryExecutionStatistics.builder().build()).build(),
+  ).build()
 
   @Mock
   private lateinit var athenaClient: AthenaClient

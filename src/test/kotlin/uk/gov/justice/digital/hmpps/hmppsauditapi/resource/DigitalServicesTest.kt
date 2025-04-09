@@ -15,6 +15,7 @@ import software.amazon.awssdk.services.athena.model.GetQueryResultsResponse
 import software.amazon.awssdk.services.athena.model.QueryExecution
 import software.amazon.awssdk.services.athena.model.QueryExecutionContext
 import software.amazon.awssdk.services.athena.model.QueryExecutionState.SUCCEEDED
+import software.amazon.awssdk.services.athena.model.QueryExecutionStatistics
 import software.amazon.awssdk.services.athena.model.QueryExecutionStatus
 import software.amazon.awssdk.services.athena.model.ResultConfiguration
 import software.amazon.awssdk.services.athena.model.ResultSet
@@ -110,7 +111,11 @@ class DigitalServicesTest : IntegrationTest() {
   private final val getQueryExecutionRequest: GetQueryExecutionRequest = GetQueryExecutionRequest.builder().queryExecutionId(queryExecutionId).build()
   private final val updatePartitionsGetQueryExecutionRequest: GetQueryExecutionRequest = GetQueryExecutionRequest.builder().queryExecutionId(updatePartitionsQueryExecutionId).build()
   private final val successfulGetQueryExecutionResponse = GetQueryExecutionResponse.builder()
-    .queryExecution(QueryExecution.builder().status(QueryExecutionStatus.builder().state(SUCCEEDED).build()).build())
+    .queryExecution(
+      QueryExecution.builder()
+        .statistics(QueryExecutionStatistics.builder().build())
+        .status(QueryExecutionStatus.builder().state(SUCCEEDED).build()).build(),
+    )
     .build()
   private final val getQueryResultsRequest: GetQueryResultsRequest = GetQueryResultsRequest.builder().queryExecutionId(queryExecutionId).build()
   private final val getQueryResultsResponse = GetQueryResultsResponse.builder().resultSet(resultSet).build()
