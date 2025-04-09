@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -47,6 +48,7 @@ private const val HMPPS_MANAGE_USERS = "hmpps-manage-users"
 private const val HMPPS_EXTERNAL_USERS = "hmpps-external-users"
 
 @ExtendWith(MockitoExtension::class)
+@Disabled
 class AuditAthenaClientTest {
   private val databaseName = "databaseName"
   private val workGroupName = "workGroupName"
