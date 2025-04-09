@@ -39,9 +39,8 @@ class AuditAthenaClient(
   }
 
   fun getQueryResults(queryExecutionId: String): DigitalServicesQueryResponse {
-    val queryState = athenaClient.getQueryExecution(
-      GetQueryExecutionRequest.builder().queryExecutionId(queryExecutionId).build(),
-    ).queryExecution().status().state()
+    val queryExecution = athenaClient.getQueryExecution(GetQueryExecutionRequest.builder().queryExecutionId(queryExecutionId).build()).queryExecution()
+    val queryState = queryExecution.status().state()
     val response = DigitalServicesQueryResponse(
       queryExecutionId = UUID.fromString(queryExecutionId),
       queryState = queryState,
@@ -49,6 +48,7 @@ class AuditAthenaClient(
     )
     if (queryState == QueryExecutionState.SUCCEEDED) {
       response.results = fetchQueryResults(queryExecutionId)
+      response.executionTimeInMillis = queryExecution.statistics().totalExecutionTimeInMillis()
     }
     return response
   }

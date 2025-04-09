@@ -11,4 +11,5 @@ data class DigitalServicesQueryResponse(
   val authorisedServices: List<String>,
   @JsonInclude(JsonInclude.Include.NON_NULL)
   var results: List<AuditDto>? = null,
+  var executionTimeInMillis: Long? = null,
 )
