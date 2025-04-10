@@ -42,6 +42,7 @@ import java.util.stream.Stream
 
 private const val ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS = "ROLE_QUERY_AUDIT__HMPPS_MANAGE_USERS"
 private const val ROLE_QUERY_AUDIT__HMPPS_EXTERNAL_USERS = "ROLE_QUERY_AUDIT__HMPPS_EXTERNAL_USERS"
+private const val ROLE_QUERY_AUDIT__HMPPS_ALL_SERVICES = "ROLE_QUERY_AUDIT__ALL_SERVICES"
 private const val HMPPS_MANAGE_USERS = "hmpps-manage-users"
 private const val HMPPS_EXTERNAL_USERS = "hmpps-external-users"
 
@@ -175,6 +176,18 @@ class AuditAthenaClientTest {
         listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS),
         "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) >= DATE '2025-01-01' AND who = 'someone' AND service IN ('hmpps-manage-users');",
         listOf(HMPPS_MANAGE_USERS),
+      ),
+
+      // Authorised to query all services
+      Arguments.of(
+        DigitalServicesQueryRequest(
+          startDate = LocalDate.of(2025, 1, 1),
+          endDate = LocalDate.of(2025, 1, 31),
+          who = "someone",
+        ),
+        listOf(ROLE_QUERY_AUDIT__HMPPS_ALL_SERVICES),
+        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND who = 'someone';",
+        listOf("all-services"),
       ),
 
       // No authorised services

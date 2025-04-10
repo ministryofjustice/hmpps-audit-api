@@ -106,8 +106,10 @@ class AuditAthenaClient(
     filter.subjectId?.let { conditions.add("subjectId = '$it'") }
     filter.subjectType?.let { conditions.add("subjectType = '$it'") }
 
-    val serviceList = services.joinToString(", ") { "'$it'" }
-    conditions.add("service IN ($serviceList)")
+    if (!services.any { it.equals("all-services", ignoreCase = true) }) {
+      val serviceList = services.joinToString(", ") { "'$it'" }
+      conditions.add("service IN ($serviceList)")
+    }
 
     val whereClause = "WHERE ${conditions.joinToString(" AND ")}"
 
