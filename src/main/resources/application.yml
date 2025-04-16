@@ -105,6 +105,10 @@ hmpps:
         asyncQueueClient: true
   repository:
     saveToS3Bucket: ${SAVE_TO_S3_BUCKET}
+  audit:
+    queriesStartDate: 2024-01-01
+    queriesEndDate: 3000-12-31
+
 
 oauth:
   token.url: ${oauth.endpoint.url}/oauth/token

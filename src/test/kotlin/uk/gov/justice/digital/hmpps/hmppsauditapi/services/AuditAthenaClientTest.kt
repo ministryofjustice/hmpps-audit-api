@@ -25,6 +25,7 @@ import software.amazon.awssdk.services.athena.model.GetQueryResultsResponse
 import software.amazon.awssdk.services.athena.model.QueryExecution
 import software.amazon.awssdk.services.athena.model.QueryExecutionContext
 import software.amazon.awssdk.services.athena.model.QueryExecutionState
+import software.amazon.awssdk.services.athena.model.QueryExecutionStatistics
 import software.amazon.awssdk.services.athena.model.QueryExecutionStatus
 import software.amazon.awssdk.services.athena.model.ResultConfiguration
 import software.amazon.awssdk.services.athena.model.ResultSet
@@ -45,6 +46,8 @@ private const val ROLE_QUERY_AUDIT__HMPPS_EXTERNAL_USERS = "ROLE_QUERY_AUDIT__HM
 private const val ROLE_QUERY_AUDIT__HMPPS_ALL_SERVICES = "ROLE_QUERY_AUDIT__ALL_SERVICES"
 private const val HMPPS_MANAGE_USERS = "hmpps-manage-users"
 private const val HMPPS_EXTERNAL_USERS = "hmpps-external-users"
+private val MOCK_START_DATE = LocalDate.parse("2025-01-01")
+private val MOCK_END_DATE = LocalDate.parse("2025-02-28")
 
 @ExtendWith(MockitoExtension::class)
 class AuditAthenaClientTest {
@@ -53,21 +56,17 @@ class AuditAthenaClientTest {
   private val outputLocation = "outputLocation"
   private val queryExecutionId = "a4ab5455-dfe1-46f2-917d-5135b7dadae3"
   private val updatePartitionsQueryExecutionId = "d9906078-2776-46cc-bcfe-3f91cfbc181b"
-  private val successfulQueryExecutionResponse = GetQueryExecutionResponse.builder()
-    .queryExecution(
-      QueryExecution.builder().status(
-        QueryExecutionStatus.builder().state(
-          QueryExecutionState.SUCCEEDED,
-        ).build(),
-      ).build(),
-    ).build()
+  private val successfulQueryExecutionResponse = GetQueryExecutionResponse.builder().queryExecution(
+    QueryExecution.builder().status(QueryExecutionStatus.builder().state(QueryExecutionState.SUCCEEDED).build())
+      .statistics(QueryExecutionStatistics.builder().build()).build(),
+  ).build()
 
   @Mock
   private lateinit var athenaClient: AthenaClient
 
   @BeforeEach
   fun setup() {
-    auditAthenaClient = AuditAthenaClient(athenaClient, databaseName, workGroupName, outputLocation)
+    auditAthenaClient = AuditAthenaClient(athenaClient, databaseName, workGroupName, outputLocation, MOCK_START_DATE, MOCK_END_DATE)
   }
 
   private lateinit var auditAthenaClient: AuditAthenaClient
@@ -108,13 +107,13 @@ class AuditAthenaClientTest {
       Arguments.of(
         DigitalServicesQueryRequest(
           startDate = LocalDate.of(2025, 1, 1),
-          endDate = LocalDate.of(2025, 1, 31),
+          endDate = LocalDate.of(2025, 1, 5),
           who = "someone",
           subjectId = "subjectId",
           subjectType = "subjectType",
         ),
         listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS),
-        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND who = 'someone' AND subjectId = 'subjectId' AND subjectType = 'subjectType' AND service IN ('hmpps-manage-users');",
+        "SELECT * FROM databaseName.audit_event WHERE ((year = 2025 AND month = 1 AND day = 1) OR (year = 2025 AND month = 1 AND day = 2) OR (year = 2025 AND month = 1 AND day = 3) OR (year = 2025 AND month = 1 AND day = 4) OR (year = 2025 AND month = 1 AND day = 5)) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND user = 'someone' AND subjectId = 'subjectId' AND subjectType = 'subjectType' AND service IN ('hmpps-manage-users');",
         listOf(HMPPS_MANAGE_USERS),
       ),
 
@@ -122,36 +121,36 @@ class AuditAthenaClientTest {
       Arguments.of(
         DigitalServicesQueryRequest(
           startDate = LocalDate.of(2025, 1, 1),
-          endDate = LocalDate.of(2025, 1, 31),
+          endDate = LocalDate.of(2025, 1, 5),
           subjectId = "subjectId",
           subjectType = "subjectType",
         ),
         listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS, ROLE_QUERY_AUDIT__HMPPS_EXTERNAL_USERS),
-        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND subjectId = 'subjectId' AND subjectType = 'subjectType' AND service IN ('hmpps-manage-users', 'hmpps-external-users');",
+        "SELECT * FROM databaseName.audit_event WHERE ((year = 2025 AND month = 1 AND day = 1) OR (year = 2025 AND month = 1 AND day = 2) OR (year = 2025 AND month = 1 AND day = 3) OR (year = 2025 AND month = 1 AND day = 4) OR (year = 2025 AND month = 1 AND day = 5)) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND subjectId = 'subjectId' AND subjectType = 'subjectType' AND service IN ('hmpps-manage-users', 'hmpps-external-users');",
         listOf(HMPPS_MANAGE_USERS, HMPPS_EXTERNAL_USERS),
       ),
 
       // Subject + endDate, no who, no startDate
       Arguments.of(
         DigitalServicesQueryRequest(
-          startDate = LocalDate.of(2025, 1, 1),
+          startDate = LocalDate.of(2025, 1, 25),
           subjectId = "subjectId",
           subjectType = "subjectType",
         ),
         listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS),
-        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) >= DATE '2025-01-01' AND subjectId = 'subjectId' AND subjectType = 'subjectType' AND service IN ('hmpps-manage-users');",
+        "SELECT * FROM databaseName.audit_event WHERE ((year = 2025 AND month = 1 AND day = 25) OR (year = 2025 AND month = 1 AND day = 26) OR (year = 2025 AND month = 1 AND day = 27) OR (year = 2025 AND month = 1 AND day = 28) OR (year = 2025 AND month = 1 AND day = 29) OR (year = 2025 AND month = 1 AND day = 30) OR (year = 2025 AND month = 1 AND day = 31) OR (year = 2025 AND month = 2 AND day = 1) OR (year = 2025 AND month = 2 AND day = 2) OR (year = 2025 AND month = 2 AND day = 3) OR (year = 2025 AND month = 2 AND day = 4) OR (year = 2025 AND month = 2 AND day = 5) OR (year = 2025 AND month = 2 AND day = 6) OR (year = 2025 AND month = 2 AND day = 7) OR (year = 2025 AND month = 2 AND day = 8) OR (year = 2025 AND month = 2 AND day = 9) OR (year = 2025 AND month = 2 AND day = 10) OR (year = 2025 AND month = 2 AND day = 11) OR (year = 2025 AND month = 2 AND day = 12) OR (year = 2025 AND month = 2 AND day = 13) OR (year = 2025 AND month = 2 AND day = 14) OR (year = 2025 AND month = 2 AND day = 15) OR (year = 2025 AND month = 2 AND day = 16) OR (year = 2025 AND month = 2 AND day = 17) OR (year = 2025 AND month = 2 AND day = 18) OR (year = 2025 AND month = 2 AND day = 19) OR (year = 2025 AND month = 2 AND day = 20) OR (year = 2025 AND month = 2 AND day = 21) OR (year = 2025 AND month = 2 AND day = 22) OR (year = 2025 AND month = 2 AND day = 23) OR (year = 2025 AND month = 2 AND day = 24) OR (year = 2025 AND month = 2 AND day = 25) OR (year = 2025 AND month = 2 AND day = 26) OR (year = 2025 AND month = 2 AND day = 27) OR (year = 2025 AND month = 2 AND day = 28)) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-25' AND DATE '2025-02-28' AND subjectId = 'subjectId' AND subjectType = 'subjectType' AND service IN ('hmpps-manage-users');",
         listOf(HMPPS_MANAGE_USERS),
       ),
 
       // Subject + endDate, no who, no startDate
       Arguments.of(
         DigitalServicesQueryRequest(
-          endDate = LocalDate.of(2025, 1, 31),
+          endDate = LocalDate.of(2025, 1, 10),
           subjectId = "subjectId",
           subjectType = "subjectType",
         ),
         listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS),
-        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) <= DATE '2025-01-31' AND subjectId = 'subjectId' AND subjectType = 'subjectType' AND service IN ('hmpps-manage-users');",
+        "SELECT * FROM databaseName.audit_event WHERE ((year = 2025 AND month = 1 AND day = 1) OR (year = 2025 AND month = 1 AND day = 2) OR (year = 2025 AND month = 1 AND day = 3) OR (year = 2025 AND month = 1 AND day = 4) OR (year = 2025 AND month = 1 AND day = 5) OR (year = 2025 AND month = 1 AND day = 6) OR (year = 2025 AND month = 1 AND day = 7) OR (year = 2025 AND month = 1 AND day = 8) OR (year = 2025 AND month = 1 AND day = 9) OR (year = 2025 AND month = 1 AND day = 10)) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-10' AND subjectId = 'subjectId' AND subjectType = 'subjectType' AND service IN ('hmpps-manage-users');",
         listOf(HMPPS_MANAGE_USERS),
       ),
 
@@ -159,22 +158,22 @@ class AuditAthenaClientTest {
       Arguments.of(
         DigitalServicesQueryRequest(
           startDate = LocalDate.of(2025, 1, 1),
-          endDate = LocalDate.of(2025, 1, 31),
+          endDate = LocalDate.of(2025, 1, 15),
           who = "someone",
         ),
         listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS),
-        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND who = 'someone' AND service IN ('hmpps-manage-users');",
+        "SELECT * FROM databaseName.audit_event WHERE ((year = 2025 AND month = 1 AND day = 1) OR (year = 2025 AND month = 1 AND day = 2) OR (year = 2025 AND month = 1 AND day = 3) OR (year = 2025 AND month = 1 AND day = 4) OR (year = 2025 AND month = 1 AND day = 5) OR (year = 2025 AND month = 1 AND day = 6) OR (year = 2025 AND month = 1 AND day = 7) OR (year = 2025 AND month = 1 AND day = 8) OR (year = 2025 AND month = 1 AND day = 9) OR (year = 2025 AND month = 1 AND day = 10) OR (year = 2025 AND month = 1 AND day = 11) OR (year = 2025 AND month = 1 AND day = 12) OR (year = 2025 AND month = 1 AND day = 13) OR (year = 2025 AND month = 1 AND day = 14) OR (year = 2025 AND month = 1 AND day = 15)) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-15' AND user = 'someone' AND service IN ('hmpps-manage-users');",
         listOf(HMPPS_MANAGE_USERS),
       ),
 
       // startDate + who, no subject, no endDate
       Arguments.of(
         DigitalServicesQueryRequest(
-          startDate = LocalDate.of(2025, 1, 1),
+          startDate = LocalDate.of(2025, 1, 25),
           who = "someone",
         ),
         listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS),
-        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) >= DATE '2025-01-01' AND who = 'someone' AND service IN ('hmpps-manage-users');",
+        "SELECT * FROM databaseName.audit_event WHERE ((year = 2025 AND month = 1 AND day = 25) OR (year = 2025 AND month = 1 AND day = 26) OR (year = 2025 AND month = 1 AND day = 27) OR (year = 2025 AND month = 1 AND day = 28) OR (year = 2025 AND month = 1 AND day = 29) OR (year = 2025 AND month = 1 AND day = 30) OR (year = 2025 AND month = 1 AND day = 31) OR (year = 2025 AND month = 2 AND day = 1) OR (year = 2025 AND month = 2 AND day = 2) OR (year = 2025 AND month = 2 AND day = 3) OR (year = 2025 AND month = 2 AND day = 4) OR (year = 2025 AND month = 2 AND day = 5) OR (year = 2025 AND month = 2 AND day = 6) OR (year = 2025 AND month = 2 AND day = 7) OR (year = 2025 AND month = 2 AND day = 8) OR (year = 2025 AND month = 2 AND day = 9) OR (year = 2025 AND month = 2 AND day = 10) OR (year = 2025 AND month = 2 AND day = 11) OR (year = 2025 AND month = 2 AND day = 12) OR (year = 2025 AND month = 2 AND day = 13) OR (year = 2025 AND month = 2 AND day = 14) OR (year = 2025 AND month = 2 AND day = 15) OR (year = 2025 AND month = 2 AND day = 16) OR (year = 2025 AND month = 2 AND day = 17) OR (year = 2025 AND month = 2 AND day = 18) OR (year = 2025 AND month = 2 AND day = 19) OR (year = 2025 AND month = 2 AND day = 20) OR (year = 2025 AND month = 2 AND day = 21) OR (year = 2025 AND month = 2 AND day = 22) OR (year = 2025 AND month = 2 AND day = 23) OR (year = 2025 AND month = 2 AND day = 24) OR (year = 2025 AND month = 2 AND day = 25) OR (year = 2025 AND month = 2 AND day = 26) OR (year = 2025 AND month = 2 AND day = 27) OR (year = 2025 AND month = 2 AND day = 28)) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-25' AND DATE '2025-02-28' AND user = 'someone' AND service IN ('hmpps-manage-users');",
         listOf(HMPPS_MANAGE_USERS),
       ),
 
@@ -182,18 +181,18 @@ class AuditAthenaClientTest {
       Arguments.of(
         DigitalServicesQueryRequest(
           startDate = LocalDate.of(2025, 1, 1),
-          endDate = LocalDate.of(2025, 1, 31),
+          endDate = LocalDate.of(2025, 1, 5),
           who = "someone",
         ),
         listOf(ROLE_QUERY_AUDIT__HMPPS_ALL_SERVICES),
-        "SELECT * FROM databaseName.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND who = 'someone';",
+        "SELECT * FROM databaseName.audit_event WHERE ((year = 2025 AND month = 1 AND day = 1) OR (year = 2025 AND month = 1 AND day = 2) OR (year = 2025 AND month = 1 AND day = 3) OR (year = 2025 AND month = 1 AND day = 4) OR (year = 2025 AND month = 1 AND day = 5)) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND user = 'someone';",
         listOf("all-services"),
       ),
 
       // No authorised services
       Arguments.of(
         DigitalServicesQueryRequest(
-          startDate = LocalDate.of(2025, 1, 1),
+          startDate = LocalDate.of(2025, 1, 31),
           who = "someone",
         ),
         emptyList<String>(),

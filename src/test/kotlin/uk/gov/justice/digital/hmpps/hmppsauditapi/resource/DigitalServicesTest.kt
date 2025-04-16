@@ -15,6 +15,7 @@ import software.amazon.awssdk.services.athena.model.GetQueryResultsResponse
 import software.amazon.awssdk.services.athena.model.QueryExecution
 import software.amazon.awssdk.services.athena.model.QueryExecutionContext
 import software.amazon.awssdk.services.athena.model.QueryExecutionState.SUCCEEDED
+import software.amazon.awssdk.services.athena.model.QueryExecutionStatistics
 import software.amazon.awssdk.services.athena.model.QueryExecutionStatus
 import software.amazon.awssdk.services.athena.model.ResultConfiguration
 import software.amazon.awssdk.services.athena.model.ResultSet
@@ -98,7 +99,7 @@ class DigitalServicesTest : IntegrationTest() {
     .resultConfiguration(ResultConfiguration.builder().outputLocation("the-location").build())
     .build()
   private val startQueryExecutionRequest: StartQueryExecutionRequest = StartQueryExecutionRequest.builder()
-    .queryString("SELECT * FROM the-database.audit_event WHERE DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' AND subjectId = 'test-subject' AND subjectType = 'USER_ID' AND service IN ('hmpps-manage-users');")
+    .queryString("SELECT * FROM the-database.audit_event WHERE ((year = 2025 AND month = 1 AND day = 1) OR (year = 2025 AND month = 1 AND day = 2) OR (year = 2025 AND month = 1 AND day = 3) OR (year = 2025 AND month = 1 AND day = 4) OR (year = 2025 AND month = 1 AND day = 5)) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND subjectId = 'test-subject' AND subjectType = 'USER_ID' AND service IN ('hmpps-manage-users');")
     .queryExecutionContext(QueryExecutionContext.builder().database("the-database").build())
     .workGroup("the-workgroup")
     .resultConfiguration(ResultConfiguration.builder().outputLocation("the-location").build())
@@ -110,7 +111,11 @@ class DigitalServicesTest : IntegrationTest() {
   private final val getQueryExecutionRequest: GetQueryExecutionRequest = GetQueryExecutionRequest.builder().queryExecutionId(queryExecutionId).build()
   private final val updatePartitionsGetQueryExecutionRequest: GetQueryExecutionRequest = GetQueryExecutionRequest.builder().queryExecutionId(updatePartitionsQueryExecutionId).build()
   private final val successfulGetQueryExecutionResponse = GetQueryExecutionResponse.builder()
-    .queryExecution(QueryExecution.builder().status(QueryExecutionStatus.builder().state(SUCCEEDED).build()).build())
+    .queryExecution(
+      QueryExecution.builder()
+        .statistics(QueryExecutionStatistics.builder().totalExecutionTimeInMillis(100).build())
+        .status(QueryExecutionStatus.builder().state(SUCCEEDED).build()).build(),
+    )
     .build()
   private final val getQueryResultsRequest: GetQueryResultsRequest = GetQueryResultsRequest.builder().queryExecutionId(queryExecutionId).build()
   private final val getQueryResultsResponse = GetQueryResultsResponse.builder().resultSet(resultSet).build()
@@ -127,7 +132,7 @@ class DigitalServicesTest : IntegrationTest() {
         BodyInserters.fromValue(
           DigitalServicesQueryRequest(
             startDate = LocalDate.of(2025, 1, 1),
-            endDate = LocalDate.of(2025, 1, 31),
+            endDate = LocalDate.of(2025, 1, 5),
             subjectId = "test-subject",
             subjectType = "USER_ID",
           ),

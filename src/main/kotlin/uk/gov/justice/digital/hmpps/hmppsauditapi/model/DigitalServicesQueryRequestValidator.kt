@@ -36,7 +36,7 @@ class DigitalServicesQueryRequestValidator : ConstraintValidator<ValidDigitalSer
       addViolation("startDate", "startDate must not be in the future")
     }
 
-    if (dto.startDate != null && dto.endDate != null && dto.startDate.isAfter(dto.endDate)) {
+    if (dto.startDate != null && dto.endDate != null && dto.startDate!!.isAfter(dto.endDate)) {
       addViolation("startDate", "startDate must be before endDate")
     }
 

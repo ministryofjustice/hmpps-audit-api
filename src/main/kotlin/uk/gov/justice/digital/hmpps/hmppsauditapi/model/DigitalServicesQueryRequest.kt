@@ -11,14 +11,14 @@ open class DigitalServicesQueryRequest(
     description = "The start date to filter the audit events",
     example = "2020-07-01",
   )
-  val startDate: LocalDate? = null,
+  var startDate: LocalDate? = null,
 
   @Schema(
     required = false,
     description = "The end date to filter the audit events",
     example = "2020-07-01",
   )
-  val endDate: LocalDate? = null,
+  var endDate: LocalDate? = null,
 
   @Schema(required = false, description = "The user who initiated the audit event", example = "Joe.Bloggs")
   @field:Size(min = 2, max = 80)
