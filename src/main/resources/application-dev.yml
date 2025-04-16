@@ -19,3 +19,6 @@ spring:
 hmpps:
   repository:
     saveToS3Bucket: true
+  audit:
+    queriesStartDate: 2024-01-01
+    queriesEndDate: 3000-12-31

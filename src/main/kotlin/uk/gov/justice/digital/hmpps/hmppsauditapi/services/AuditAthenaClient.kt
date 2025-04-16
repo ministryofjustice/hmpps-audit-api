@@ -13,6 +13,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequ
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import java.time.Instant
+import java.time.LocalDate
 import java.util.UUID
 
 private const val AUTHORISED_SERVICE_ROLE_PREFIX = "ROLE_QUERY_AUDIT__"
@@ -23,9 +24,19 @@ class AuditAthenaClient(
   @Value("\${aws.athena.database}") private val databaseName: String,
   @Value("\${aws.athena.workgroup}") private val workGroup: String,
   @Value("\${aws.athena.outputLocation}") private val outputLocation: String,
+
+  // These values are in place of LocalDate.MIN and LocalDate.MAX. They are settable to make buildPartitionDateConditions easier to test
+  @Value("\${hmpps.audit.queriesStartDate}") private val queriesStartDate: LocalDate,
+  @Value("\${hmpps.audit.queriesEndDate}") private val queriesEndDate: LocalDate,
 ) {
 
   fun triggerQuery(filter: DigitalServicesQueryRequest): DigitalServicesQueryResponse {
+    if (filter.startDate == null) {
+      filter.startDate = queriesStartDate
+    }
+    if (filter.endDate == null) {
+      filter.endDate = queriesEndDate
+    }
     updateAthenaPartitions()
     val authorisedServices = getAuthorisedServices()
     val query = buildAthenaQuery(filter, authorisedServices)
@@ -39,9 +50,8 @@ class AuditAthenaClient(
   }
 
   fun getQueryResults(queryExecutionId: String): DigitalServicesQueryResponse {
-    val queryState = athenaClient.getQueryExecution(
-      GetQueryExecutionRequest.builder().queryExecutionId(queryExecutionId).build(),
-    ).queryExecution().status().state()
+    val queryExecution = athenaClient.getQueryExecution(GetQueryExecutionRequest.builder().queryExecutionId(queryExecutionId).build()).queryExecution()
+    val queryState = queryExecution.status().state()
     val response = DigitalServicesQueryResponse(
       queryExecutionId = UUID.fromString(queryExecutionId),
       queryState = queryState,
@@ -49,6 +59,7 @@ class AuditAthenaClient(
     )
     if (queryState == QueryExecutionState.SUCCEEDED) {
       response.results = fetchQueryResults(queryExecutionId)
+      response.executionTimeInMillis = queryExecution.statistics().totalExecutionTimeInMillis()
     }
     return response
   }
@@ -95,14 +106,13 @@ class AuditAthenaClient(
       return "SELECT * FROM $databaseName.audit_event WHERE 1 = 0;"
     }
 
-    if (filter.startDate != null && filter.endDate != null) {
-      conditions.add("DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '${filter.startDate}' AND DATE '${filter.endDate}'")
-    } else if (filter.startDate != null) {
-      conditions.add("DATE(from_iso8601_timestamp(\"when\")) >= DATE '${filter.startDate}'")
-    } else if (filter.endDate != null) {
-      conditions.add("DATE(from_iso8601_timestamp(\"when\")) <= DATE '${filter.endDate}'")
-    }
-    filter.who?.let { conditions.add("who = '$it'") }
+    // Partition filtering based on full year/month/day decomposition
+    val partitionConditions = buildPartitionDateConditions(filter.startDate!!, filter.endDate!!)
+    conditions.add("(${partitionConditions.joinToString(" OR ")})")
+
+    // Timestamp-based filtering for precision
+    conditions.add("DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '${filter.startDate}' AND DATE '${filter.endDate}'")
+    filter.who?.let { conditions.add("user = '$it'") }
     filter.subjectId?.let { conditions.add("subjectId = '$it'") }
     filter.subjectType?.let { conditions.add("subjectType = '$it'") }
 
@@ -114,6 +124,17 @@ class AuditAthenaClient(
     val whereClause = "WHERE ${conditions.joinToString(" AND ")}"
 
     return "SELECT * FROM $databaseName.audit_event $whereClause;"
+  }
+
+  private fun buildPartitionDateConditions(startDate: LocalDate, endDate: LocalDate): List<String> {
+    require(!endDate.isBefore(startDate)) { "End date must be on or after start date" }
+
+    return generateSequence(startDate) { it.plusDays(1) }
+      .takeWhile { !it.isAfter(endDate) }
+      .map { date ->
+        "(year = ${date.year} AND month = ${date.monthValue} AND day = ${date.dayOfMonth})"
+      }
+      .toList()
   }
 
   private fun startAthenaQuery(query: String): String {

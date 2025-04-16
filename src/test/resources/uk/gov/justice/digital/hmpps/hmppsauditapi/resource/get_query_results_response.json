@@ -2,6 +2,7 @@
   "queryExecutionId": "b1231f6e-9653-4b3f-9507-793730932daf",
   "queryState": "SUCCEEDED",
   "authorisedServices": ["hmpps-manage-users"],
+  "executionTimeInMillis": 100,
   "results": [
     {
       "id": "cebcfc92-bdd6-4c3c-be50-a33fb08a9853",
