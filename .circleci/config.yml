@@ -98,11 +98,11 @@ workflows:
   security:
     triggers:
       - schedule:
-          cron: "2 3 * * 1-5"
+          cron: "0,10,20,30,40,50 * * * 1-5"
           filters:
             branches:
               only:
-                - main
+                - suppression-fix
     jobs:
       - hmpps/gradle_owasp_dependency_check:
           jdk_tag: "21.0"
