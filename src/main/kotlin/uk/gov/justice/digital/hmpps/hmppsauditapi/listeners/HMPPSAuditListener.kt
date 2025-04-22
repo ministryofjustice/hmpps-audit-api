@@ -37,19 +37,16 @@ class HMPPSAuditListener(
     auditService.audit(cleansedAuditEvent)
   }
 
-  private fun patchSubjectTypeIfMissing(message: String): String {
-    return try {
-      val tree = jacksonObjectMapper().readTree(message)
-      if (!tree.has("subjectType") || tree.get("subjectType").isNull) {
-        (tree as ObjectNode).put("subjectType", DEFAULT_SUBJECT_TYPE)
-      }
-
-      tree.toString()
-    } catch (e: Exception) {
-      message
+  private fun patchSubjectTypeIfMissing(message: String): String = try {
+    val tree = jacksonObjectMapper().readTree(message)
+    if (!tree.has("subjectType") || tree.get("subjectType").isNull) {
+      (tree as ObjectNode).put("subjectType", DEFAULT_SUBJECT_TYPE)
     }
-  }
 
+    tree.toString()
+  } catch (e: Exception) {
+    message
+  }
 
   private fun String.jsonString(): String? = try {
     jacksonObjectMapper().readTree(trim())
