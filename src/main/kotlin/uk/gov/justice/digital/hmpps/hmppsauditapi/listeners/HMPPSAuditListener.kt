@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.listeners
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.awspring.cloud.sqs.annotation.SqsListener
 import io.swagger.v3.oas.annotations.Hidden
@@ -16,6 +17,8 @@ import java.io.IOException
 import java.time.Instant
 import java.util.UUID
 
+private const val DEFAULT_SUBJECT_TYPE = "NOT_APPLICABLE"
+
 @Service
 class HMPPSAuditListener(
   private val auditService: AuditService,
@@ -24,7 +27,8 @@ class HMPPSAuditListener(
 
   @SqsListener("auditqueue", factory = "hmppsQueueContainerFactoryProxy")
   fun onAuditEvent(message: String) {
-    val auditEvent: AuditEvent = objectMapper.readValue(message, AuditEvent::class.java)
+    val patchedJson = patchSubjectTypeIfMissing(message)
+    val auditEvent: AuditEvent = objectMapper.readValue(patchedJson, AuditEvent::class.java)
 
     val cleansedAuditEvent = auditEvent.copy(
       details = auditEvent.details?.jsonString(),
@@ -32,6 +36,20 @@ class HMPPSAuditListener(
 
     auditService.audit(cleansedAuditEvent)
   }
+
+  private fun patchSubjectTypeIfMissing(message: String): String {
+    return try {
+      val tree = jacksonObjectMapper().readTree(message)
+      if (!tree.has("subjectType") || tree.get("subjectType").isNull) {
+        (tree as ObjectNode).put("subjectType", DEFAULT_SUBJECT_TYPE)
+      }
+
+      tree.toString()
+    } catch (e: Exception) {
+      message
+    }
+  }
+
 
   private fun String.jsonString(): String? = try {
     jacksonObjectMapper().readTree(trim())
@@ -58,7 +76,7 @@ class HMPPSAuditListener(
     @Schema(description = "The subject ID for the Event", example = "cadea6d876c62e2f5264c94c7b50875e")
     val subjectId: String? = null,
     @Schema(description = "The subject type for the Event", example = "PERSON")
-    val subjectType: String = "NOT_APPLICABLE",
+    val subjectType: String = DEFAULT_SUBJECT_TYPE,
     @Schema(description = "The correlation ID for the Event", example = "cadea6d876c62e2f5264c94c7b50875e")
     val correlationId: String? = null,
     @Schema(description = "Who initiated the Event", example = "fred.smith@myemail.com")
