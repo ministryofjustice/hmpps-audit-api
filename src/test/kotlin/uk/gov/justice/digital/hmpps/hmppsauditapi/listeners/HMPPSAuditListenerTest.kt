@@ -63,4 +63,33 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
       },
     )
   }
+
+  @Test
+  internal fun `sets subjectType to default value if it comes in as null`() {
+    val message = """
+    {
+      "what": "USER_LOGIN",
+      "when": "2021-01-25T12:35:00Z",
+      "who": "alice.jones",
+      "service": "auth-service",
+      "details": "non-json-stringified details",
+      "subjectType": null
+    }
+  """
+
+    doNothing().whenever(auditService).audit(any())
+
+    listener.onAuditEvent(message)
+
+    verify(auditService).audit(
+      check {
+        assertThat(it.details).isEqualTo("{\"details\":\"non-json-stringified details\"}")
+        assertThat(it.`when`).isEqualTo("2021-01-25T12:35:00Z")
+        assertThat(it.what).isEqualTo("USER_LOGIN")
+        assertThat(it.who).isEqualTo("alice.jones")
+        assertThat(it.service).isEqualTo("auth-service")
+        assertThat(it.subjectType).isEqualTo("NOT_APPLICABLE")
+      },
+    )
+  }
 }
