@@ -114,7 +114,6 @@ class AuditAthenaClient(
     throw RuntimeException("Timeout: Athena query $queryExecutionId did not complete within ${timeoutMillis / 1000} seconds")
   }
 
-
   private fun buildAthenaQuery(filter: DigitalServicesQueryRequest, services: List<String>): String {
     val conditions = mutableListOf<String>()
 
