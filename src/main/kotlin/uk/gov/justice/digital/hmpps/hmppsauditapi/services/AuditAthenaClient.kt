@@ -104,7 +104,7 @@ class AuditAthenaClient(
         QueryExecutionState.FAILED, QueryExecutionState.CANCELLED ->
           throw RuntimeException("Athena query to update partitions failed with state: $queryStatus")
         else -> {
-          Thread.sleep(3000)
+          Thread.sleep(1000)
         }
       }
     }
