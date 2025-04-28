@@ -90,7 +90,7 @@ class AuditAthenaClient(
     waitForQueryToComplete(queryExecutionId)
   }
 
-  private fun waitForQueryToComplete(queryExecutionId: String, timeoutMillis: Long = 30 * 1000, pollIntervalMillis: Long = 2000) {
+  private fun waitForQueryToComplete(queryExecutionId: String, timeoutMillis: Long = 60 * 1000, pollIntervalMillis: Long = 2000) {
     val startTime = System.currentTimeMillis()
 
     while (System.currentTimeMillis() - startTime < timeoutMillis) {
