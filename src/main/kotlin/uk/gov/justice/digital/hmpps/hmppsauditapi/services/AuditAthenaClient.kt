@@ -101,7 +101,7 @@ class AuditAthenaClient(
     return generateSequence(startDate) { it.plusDays(1) }
       .takeWhile { !it.isAfter(endDate) }
       .map { date ->
-        "(year = ${date.year} AND month = ${date.monthValue} AND day = ${date.dayOfMonth})"
+        "(year = '${date.year}' AND month = '${date.monthValue}' AND day = '${date.dayOfMonth}')"
       }
       .toList()
   }
