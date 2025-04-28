@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
+import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
@@ -9,6 +10,7 @@ import software.amazon.awssdk.services.athena.model.GetQueryExecutionRequest
 import software.amazon.awssdk.services.athena.model.GetQueryResultsRequest
 import software.amazon.awssdk.services.athena.model.QueryExecutionState
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
@@ -21,6 +23,7 @@ private const val AUTHORISED_SERVICE_ROLE_PREFIX = "ROLE_QUERY_AUDIT__"
 @Service
 class AuditAthenaClient(
   private val athenaClient: AthenaClient,
+  private val telemetryClient: TelemetryClient,
   @Value("\${aws.athena.database}") private val databaseName: String,
   @Value("\${aws.athena.workgroup}") private val workGroup: String,
   @Value("\${aws.athena.outputLocation}") private val outputLocation: String,
@@ -35,8 +38,15 @@ class AuditAthenaClient(
       filter.startDate = queriesStartDate
     }
     if (filter.endDate == null) {
-      filter.endDate = queriesEndDate
+      filter.endDate = LocalDate.now()
     }
+    telemetryClient.trackEvent(
+      "mohamad",
+      mapOf(
+        "startDate" to filter.startDate.toString(),
+        "endDate" to filter.endDate.toString(),
+      ),
+    )
     updateAthenaPartitions()
     val authorisedServices = getAuthorisedServices()
     val query = buildAthenaQuery(filter, authorisedServices)
