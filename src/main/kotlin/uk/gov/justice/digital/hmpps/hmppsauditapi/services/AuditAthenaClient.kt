@@ -97,13 +97,14 @@ class AuditAthenaClient(
           .queryExecutionId(queryExecutionId)
           .build(),
       ).queryExecution().status().state()
+      telemetryClient.trackEvent("mohamad", mapOf("queryStatus" to queryStatus.name))
 
       when (queryStatus) {
         QueryExecutionState.SUCCEEDED -> return
         QueryExecutionState.FAILED, QueryExecutionState.CANCELLED ->
           throw RuntimeException("Athena query to update partitions failed with state: $queryStatus")
         else -> {
-          Thread.sleep(2000)
+          Thread.sleep(3000)
         }
       }
     }
