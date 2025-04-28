@@ -66,6 +66,7 @@ class AuditAthenaClient(
       queryState = queryState,
       authorisedServices = getAuthorisedServices(),
     )
+    telemetryClient.trackEvent("mohamad", mapOf("errorMessage" to queryExecution.status().athenaError().errorMessage()))
     if (queryState == QueryExecutionState.SUCCEEDED) {
       response.results = fetchQueryResults(queryExecutionId)
       response.executionTimeInMillis = queryExecution.statistics().totalExecutionTimeInMillis()
