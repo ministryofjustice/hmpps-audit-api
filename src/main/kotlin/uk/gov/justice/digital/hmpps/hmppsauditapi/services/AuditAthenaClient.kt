@@ -47,7 +47,6 @@ class AuditAthenaClient(
         "endDate" to filter.endDate.toString(),
       ),
     )
-    updateAthenaPartitions()
     val authorisedServices = getAuthorisedServices()
     val query = buildAthenaQuery(filter, authorisedServices)
     val queryExecutionId = startAthenaQuery(query)
@@ -72,46 +71,6 @@ class AuditAthenaClient(
       response.executionTimeInMillis = queryExecution.statistics().totalExecutionTimeInMillis()
     }
     return response
-  }
-
-  private fun updateAthenaPartitions() {
-    val repairTableQuery = "MSCK REPAIR TABLE $databaseName.audit_event;"
-
-    val request = StartQueryExecutionRequest.builder()
-      .queryString(repairTableQuery)
-      .queryExecutionContext { it.database(databaseName) }
-      .workGroup(workGroup)
-      .resultConfiguration { it.outputLocation(outputLocation) }
-      .build()
-
-    val response = athenaClient.startQueryExecution(request)
-    val queryExecutionId = response.queryExecutionId()
-
-    waitForQueryToComplete(queryExecutionId)
-  }
-
-  private fun waitForQueryToComplete(queryExecutionId: String, timeoutMillis: Long = 60 * 1000, pollIntervalMillis: Long = 2000) {
-    val startTime = System.currentTimeMillis()
-
-    while (System.currentTimeMillis() - startTime < timeoutMillis) {
-      val queryStatus = athenaClient.getQueryExecution(
-        GetQueryExecutionRequest.builder()
-          .queryExecutionId(queryExecutionId)
-          .build(),
-      ).queryExecution().status().state()
-
-      telemetryClient.trackEvent("mohamad", mapOf("queryStatus" to queryStatus.name))
-
-      when (queryStatus) {
-        QueryExecutionState.SUCCEEDED -> return
-        QueryExecutionState.FAILED, QueryExecutionState.CANCELLED ->
-          throw RuntimeException("Athena query to update partitions failed with state: $queryStatus")
-        else -> {
-          Thread.sleep(pollIntervalMillis)
-        }
-      }
-    }
-    throw RuntimeException("Timeout: Athena query $queryExecutionId did not complete within ${timeoutMillis / 1000} seconds")
   }
 
   private fun buildAthenaQuery(filter: DigitalServicesQueryRequest, services: List<String>): String {
