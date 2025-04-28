@@ -30,7 +30,7 @@ class AthenaPartitionRepairService(
         .build()
 
       val response = athenaClient.startQueryExecution(request)
-      telemetryClient.trackEvent("mohamad", mapOf("partition query execution ID" to response.queryExecutionId()))
+      telemetryClient.trackEvent("partition", mapOf("partition query execution ID" to response.queryExecutionId()))
     } catch (ex: Exception) {
       telemetryClient.trackEvent("hmpps-audit", mapOf("error" to ex.message.toString()))
     }

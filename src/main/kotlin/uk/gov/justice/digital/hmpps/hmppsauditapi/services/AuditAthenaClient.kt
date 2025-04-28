@@ -40,13 +40,6 @@ class AuditAthenaClient(
     if (filter.endDate == null) {
       filter.endDate = LocalDate.now()
     }
-    telemetryClient.trackEvent(
-      "mohamad",
-      mapOf(
-        "startDate" to filter.startDate.toString(),
-        "endDate" to filter.endDate.toString(),
-      ),
-    )
     val authorisedServices = getAuthorisedServices()
     val query = buildAthenaQuery(filter, authorisedServices)
     val queryExecutionId = startAthenaQuery(query)
