@@ -92,24 +92,15 @@ class DigitalServicesTest : IntegrationTest() {
         ).build(),
       ),
     ).build()
-  private val updatePartitionsStartQueryExecutionRequest: StartQueryExecutionRequest = StartQueryExecutionRequest.builder()
-    .queryString("MSCK REPAIR TABLE the-database.audit_event;")
-    .queryExecutionContext(QueryExecutionContext.builder().database("the-database").build())
-    .workGroup("the-workgroup")
-    .resultConfiguration(ResultConfiguration.builder().outputLocation("the-location").build())
-    .build()
   private val startQueryExecutionRequest: StartQueryExecutionRequest = StartQueryExecutionRequest.builder()
-    .queryString("SELECT * FROM the-database.audit_event WHERE ((year = 2025 AND month = 1 AND day = 1) OR (year = 2025 AND month = 1 AND day = 2) OR (year = 2025 AND month = 1 AND day = 3) OR (year = 2025 AND month = 1 AND day = 4) OR (year = 2025 AND month = 1 AND day = 5)) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND subjectId = 'test-subject' AND subjectType = 'USER_ID' AND service IN ('hmpps-manage-users');")
+    .queryString("SELECT * FROM the-database.audit_event WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND subjectId = 'test-subject' AND subjectType = 'USER_ID' AND service IN ('hmpps-manage-users');")
     .queryExecutionContext(QueryExecutionContext.builder().database("the-database").build())
     .workGroup("the-workgroup")
     .resultConfiguration(ResultConfiguration.builder().outputLocation("the-location").build())
     .build()
   private final val queryExecutionId = "b1231f6e-9653-4b3f-9507-793730932daf"
-  private final val updatePartitionsQueryExecutionId = "7e73c8a0-dcef-4ef2-b43d-60c53421f1c4"
   private val startQueryExecutionResponse: StartQueryExecutionResponse = StartQueryExecutionResponse.builder().queryExecutionId(queryExecutionId).build()
-  private val updatePartitionsStartQueryExecutionResponse: StartQueryExecutionResponse = StartQueryExecutionResponse.builder().queryExecutionId(updatePartitionsQueryExecutionId).build()
   private final val getQueryExecutionRequest: GetQueryExecutionRequest = GetQueryExecutionRequest.builder().queryExecutionId(queryExecutionId).build()
-  private final val updatePartitionsGetQueryExecutionRequest: GetQueryExecutionRequest = GetQueryExecutionRequest.builder().queryExecutionId(updatePartitionsQueryExecutionId).build()
   private final val successfulGetQueryExecutionResponse = GetQueryExecutionResponse.builder()
     .queryExecution(
       QueryExecution.builder()
@@ -122,9 +113,7 @@ class DigitalServicesTest : IntegrationTest() {
 
   @Test
   fun startQuery() {
-    given(athenaClient.startQueryExecution(updatePartitionsStartQueryExecutionRequest)).willReturn(updatePartitionsStartQueryExecutionResponse)
     given(athenaClient.startQueryExecution(startQueryExecutionRequest)).willReturn(startQueryExecutionResponse)
-    given(athenaClient.getQueryExecution(updatePartitionsGetQueryExecutionRequest)).willReturn(successfulGetQueryExecutionResponse)
 
     webTestClient.post().uri("/audit/query")
       .headers(setAuthorisation(roles = listOf("ROLE_AUDIT", "ROLE_QUERY_AUDIT__HMPPS_MANAGE_USERS"), scopes = listOf("read")))
