@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
-import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
@@ -10,10 +9,10 @@ import software.amazon.awssdk.services.athena.model.GetQueryExecutionRequest
 import software.amazon.awssdk.services.athena.model.GetQueryResultsRequest
 import software.amazon.awssdk.services.athena.model.QueryExecutionState
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
-import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
+import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
@@ -23,14 +22,13 @@ private const val AUTHORISED_SERVICE_ROLE_PREFIX = "ROLE_QUERY_AUDIT__"
 @Service
 class AuditAthenaClient(
   private val athenaClient: AthenaClient,
-  private val telemetryClient: TelemetryClient,
+  private val clock: Clock,
   @Value("\${aws.athena.database}") private val databaseName: String,
   @Value("\${aws.athena.workgroup}") private val workGroup: String,
   @Value("\${aws.athena.outputLocation}") private val outputLocation: String,
 
   // These values are in place of LocalDate.MIN and LocalDate.MAX. They are settable to make buildPartitionDateConditions easier to test
   @Value("\${hmpps.audit.queriesStartDate}") private val queriesStartDate: LocalDate,
-  @Value("\${hmpps.audit.queriesEndDate}") private val queriesEndDate: LocalDate,
 ) {
 
   fun triggerQuery(filter: DigitalServicesQueryRequest): DigitalServicesQueryResponse {
@@ -38,7 +36,7 @@ class AuditAthenaClient(
       filter.startDate = queriesStartDate
     }
     if (filter.endDate == null) {
-      filter.endDate = LocalDate.now()
+      filter.endDate = LocalDate.now(clock)
     }
     val authorisedServices = getAuthorisedServices()
     val query = buildAthenaQuery(filter, authorisedServices)
@@ -59,8 +57,6 @@ class AuditAthenaClient(
       queryState = queryState,
       authorisedServices = getAuthorisedServices(),
     )
-    telemetryClient.trackEvent("mohamad", mapOf("query" to queryExecution.query()))
-    // telemetryClient.trackEvent("mohamad", mapOf("errorMessage" to queryExecution.status().athenaError().errorMessage()))
     if (queryState == QueryExecutionState.SUCCEEDED) {
       response.results = fetchQueryResults(queryExecutionId)
       response.executionTimeInMillis = queryExecution.statistics().totalExecutionTimeInMillis()
