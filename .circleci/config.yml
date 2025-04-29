@@ -45,7 +45,7 @@ workflows:
           filters:
             branches:
               only:
-                - fix-timeout
+                - main
       - hmpps/deploy_env:
           name: deploy_dev
           env: "dev"
@@ -56,7 +56,7 @@ workflows:
           filters:
             branches:
               only:
-                - fix-timeout
+                - main
           requires:
             - validate
             - build_docker
