@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
-import com.microsoft.applicationinsights.TelemetryClient
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -20,9 +19,6 @@ class AthenaPartitionRepairServiceTest {
   @Mock
   private lateinit var athenaClient: AthenaClient
 
-  @Mock
-  private lateinit var telemetryClient: TelemetryClient
-
   private val databaseName = "databaseName"
   private val workGroupName = "workGroupName"
   private val outputLocation = "outputLocation"
@@ -37,7 +33,7 @@ class AthenaPartitionRepairServiceTest {
 
   @BeforeEach
   fun setup() {
-    service = AthenaPartitionRepairService(athenaClient, telemetryClient, databaseName, workGroupName, outputLocation)
+    service = AthenaPartitionRepairService(athenaClient, databaseName, workGroupName, outputLocation)
   }
 
   @Test
