@@ -12,6 +12,7 @@ import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
+import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
@@ -21,13 +22,13 @@ private const val AUTHORISED_SERVICE_ROLE_PREFIX = "ROLE_QUERY_AUDIT__"
 @Service
 class AuditAthenaClient(
   private val athenaClient: AthenaClient,
+  private val clock: Clock,
   @Value("\${aws.athena.database}") private val databaseName: String,
   @Value("\${aws.athena.workgroup}") private val workGroup: String,
   @Value("\${aws.athena.outputLocation}") private val outputLocation: String,
 
   // These values are in place of LocalDate.MIN and LocalDate.MAX. They are settable to make buildPartitionDateConditions easier to test
   @Value("\${hmpps.audit.queriesStartDate}") private val queriesStartDate: LocalDate,
-  @Value("\${hmpps.audit.queriesEndDate}") private val queriesEndDate: LocalDate,
 ) {
 
   fun triggerQuery(filter: DigitalServicesQueryRequest): DigitalServicesQueryResponse {
@@ -35,9 +36,8 @@ class AuditAthenaClient(
       filter.startDate = queriesStartDate
     }
     if (filter.endDate == null) {
-      filter.endDate = queriesEndDate
+      filter.endDate = LocalDate.now(clock)
     }
-    updateAthenaPartitions()
     val authorisedServices = getAuthorisedServices()
     val query = buildAthenaQuery(filter, authorisedServices)
     val queryExecutionId = startAthenaQuery(query)
@@ -62,41 +62,6 @@ class AuditAthenaClient(
       response.executionTimeInMillis = queryExecution.statistics().totalExecutionTimeInMillis()
     }
     return response
-  }
-
-  private fun updateAthenaPartitions() {
-    val repairTableQuery = "MSCK REPAIR TABLE $databaseName.audit_event;"
-
-    val request = StartQueryExecutionRequest.builder()
-      .queryString(repairTableQuery)
-      .queryExecutionContext { it.database(databaseName) }
-      .workGroup(workGroup)
-      .resultConfiguration { it.outputLocation(outputLocation) }
-      .build()
-
-    val response = athenaClient.startQueryExecution(request)
-    val queryExecutionId = response.queryExecutionId()
-
-    waitForQueryToComplete(queryExecutionId)
-  }
-
-  private fun waitForQueryToComplete(queryExecutionId: String) {
-    while (true) {
-      val queryStatus = athenaClient.getQueryExecution(
-        GetQueryExecutionRequest.builder()
-          .queryExecutionId(queryExecutionId)
-          .build(),
-      ).queryExecution().status().state()
-
-      when (queryStatus) {
-        QueryExecutionState.SUCCEEDED -> return
-        QueryExecutionState.FAILED, QueryExecutionState.CANCELLED ->
-          throw RuntimeException("Athena query to update partitions failed with state: $queryStatus")
-        else -> {
-          Thread.sleep(2000)
-        }
-      }
-    }
   }
 
   private fun buildAthenaQuery(filter: DigitalServicesQueryRequest, services: List<String>): String {
@@ -132,7 +97,7 @@ class AuditAthenaClient(
     return generateSequence(startDate) { it.plusDays(1) }
       .takeWhile { !it.isAfter(endDate) }
       .map { date ->
-        "(year = ${date.year} AND month = ${date.monthValue} AND day = ${date.dayOfMonth})"
+        "(year = '${date.year}' AND month = '${date.monthValue}' AND day = '${date.dayOfMonth}')"
       }
       .toList()
   }
