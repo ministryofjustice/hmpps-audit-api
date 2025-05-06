@@ -60,6 +60,7 @@ class AuditAthenaClient(
     if (queryState == QueryExecutionState.SUCCEEDED) {
       response.results = fetchQueryResults(queryExecutionId)
       response.executionTimeInMillis = queryExecution.statistics().totalExecutionTimeInMillis()
+      response.query = queryExecution.query()
     }
     return response
   }
