@@ -77,7 +77,7 @@ class AuditAthenaClient(
     conditions.add("(${partitionConditions.joinToString(" OR ")})")
 
     // Timestamp-based filtering for precision
-    conditions.add("DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '${filter.startDate}' AND DATE '${filter.endDate}'")
+    // conditions.add("DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '${filter.startDate}' AND DATE '${filter.endDate}'")
     filter.who?.let { conditions.add("user = '$it'") }
     filter.subjectId?.let { conditions.add("subjectId = '$it'") }
     filter.subjectType?.let { conditions.add("subjectType = '$it'") }
