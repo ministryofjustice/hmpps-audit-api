@@ -39,7 +39,7 @@ class AuditS3Client(
         .contentLength(0)
         .contentType("application/x-directory")
         .build(),
-      RequestBody.empty()
+      RequestBody.empty(),
     )
 
     val putObjectRequest = PutObjectRequest.builder()
