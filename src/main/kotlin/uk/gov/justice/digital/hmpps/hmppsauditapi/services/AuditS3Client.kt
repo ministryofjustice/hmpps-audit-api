@@ -31,6 +31,15 @@ class AuditS3Client(
     val md5Digest = MessageDigest.getInstance("MD5").digest(parquetBytes)
     val md5Base64 = Base64.getEncoder().encodeToString(md5Digest)
 
+    val folderKey = fileName.substringBeforeLast("/") + "/"
+    s3Client.putObject(
+      PutObjectRequest.builder()
+        .bucket(bucketName)
+        .key(folderKey)
+        .build(),
+      RequestBody.empty(),
+    )
+
     val putObjectRequest = PutObjectRequest.builder()
       .bucket(bucketName)
       .key(fileName)
