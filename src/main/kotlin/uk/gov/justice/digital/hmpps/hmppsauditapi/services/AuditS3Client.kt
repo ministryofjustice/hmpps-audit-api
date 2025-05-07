@@ -28,29 +28,19 @@ class AuditS3Client(
   fun save(auditEvent: HMPPSAuditListener.AuditEvent) {
     val folderKey = generateFolderKey(auditEvent)
 
-    s3Client.putObject(
-      PutObjectRequest.builder()
-        .bucket(bucketName)
-        .key(folderKey)
-        .contentLength(0)
-        .contentType("application/x-directory")
-        .build(),
-      RequestBody.empty(),
-    )
-
-    s3Client.headObject { it.bucket(bucketName).key(folderKey) }
     val fileName = folderKey + "${auditEvent.id}.parquet"
     val parquetBytes = convertToParquetBytes(auditEvent)
     val md5Digest = MessageDigest.getInstance("MD5").digest(parquetBytes)
     val md5Base64 = Base64.getEncoder().encodeToString(md5Digest)
 
-    val putObjectRequest = PutObjectRequest.builder()
-      .bucket(bucketName)
-      .key(fileName)
-      .contentMD5(md5Base64)
-      .build()
-
-    s3Client.putObject(putObjectRequest, RequestBody.fromBytes(parquetBytes))
+    s3Client.putObject(
+      PutObjectRequest.builder()
+        .bucket(bucketName)
+        .key(fileName)
+        .contentMD5(md5Base64)
+        .build(),
+      RequestBody.fromBytes(parquetBytes),
+    )
   }
 
   private fun generateFolderKey(auditEvent: HMPPSAuditListener.AuditEvent): String {
