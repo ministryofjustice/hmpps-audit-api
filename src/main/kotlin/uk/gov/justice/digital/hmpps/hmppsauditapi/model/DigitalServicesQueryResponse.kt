@@ -13,5 +13,4 @@ data class DigitalServicesQueryResponse(
   var results: List<AuditDto>? = null,
   @JsonInclude(JsonInclude.Include.NON_NULL)
   var executionTimeInMillis: Long? = null,
-  var query: String? = null,
 )
