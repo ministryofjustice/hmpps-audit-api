@@ -38,6 +38,7 @@ class AuditS3Client(
       RequestBody.empty(),
     )
 
+    s3Client.headObject { it.bucket(bucketName).key(folderKey) }
     val fileName = folderKey + "${auditEvent.id}.parquet"
     val parquetBytes = convertToParquetBytes(auditEvent)
     val md5Digest = MessageDigest.getInstance("MD5").digest(parquetBytes)
