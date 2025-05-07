@@ -16,7 +16,6 @@ class AthenaPartitionRepairService(
   private val athenaClient: AthenaClient,
   @Value("\${aws.s3.auditBucketName}") private val bucketName: String,
   @Value("\${aws.athena.database}") private val athenaDatabase: String,
-  @Value("\${aws.athena.resultsLocation}") private val athenaResultsLocation: String,
 ) {
 
   @Scheduled(cron = "0 */10 * * * *")
@@ -34,7 +33,7 @@ class AthenaPartitionRepairService(
         StartQueryExecutionRequest.builder()
           .queryString(alterTableQuery)
           .queryExecutionContext(QueryExecutionContext.builder().database(athenaDatabase).build())
-          .resultConfiguration(ResultConfiguration.builder().outputLocation(athenaResultsLocation).build())
+          .resultConfiguration(ResultConfiguration.builder().outputLocation("s3://$bucketName/athena-results/").build())
           .build(),
       )
     }
