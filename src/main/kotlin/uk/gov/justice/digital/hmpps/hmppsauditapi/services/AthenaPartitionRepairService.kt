@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
+import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -9,11 +10,13 @@ import software.amazon.awssdk.services.athena.model.ResultConfiguration
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 
 @Component
 class AthenaPartitionRepairService(
   private val s3Client: S3Client,
   private val athenaClient: AthenaClient,
+  private val telemetryClient: TelemetryClient,
   @Value("\${aws.s3.auditBucketName}") private val bucketName: String,
   @Value("\${aws.athena.database}") private val athenaDatabase: String,
 ) {
@@ -36,6 +39,10 @@ class AthenaPartitionRepairService(
           .resultConfiguration(ResultConfiguration.builder().outputLocation("s3://$bucketName/athena-results/").build())
           .build(),
       )
+
+      telemetryClient.trackEvent("mohamad", mapOf(Pair("query", alterTableQuery)))
+      telemetryClient.trackEvent("mohamad", mapOf(Pair("athenaDatabase", athenaDatabase)))
+      telemetryClient.trackEvent("mohamad", mapOf(Pair("athenaDatabase", athenaDatabase)))
     }
   }
 
@@ -51,6 +58,8 @@ class AthenaPartitionRepairService(
           .continuationToken(continuationToken)
           .build(),
       )
+
+      telemetryClient.trackEvent("mohamad", mapOf(Pair("response from listObjectsV2", response.contents().toString())))
 
       response.contents().asSequence()
         .mapNotNull { PARTITION_REGEX.find(it.key())?.destructured }
