@@ -21,10 +21,10 @@ class AthenaPartitionRepairService(
   @Value("\${aws.athena.database}") private val athenaDatabase: String,
 ) {
 
-  @Scheduled(cron = "0 */10 * * * *")
+  // @Scheduled(cron = "0 */10 * * * *")
   fun repairPartitions() {
+    telemetryClient.trackEvent("mohamad", mapOf(Pair("API request", "API request")))
     val partitions = fetchPartitionsFromS3()
-    // telemetryClient.trackEvent("mohamad", mapOf(Pair("partitions", partitions.toString())))
     if (partitions.isNotEmpty()) {
       val alterTableQuery = partitions
         .sortedWith(compareBy({ it.year }, { it.month }, { it.day }, { it.user }))
