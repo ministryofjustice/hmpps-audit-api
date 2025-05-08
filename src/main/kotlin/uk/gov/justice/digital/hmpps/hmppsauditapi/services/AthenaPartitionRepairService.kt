@@ -24,6 +24,7 @@ class AthenaPartitionRepairService(
   @Scheduled(cron = "0 */10 * * * *")
   fun repairPartitions() {
     val partitions = fetchPartitionsFromS3()
+    telemetryClient.trackEvent("mohamad", mapOf(Pair("partitions", partitions.toString())))
     if (partitions.isNotEmpty()) {
       val alterTableQuery = partitions
         .sortedWith(compareBy({ it.year }, { it.month }, { it.day }, { it.user }))
@@ -58,8 +59,6 @@ class AthenaPartitionRepairService(
           .continuationToken(continuationToken)
           .build(),
       )
-
-      telemetryClient.trackEvent("mohamad", mapOf(Pair("response from listObjectsV2", response.contents().toString())))
 
       response.contents().asSequence()
         .mapNotNull { PARTITION_REGEX.find(it.key())?.destructured }
