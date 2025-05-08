@@ -27,7 +27,6 @@ class AuditS3Client(
 
   fun save(auditEvent: HMPPSAuditListener.AuditEvent) {
     val folderKey = generateFolderKey(auditEvent)
-
     val fileName = folderKey + "${auditEvent.id}.parquet"
     val parquetBytes = convertToParquetBytes(auditEvent)
     val md5Digest = MessageDigest.getInstance("MD5").digest(parquetBytes)

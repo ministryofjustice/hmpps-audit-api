@@ -18,7 +18,7 @@ class AthenaPartitionRepairService(
   @Value("\${aws.athena.database}") private val athenaDatabase: String,
 ) {
 
-  @Scheduled(cron = "0 0 */12 * * *")
+  @Scheduled(cron = "0 */10 * * * *")
   fun repairPartitions() {
     val partitions = fetchPartitionsFromS3()
     if (partitions.isNotEmpty()) {
