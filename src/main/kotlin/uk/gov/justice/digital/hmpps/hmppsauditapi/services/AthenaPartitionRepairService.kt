@@ -31,6 +31,7 @@ class AthenaPartitionRepairService(
           "PARTITION (year='${partition.year}', month='${partition.month}', day='${partition.day}', user='${partition.user}') " +
             "LOCATION 's3://$bucketName/year=${partition.year}/month=${partition.month}/day=${partition.day}/user=${partition.user}/'"
         }
+      telemetryClient.trackEvent("mohamad", mapOf(Pair("alterTableQuery", alterTableQuery)))
 
       val request = athenaClient.startQueryExecution(
         StartQueryExecutionRequest.builder()
