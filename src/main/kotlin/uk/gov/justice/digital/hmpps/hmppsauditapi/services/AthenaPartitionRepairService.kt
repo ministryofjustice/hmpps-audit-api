@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
 import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import software.amazon.awssdk.services.athena.AthenaClient
 import software.amazon.awssdk.services.athena.model.QueryExecutionContext
