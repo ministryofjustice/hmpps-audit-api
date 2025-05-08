@@ -24,7 +24,7 @@ class AthenaPartitionRepairService(
   @Scheduled(cron = "0 */10 * * * *")
   fun repairPartitions() {
     val partitions = fetchPartitionsFromS3()
-    telemetryClient.trackEvent("mohamad", mapOf(Pair("partitions", partitions.toString())))
+    // telemetryClient.trackEvent("mohamad", mapOf(Pair("partitions", partitions.toString())))
     if (partitions.isNotEmpty()) {
       val alterTableQuery = partitions
         .sortedWith(compareBy({ it.year }, { it.month }, { it.day }, { it.user }))
@@ -33,7 +33,7 @@ class AthenaPartitionRepairService(
             "LOCATION 's3://$bucketName/year=${partition.year}/month=${partition.month}/day=${partition.day}/user=${partition.user}/'"
         }
 
-      athenaClient.startQueryExecution(
+      val request = athenaClient.startQueryExecution(
         StartQueryExecutionRequest.builder()
           .queryString(alterTableQuery)
           .queryExecutionContext(QueryExecutionContext.builder().database(athenaDatabase).build())
@@ -41,6 +41,7 @@ class AthenaPartitionRepairService(
           .build(),
       )
 
+      telemetryClient.trackEvent("mohamad", mapOf(Pair("athenaClient.startQueryExecution", request.queryExecutionId())))
       telemetryClient.trackEvent("mohamad", mapOf(Pair("query", alterTableQuery)))
       telemetryClient.trackEvent("mohamad", mapOf(Pair("athenaDatabase", athenaDatabase)))
       telemetryClient.trackEvent("mohamad", mapOf(Pair("athenaDatabase", athenaDatabase)))
