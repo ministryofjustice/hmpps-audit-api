@@ -197,7 +197,7 @@ class AuditAthenaClientTest {
           endDate = LocalDate.of(2025, 1, 5),
           who = "someone",
         ),
-        listOf(ROLE_QUERY_AUDIT__HMPPS_ALL_SERVICES, ROLE_QUERY_AUDIT__HMPPS_EXTERNAL_USERS, ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS),
+        listOf(ROLE_QUERY_AUDIT__HMPPS_ALL_SERVICES),
         "SELECT * FROM databaseName.audit_event WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND user = 'someone';",
         listOf("all-services"),
       ),
