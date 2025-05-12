@@ -7,14 +7,7 @@
         <notes><![CDATA[
      file name: parquet-avro-1.15.2.jar
      ]]></notes>
-        <packageUrl regex="true">^pkg:maven/org\.apache\.parquet/parquet-avro@1.15.1$</packageUrl>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.parquet/parquet-avro@1.15.2$</packageUrl>
         <cve>CVE-2023-37475</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-     file name: parquet-avro-1.15.2.jar
-     ]]></notes>
-        <packageUrl regex="true">^pkg:maven/org\.apache\.parquet/parquet-avro@1.15.1$</packageUrl>
-        <cve>CVE-2025-46762</cve>
     </suppress>
 </suppressions>
