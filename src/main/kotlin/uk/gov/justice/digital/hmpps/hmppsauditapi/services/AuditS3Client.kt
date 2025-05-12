@@ -26,25 +26,24 @@ class AuditS3Client(
 ) {
 
   fun save(auditEvent: HMPPSAuditListener.AuditEvent) {
-    val folderKey = generateFolderKey(auditEvent)
-    val fileName = folderKey + "${auditEvent.id}.parquet"
+    val fileName = generateFilename(auditEvent)
     val parquetBytes = convertToParquetBytes(auditEvent)
     val md5Digest = MessageDigest.getInstance("MD5").digest(parquetBytes)
     val md5Base64 = Base64.getEncoder().encodeToString(md5Digest)
 
-    s3Client.putObject(
-      PutObjectRequest.builder()
-        .bucket(bucketName)
-        .key(fileName)
-        .contentMD5(md5Base64)
-        .build(),
-      RequestBody.fromBytes(parquetBytes),
-    )
+    val putObjectRequest = PutObjectRequest.builder()
+      .bucket(bucketName)
+      .key(fileName)
+      .contentMD5(md5Base64)
+      .build()
+
+    s3Client.putObject(putObjectRequest, RequestBody.fromBytes(parquetBytes))
   }
 
-  private fun generateFolderKey(auditEvent: HMPPSAuditListener.AuditEvent): String {
+  private fun generateFilename(auditEvent: HMPPSAuditListener.AuditEvent): String {
     val whenDateTime = auditEvent.`when`.atZone(ZoneId.systemDefault()).toLocalDateTime()
-    return "year=${whenDateTime.year}/month=${whenDateTime.monthValue}/day=${whenDateTime.dayOfMonth}/user=${auditEvent.who}/"
+    return "year=${whenDateTime.year}/month=${whenDateTime.monthValue}/day=${whenDateTime.dayOfMonth}/user=${auditEvent.who}/" +
+      "${auditEvent.id}.parquet"
   }
 
   private fun convertToParquetBytes(auditEvent: HMPPSAuditListener.AuditEvent): ByteArray {
