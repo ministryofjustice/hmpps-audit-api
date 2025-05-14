@@ -163,6 +163,5 @@ class AuditAthenaClient(
       ?: emptyList()
   }
 
-  private fun userDoesNotHaveAccessToAllServices(services: List<String>) =
-    !services.any { it.equals("all-services", ignoreCase = true) }
+  private fun userDoesNotHaveAccessToAllServices(services: List<String>) = !services.any { it.equals("all-services", ignoreCase = true) }
 }
