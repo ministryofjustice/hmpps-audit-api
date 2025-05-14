@@ -54,6 +54,7 @@ private val MOCK_END_DATE = LocalDate.parse("2025-02-28")
 @ExtendWith(MockitoExtension::class)
 class AuditAthenaClientTest {
   private val databaseName = "databaseName"
+  private val tableName = "tableName"
   private val workGroupName = "workGroupName"
   private val outputLocation = "outputLocation"
   private val queryExecutionId = "a4ab5455-dfe1-46f2-917d-5135b7dadae3"
@@ -76,6 +77,7 @@ class AuditAthenaClientTest {
       athenaClient,
       clock,
       databaseName,
+      tableName,
       workGroupName,
       outputLocation,
       MOCK_START_DATE,
@@ -126,7 +128,7 @@ class AuditAthenaClientTest {
           subjectType = "subjectType",
         ),
         listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS),
-        "SELECT * FROM databaseName.audit_event WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND user = 'someone' AND subjectId = 'subjectId' AND subjectType = 'subjectType' AND service IN ('hmpps-manage-users');",
+        "SELECT * FROM databaseName.$tableName WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND user = 'someone' AND subjectId = 'subjectId' AND subjectType = 'subjectType' AND service IN ('hmpps-manage-users');",
         listOf(HMPPS_MANAGE_USERS),
       ),
 
@@ -139,7 +141,7 @@ class AuditAthenaClientTest {
           subjectType = "subjectType",
         ),
         listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS, ROLE_QUERY_AUDIT__HMPPS_EXTERNAL_USERS),
-        "SELECT * FROM databaseName.audit_event WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND subjectId = 'subjectId' AND subjectType = 'subjectType' AND service IN ('hmpps-manage-users', 'hmpps-external-users');",
+        "SELECT * FROM databaseName.$tableName WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND subjectId = 'subjectId' AND subjectType = 'subjectType' AND service IN ('hmpps-manage-users', 'hmpps-external-users');",
         listOf(HMPPS_MANAGE_USERS, HMPPS_EXTERNAL_USERS),
       ),
 
@@ -151,7 +153,7 @@ class AuditAthenaClientTest {
           subjectType = "subjectType",
         ),
         listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS),
-        "SELECT * FROM databaseName.audit_event WHERE ((year = '2025' AND month = '1' AND day = '25') OR (year = '2025' AND month = '1' AND day = '26') OR (year = '2025' AND month = '1' AND day = '27') OR (year = '2025' AND month = '1' AND day = '28') OR (year = '2025' AND month = '1' AND day = '29') OR (year = '2025' AND month = '1' AND day = '30') OR (year = '2025' AND month = '1' AND day = '31') OR (year = '2025' AND month = '2' AND day = '1') OR (year = '2025' AND month = '2' AND day = '2') OR (year = '2025' AND month = '2' AND day = '3') OR (year = '2025' AND month = '2' AND day = '4') OR (year = '2025' AND month = '2' AND day = '5') OR (year = '2025' AND month = '2' AND day = '6') OR (year = '2025' AND month = '2' AND day = '7') OR (year = '2025' AND month = '2' AND day = '8') OR (year = '2025' AND month = '2' AND day = '9') OR (year = '2025' AND month = '2' AND day = '10') OR (year = '2025' AND month = '2' AND day = '11') OR (year = '2025' AND month = '2' AND day = '12') OR (year = '2025' AND month = '2' AND day = '13') OR (year = '2025' AND month = '2' AND day = '14') OR (year = '2025' AND month = '2' AND day = '15') OR (year = '2025' AND month = '2' AND day = '16') OR (year = '2025' AND month = '2' AND day = '17') OR (year = '2025' AND month = '2' AND day = '18') OR (year = '2025' AND month = '2' AND day = '19') OR (year = '2025' AND month = '2' AND day = '20') OR (year = '2025' AND month = '2' AND day = '21') OR (year = '2025' AND month = '2' AND day = '22') OR (year = '2025' AND month = '2' AND day = '23') OR (year = '2025' AND month = '2' AND day = '24') OR (year = '2025' AND month = '2' AND day = '25') OR (year = '2025' AND month = '2' AND day = '26') OR (year = '2025' AND month = '2' AND day = '27') OR (year = '2025' AND month = '2' AND day = '28')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-25' AND DATE '2025-02-28' AND subjectId = 'subjectId' AND subjectType = 'subjectType' AND service IN ('hmpps-manage-users');",
+        "SELECT * FROM databaseName.$tableName WHERE ((year = '2025' AND month = '1' AND day = '25') OR (year = '2025' AND month = '1' AND day = '26') OR (year = '2025' AND month = '1' AND day = '27') OR (year = '2025' AND month = '1' AND day = '28') OR (year = '2025' AND month = '1' AND day = '29') OR (year = '2025' AND month = '1' AND day = '30') OR (year = '2025' AND month = '1' AND day = '31') OR (year = '2025' AND month = '2' AND day = '1') OR (year = '2025' AND month = '2' AND day = '2') OR (year = '2025' AND month = '2' AND day = '3') OR (year = '2025' AND month = '2' AND day = '4') OR (year = '2025' AND month = '2' AND day = '5') OR (year = '2025' AND month = '2' AND day = '6') OR (year = '2025' AND month = '2' AND day = '7') OR (year = '2025' AND month = '2' AND day = '8') OR (year = '2025' AND month = '2' AND day = '9') OR (year = '2025' AND month = '2' AND day = '10') OR (year = '2025' AND month = '2' AND day = '11') OR (year = '2025' AND month = '2' AND day = '12') OR (year = '2025' AND month = '2' AND day = '13') OR (year = '2025' AND month = '2' AND day = '14') OR (year = '2025' AND month = '2' AND day = '15') OR (year = '2025' AND month = '2' AND day = '16') OR (year = '2025' AND month = '2' AND day = '17') OR (year = '2025' AND month = '2' AND day = '18') OR (year = '2025' AND month = '2' AND day = '19') OR (year = '2025' AND month = '2' AND day = '20') OR (year = '2025' AND month = '2' AND day = '21') OR (year = '2025' AND month = '2' AND day = '22') OR (year = '2025' AND month = '2' AND day = '23') OR (year = '2025' AND month = '2' AND day = '24') OR (year = '2025' AND month = '2' AND day = '25') OR (year = '2025' AND month = '2' AND day = '26') OR (year = '2025' AND month = '2' AND day = '27') OR (year = '2025' AND month = '2' AND day = '28')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-25' AND DATE '2025-02-28' AND subjectId = 'subjectId' AND subjectType = 'subjectType' AND service IN ('hmpps-manage-users');",
         listOf(HMPPS_MANAGE_USERS),
       ),
 
@@ -163,7 +165,7 @@ class AuditAthenaClientTest {
           subjectType = "subjectType",
         ),
         listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS),
-        "SELECT * FROM databaseName.audit_event WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5') OR (year = '2025' AND month = '1' AND day = '6') OR (year = '2025' AND month = '1' AND day = '7') OR (year = '2025' AND month = '1' AND day = '8') OR (year = '2025' AND month = '1' AND day = '9') OR (year = '2025' AND month = '1' AND day = '10')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-10' AND subjectId = 'subjectId' AND subjectType = 'subjectType' AND service IN ('hmpps-manage-users');",
+        "SELECT * FROM databaseName.$tableName WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5') OR (year = '2025' AND month = '1' AND day = '6') OR (year = '2025' AND month = '1' AND day = '7') OR (year = '2025' AND month = '1' AND day = '8') OR (year = '2025' AND month = '1' AND day = '9') OR (year = '2025' AND month = '1' AND day = '10')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-10' AND subjectId = 'subjectId' AND subjectType = 'subjectType' AND service IN ('hmpps-manage-users');",
         listOf(HMPPS_MANAGE_USERS),
       ),
 
@@ -175,7 +177,7 @@ class AuditAthenaClientTest {
           who = "someone",
         ),
         listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS),
-        "SELECT * FROM databaseName.audit_event WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5') OR (year = '2025' AND month = '1' AND day = '6') OR (year = '2025' AND month = '1' AND day = '7') OR (year = '2025' AND month = '1' AND day = '8') OR (year = '2025' AND month = '1' AND day = '9') OR (year = '2025' AND month = '1' AND day = '10') OR (year = '2025' AND month = '1' AND day = '11') OR (year = '2025' AND month = '1' AND day = '12') OR (year = '2025' AND month = '1' AND day = '13') OR (year = '2025' AND month = '1' AND day = '14') OR (year = '2025' AND month = '1' AND day = '15')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-15' AND user = 'someone' AND service IN ('hmpps-manage-users');",
+        "SELECT * FROM databaseName.$tableName WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5') OR (year = '2025' AND month = '1' AND day = '6') OR (year = '2025' AND month = '1' AND day = '7') OR (year = '2025' AND month = '1' AND day = '8') OR (year = '2025' AND month = '1' AND day = '9') OR (year = '2025' AND month = '1' AND day = '10') OR (year = '2025' AND month = '1' AND day = '11') OR (year = '2025' AND month = '1' AND day = '12') OR (year = '2025' AND month = '1' AND day = '13') OR (year = '2025' AND month = '1' AND day = '14') OR (year = '2025' AND month = '1' AND day = '15')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-15' AND user = 'someone' AND service IN ('hmpps-manage-users');",
         listOf(HMPPS_MANAGE_USERS),
       ),
 
@@ -186,7 +188,7 @@ class AuditAthenaClientTest {
           who = "someone",
         ),
         listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS),
-        "SELECT * FROM databaseName.audit_event WHERE ((year = '2025' AND month = '1' AND day = '25') OR (year = '2025' AND month = '1' AND day = '26') OR (year = '2025' AND month = '1' AND day = '27') OR (year = '2025' AND month = '1' AND day = '28') OR (year = '2025' AND month = '1' AND day = '29') OR (year = '2025' AND month = '1' AND day = '30') OR (year = '2025' AND month = '1' AND day = '31') OR (year = '2025' AND month = '2' AND day = '1') OR (year = '2025' AND month = '2' AND day = '2') OR (year = '2025' AND month = '2' AND day = '3') OR (year = '2025' AND month = '2' AND day = '4') OR (year = '2025' AND month = '2' AND day = '5') OR (year = '2025' AND month = '2' AND day = '6') OR (year = '2025' AND month = '2' AND day = '7') OR (year = '2025' AND month = '2' AND day = '8') OR (year = '2025' AND month = '2' AND day = '9') OR (year = '2025' AND month = '2' AND day = '10') OR (year = '2025' AND month = '2' AND day = '11') OR (year = '2025' AND month = '2' AND day = '12') OR (year = '2025' AND month = '2' AND day = '13') OR (year = '2025' AND month = '2' AND day = '14') OR (year = '2025' AND month = '2' AND day = '15') OR (year = '2025' AND month = '2' AND day = '16') OR (year = '2025' AND month = '2' AND day = '17') OR (year = '2025' AND month = '2' AND day = '18') OR (year = '2025' AND month = '2' AND day = '19') OR (year = '2025' AND month = '2' AND day = '20') OR (year = '2025' AND month = '2' AND day = '21') OR (year = '2025' AND month = '2' AND day = '22') OR (year = '2025' AND month = '2' AND day = '23') OR (year = '2025' AND month = '2' AND day = '24') OR (year = '2025' AND month = '2' AND day = '25') OR (year = '2025' AND month = '2' AND day = '26') OR (year = '2025' AND month = '2' AND day = '27') OR (year = '2025' AND month = '2' AND day = '28')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-25' AND DATE '2025-02-28' AND user = 'someone' AND service IN ('hmpps-manage-users');",
+        "SELECT * FROM databaseName.$tableName WHERE ((year = '2025' AND month = '1' AND day = '25') OR (year = '2025' AND month = '1' AND day = '26') OR (year = '2025' AND month = '1' AND day = '27') OR (year = '2025' AND month = '1' AND day = '28') OR (year = '2025' AND month = '1' AND day = '29') OR (year = '2025' AND month = '1' AND day = '30') OR (year = '2025' AND month = '1' AND day = '31') OR (year = '2025' AND month = '2' AND day = '1') OR (year = '2025' AND month = '2' AND day = '2') OR (year = '2025' AND month = '2' AND day = '3') OR (year = '2025' AND month = '2' AND day = '4') OR (year = '2025' AND month = '2' AND day = '5') OR (year = '2025' AND month = '2' AND day = '6') OR (year = '2025' AND month = '2' AND day = '7') OR (year = '2025' AND month = '2' AND day = '8') OR (year = '2025' AND month = '2' AND day = '9') OR (year = '2025' AND month = '2' AND day = '10') OR (year = '2025' AND month = '2' AND day = '11') OR (year = '2025' AND month = '2' AND day = '12') OR (year = '2025' AND month = '2' AND day = '13') OR (year = '2025' AND month = '2' AND day = '14') OR (year = '2025' AND month = '2' AND day = '15') OR (year = '2025' AND month = '2' AND day = '16') OR (year = '2025' AND month = '2' AND day = '17') OR (year = '2025' AND month = '2' AND day = '18') OR (year = '2025' AND month = '2' AND day = '19') OR (year = '2025' AND month = '2' AND day = '20') OR (year = '2025' AND month = '2' AND day = '21') OR (year = '2025' AND month = '2' AND day = '22') OR (year = '2025' AND month = '2' AND day = '23') OR (year = '2025' AND month = '2' AND day = '24') OR (year = '2025' AND month = '2' AND day = '25') OR (year = '2025' AND month = '2' AND day = '26') OR (year = '2025' AND month = '2' AND day = '27') OR (year = '2025' AND month = '2' AND day = '28')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-25' AND DATE '2025-02-28' AND user = 'someone' AND service IN ('hmpps-manage-users');",
         listOf(HMPPS_MANAGE_USERS),
       ),
 
@@ -198,7 +200,7 @@ class AuditAthenaClientTest {
           who = "someone",
         ),
         listOf(ROLE_QUERY_AUDIT__HMPPS_ALL_SERVICES),
-        "SELECT * FROM databaseName.audit_event WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND user = 'someone';",
+        "SELECT * FROM databaseName.$tableName WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND user = 'someone';",
         listOf("all-services"),
       ),
 
@@ -209,7 +211,7 @@ class AuditAthenaClientTest {
           who = "someone",
         ),
         emptyList<String>(),
-        "SELECT * FROM databaseName.audit_event WHERE 1 = 0;",
+        "SELECT * FROM databaseName.$tableName WHERE 1 = 0;",
         emptyList<String>(),
       ),
     )

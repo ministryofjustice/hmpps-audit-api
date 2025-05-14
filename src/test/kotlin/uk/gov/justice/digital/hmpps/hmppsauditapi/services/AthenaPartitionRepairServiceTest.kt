@@ -20,6 +20,7 @@ class AthenaPartitionRepairServiceTest {
   private lateinit var athenaClient: AthenaClient
 
   private val databaseName = "databaseName"
+  private val tableName = "tableName"
   private val workGroupName = "workGroupName"
   private val outputLocation = "outputLocation"
 
@@ -33,13 +34,13 @@ class AthenaPartitionRepairServiceTest {
 
   @BeforeEach
   fun setup() {
-    service = AthenaPartitionRepairService(athenaClient, databaseName, workGroupName, outputLocation)
+    service = AthenaPartitionRepairService(athenaClient, databaseName, tableName, workGroupName, outputLocation)
   }
 
   @Test
   fun `should repair Athena partitions and send telemetry`() {
     // Given
-    val updatePartitionsQuery = "MSCK REPAIR TABLE $databaseName.audit_event;"
+    val updatePartitionsQuery = "MSCK REPAIR TABLE $databaseName.$tableName;"
     val startQueryExecutionRequest = startQueryExecutionRequestBuilder.queryString(updatePartitionsQuery).build()
     given(athenaClient.startQueryExecution(startQueryExecutionRequest)).willReturn(StartQueryExecutionResponse.builder().queryExecutionId(updatePartitionsQueryExecutionId).build())
 

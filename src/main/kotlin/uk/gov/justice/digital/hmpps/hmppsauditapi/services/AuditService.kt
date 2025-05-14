@@ -29,14 +29,14 @@ class AuditService(
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 
-  fun audit(auditEvent: AuditEvent) {
-    telemetryClient.trackEvent("hmpps-audit", auditEvent.asMap())
+  fun saveAuditEvent(auditEvent: AuditEvent) {
     if (saveToS3Bucket) {
       auditEvent.id = UUID.randomUUID()
       auditS3Client.save(auditEvent)
     } else {
       auditRepository.save(auditEvent)
     }
+    telemetryClient.trackEvent("hmpps-audit", auditEvent.asMap())
   }
 
   fun findAll(): List<AuditDto> = auditRepository.findAll(Sort.by(DESC, "when")).map { AuditDto(it) }

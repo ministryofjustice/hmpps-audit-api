@@ -24,10 +24,9 @@ class AuditAthenaClient(
   private val athenaClient: AthenaClient,
   private val clock: Clock,
   @Value("\${aws.athena.database}") private val databaseName: String,
+  @Value("\${aws.athena.table}") private val tableName: String,
   @Value("\${aws.athena.workgroup}") private val workGroup: String,
   @Value("\${aws.athena.outputLocation}") private val outputLocation: String,
-
-  // These values are in place of LocalDate.MIN and LocalDate.MAX. They are settable to make buildPartitionDateConditions easier to test
   @Value("\${hmpps.audit.queriesStartDate}") private val queriesStartDate: LocalDate,
 ) {
 
@@ -68,7 +67,7 @@ class AuditAthenaClient(
     val conditions = mutableListOf<String>()
 
     if (services.isEmpty()) {
-      return "SELECT * FROM $databaseName.audit_event WHERE 1 = 0;"
+      return "SELECT * FROM $databaseName.$tableName WHERE 1 = 0;"
     }
 
     // Partition filtering based on full year/month/day decomposition
@@ -81,14 +80,14 @@ class AuditAthenaClient(
     filter.subjectId?.let { conditions.add("subjectId = '$it'") }
     filter.subjectType?.let { conditions.add("subjectType = '$it'") }
 
-    if (!services.any { it.equals("all-services", ignoreCase = true) }) {
+    if (userDoesNotHaveAccessToAllServices(services)) {
       val serviceList = services.joinToString(", ") { "'$it'" }
       conditions.add("service IN ($serviceList)")
     }
 
     val whereClause = "WHERE ${conditions.joinToString(" AND ")}"
 
-    return "SELECT * FROM $databaseName.audit_event $whereClause;"
+    return "SELECT * FROM $databaseName.$tableName $whereClause;"
   }
 
   private fun buildPartitionDateConditions(startDate: LocalDate, endDate: LocalDate): List<String> {
@@ -163,4 +162,7 @@ class AuditAthenaClient(
       ?.map { it.removePrefix(AUTHORISED_SERVICE_ROLE_PREFIX).lowercase().replace('_', '-') }
       ?: emptyList()
   }
+
+  private fun userDoesNotHaveAccessToAllServices(services: List<String>) =
+    !services.any { it.equals("all-services", ignoreCase = true) }
 }

@@ -82,6 +82,7 @@ aws:
   region: eu-west-2
   athena:
     database: ${HMPPS_GLUE_DATABASE_NAME}
+    table: ${HMPPS_GLUE_TABLE_NAME}
     workgroup: ${HMPPS_ATHENA_WORKGROUP_NAME}
     outputLocation: ${HMPPS_ATHENA_OUTPUT_LOCATION}
   s3:
@@ -107,7 +108,6 @@ hmpps:
     saveToS3Bucket: ${SAVE_TO_S3_BUCKET}
   audit:
     queriesStartDate: 2024-01-01
-    queriesEndDate: 3000-12-31
 
 
 oauth:
