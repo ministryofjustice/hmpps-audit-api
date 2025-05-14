@@ -59,7 +59,7 @@ generic-service:
     glue-catalog-table-name:
       HMPPS_GLUE_DATABASE_NAME: "database_name"
     table-database-name:
-      HMPPS_GLUE_DATABASE_NAME: "table_name"
+      HMPPS_GLUE_DATABASE_NAME: "database_name"
     athena-workgroup-secret:
       HMPPS_ATHENA_WORKGROUP_NAME: "workgroup_name"
     athena-output-location-secret:
