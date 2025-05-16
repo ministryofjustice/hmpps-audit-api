@@ -24,9 +24,9 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
   """
     listener.onAuditEvent(message)
 
-    doNothing().whenever(auditService).audit(any())
+    doNothing().whenever(auditService).saveAuditEvent(any())
 
-    verify(auditService).audit(
+    verify(auditService).saveAuditEvent(
       check {
         assertThat(it.details).isEqualTo("{ \"offenderId\": \"99\" }")
         assertThat(it.`when`).isEqualTo("2021-01-25T12:30:00Z")
@@ -49,11 +49,11 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
     }
   """
 
-    doNothing().whenever(auditService).audit(any())
+    doNothing().whenever(auditService).saveAuditEvent(any())
 
     listener.onAuditEvent(message)
 
-    verify(auditService).audit(
+    verify(auditService).saveAuditEvent(
       check {
         assertThat(it.details).isEqualTo("{\"details\":\"non-json-stringified details\"}")
         assertThat(it.`when`).isEqualTo("2021-01-25T12:35:00Z")
@@ -77,11 +77,11 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
     }
   """
 
-    doNothing().whenever(auditService).audit(any())
+    doNothing().whenever(auditService).saveAuditEvent(any())
 
     listener.onAuditEvent(message)
 
-    verify(auditService).audit(
+    verify(auditService).saveAuditEvent(
       check {
         assertThat(it.details).isEqualTo("{\"details\":\"non-json-stringified details\"}")
         assertThat(it.`when`).isEqualTo("2021-01-25T12:35:00Z")

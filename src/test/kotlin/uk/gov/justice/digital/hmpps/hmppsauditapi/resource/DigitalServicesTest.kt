@@ -93,7 +93,7 @@ class DigitalServicesTest : IntegrationTest() {
       ),
     ).build()
   private val startQueryExecutionRequest: StartQueryExecutionRequest = StartQueryExecutionRequest.builder()
-    .queryString("SELECT * FROM the-database.audit_event WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND subjectId = 'test-subject' AND subjectType = 'USER_ID' AND service IN ('hmpps-manage-users');")
+    .queryString("SELECT * FROM the-database.the-table WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND subjectId = 'test-subject' AND subjectType = 'USER_ID' AND service IN ('hmpps-manage-users');")
     .queryExecutionContext(QueryExecutionContext.builder().database("the-database").build())
     .workGroup("the-workgroup")
     .resultConfiguration(ResultConfiguration.builder().outputLocation("the-location").build())

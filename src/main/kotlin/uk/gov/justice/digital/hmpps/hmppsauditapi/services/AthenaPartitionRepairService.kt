@@ -10,13 +10,14 @@ import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
 class AthenaPartitionRepairService(
   private val athenaClient: AthenaClient,
   @Value("\${aws.athena.database}") private val databaseName: String,
+  @Value("\${aws.athena.table}") private val tableName: String,
   @Value("\${aws.athena.workgroup}") private val workGroup: String,
   @Value("\${aws.athena.outputLocation}") private val outputLocation: String,
 ) {
 
   @Scheduled(cron = "0 0 * * * *")
   fun repairPartitions() {
-    val repairQuery = "MSCK REPAIR TABLE $databaseName.audit_event;"
+    val repairQuery = "MSCK REPAIR TABLE $databaseName.$tableName;"
     val request = StartQueryExecutionRequest.builder()
       .queryString(repairQuery)
       .queryExecutionContext { it.database(databaseName) }

@@ -375,7 +375,7 @@ class AuditServiceTest {
     fun `save audit event to database when saveToS3Bucket is false`() {
       auditService = AuditService(telemetryClient, auditRepository, auditS3Client, auditAthenaClient, false)
 
-      auditService.audit(
+      auditService.saveAuditEvent(
         auditEvent,
       )
 
@@ -386,7 +386,7 @@ class AuditServiceTest {
     fun `save audit event to S3 bucket when saveToS3Bucket is true`() {
       auditService = AuditService(telemetryClient, auditRepository, auditS3Client, auditAthenaClient, true)
 
-      auditService.audit(
+      auditService.saveAuditEvent(
         auditEvent,
       )
 

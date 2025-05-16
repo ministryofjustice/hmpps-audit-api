@@ -9,6 +9,7 @@ aws:
   provider: localstack
   athena:
     database: "the-database"
+    table: "the-table"
     workgroup: "the-workgroup"
     outputLocation: "the-location"
   s3:
@@ -42,4 +43,3 @@ hmpps:
     saveToS3Bucket: true
   audit:
     queriesStartDate: 2024-01-01
-    queriesEndDate: 3000-12-31
