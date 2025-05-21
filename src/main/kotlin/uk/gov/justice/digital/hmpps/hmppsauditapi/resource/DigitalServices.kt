@@ -67,7 +67,5 @@ class DigitalServices(
   @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_read')")
   @StandardApiResponses
   @GetMapping("/partition-repair")
-  fun repairPartitions() {
-    return athenaPartitionRepairService.repairPartitions()
-  }
+  fun repairPartitions() = athenaPartitionRepairService.repairPartitions()
 }
