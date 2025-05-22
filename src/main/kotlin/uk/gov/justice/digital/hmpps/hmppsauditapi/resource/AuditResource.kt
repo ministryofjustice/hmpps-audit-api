@@ -5,14 +5,9 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Schema
-import io.swagger.v3.oas.annotations.security.SecurityRequirement
-import jakarta.validation.Valid
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
@@ -20,8 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
-import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditFilterDto
-import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.swagger.StandardApiResponses
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
 import java.io.IOException
@@ -34,40 +27,44 @@ class AuditResource(
   private val auditService: AuditService,
   private val auditQueueService: AuditQueueService,
 ) {
-  @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_read')")
-  @Operation(
-    summary = "Get all audit events",
-    description = "Get all audit events, role required is ROLE_AUDIT",
-    security = [SecurityRequirement(name = "ROLE_AUDIT")],
-  )
-  @StandardApiResponses
-  @GetMapping("")
-  fun findAll(): List<AuditDto> {
-    auditQueueService.sendAuditAuditEvent(
-      AuditType.AUDIT_GET_ALL.name,
-      "",
-    )
-    return auditService.findAll()
-  }
 
-  @PreAuthorize("hasRole('ROLE_AUDIT')")
-  @Operation(
-    summary = "Get paged audit events",
-    security = [SecurityRequirement(name = "ROLE_AUDIT")],
-  )
-  @PostMapping("/paged")
-  @StandardApiResponses
-  fun findPage(
-    pageable: Pageable = Pageable.unpaged(),
-    @RequestBody @Valid
-    auditFilterDto: AuditFilterDto,
-  ): Page<AuditDto> {
-    auditQueueService.sendAuditAuditEvent(
-      AuditType.AUDIT_GET_ALL_PAGED.name,
-      auditFilterDto,
-    )
-    return auditService.findPage(pageable, auditFilterDto)
-  }
+  /**
+   * These endpoints are temporarily disabled to shrink the attack surface whilst we secure the MoJ from the May 18th hacker
+   */
+//  @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_read')")
+//  @Operation(
+//    summary = "Get all audit events",
+//    description = "Get all audit events, role required is ROLE_AUDIT",
+//    security = [SecurityRequirement(name = "ROLE_AUDIT")],
+//  )
+//  @StandardApiResponses
+//  @GetMapping("")
+//  fun findAll(): List<AuditDto> {
+//    auditQueueService.sendAuditAuditEvent(
+//      AuditType.AUDIT_GET_ALL.name,
+//      "",
+//    )
+//    return auditService.findAll()
+//  }
+
+//  @PreAuthorize("hasRole('ROLE_AUDIT')")
+//  @Operation(
+//    summary = "Get paged audit events",
+//    security = [SecurityRequirement(name = "ROLE_AUDIT")],
+//  )
+//  @PostMapping("/paged")
+//  @StandardApiResponses
+//  fun findPage(
+//    pageable: Pageable = Pageable.unpaged(),
+//    @RequestBody @Valid
+//    auditFilterDto: AuditFilterDto,
+//  ): Page<AuditDto> {
+//    auditQueueService.sendAuditAuditEvent(
+//      AuditType.AUDIT_GET_ALL_PAGED.name,
+//      auditFilterDto,
+//    )
+//    return auditService.findPage(pageable, auditFilterDto)
+//  }
 
   @Deprecated("Audit events should be sent via audit queue")
   @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_write')")

@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -32,6 +33,7 @@ class AuditResourceTest : IntegrationTest() {
 
   @TestInstance(PER_CLASS)
   @Nested
+  @Disabled
   inner class SecureGetEndpoints {
     private fun secureEndpointsGet() = listOf(
       "/audit",
@@ -382,6 +384,7 @@ class AuditResourceTest : IntegrationTest() {
   }
 
   @Nested
+  @Disabled
   inner class findAuditEntries {
     @Test
     fun `find all audit entries`() {
