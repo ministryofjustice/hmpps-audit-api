@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 
+import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -16,6 +17,7 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/internal/test")
+@Profile("dev")
 class AuditIntegrationTestController(
   private val auditQueueService: AuditQueueService,
   private val athenaPartitionRepairService: AthenaPartitionRepairService,
@@ -47,28 +49,33 @@ class AuditIntegrationTestController(
       who = testEvent.who,
       startDate = LocalDate.now(),
     )
-
     val queryResponse = auditService.triggerQuery(queryRequest)
-    val queryId = queryResponse.queryExecutionId.toString()
 
     // Step 5: Poll Athena until query succeeds or times out
+    val queryId = queryResponse.queryExecutionId.toString()
     val result = pollUntilSucceeded(queryId)
 
     // Step 6: Verify result
     val matchFound = result.results?.any {
       it.`when` == testEvent.`when` &&
         it.who == testEvent.who &&
-        it.what == testEvent.what
+        it.what == testEvent.what &&
+        it.operationId == testEvent.operationId &&
+        it.subjectId == testEvent.subjectId &&
+        it.subjectType == testEvent.subjectType &&
+        it.correlationId == testEvent.correlationId &&
+        it.service == testEvent.service &&
+        it.details == testEvent.details
     } ?: false
 
     if (matchFound) {
       return ResponseEntity.ok(
-        IntegrationTestResult(true, "Audit event found in Athena", result),
+        IntegrationTestResult(true, "Test successful. Audit event found in Athena", result),
       )
     }
 
     return ResponseEntity.internalServerError().body(
-      IntegrationTestResult(false, "ID: " + testEvent.id.toString() + ", who: " + testEvent.who + ", what: " + testEvent.what, result),
+      IntegrationTestResult(false, "Test failed. Audit event not found in Athena", result),
     )
   }
 
