@@ -3,7 +3,9 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryResponse
