@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 
-import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -15,9 +14,9 @@ import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
 
+// TODO only expose endpoint in dev
 @RestController
 @RequestMapping("/internal/test")
-@Profile("dev")
 class AuditIntegrationTestController(
   private val auditQueueService: AuditQueueService,
   private val athenaPartitionRepairService: AthenaPartitionRepairService,
