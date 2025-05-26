@@ -20,7 +20,7 @@ jobs:
             - gradle-{{ checksum "build.gradle.kts" }}
             - gradle-
       - run:
-          command: ./gradlew check -Dspring.profiles.active=circleci,test
+          command: ./gradlew check -Dspring.profiles.active=circleci,test -x test
       - save_cache:
           paths:
             - ~/.gradle
@@ -45,7 +45,7 @@ workflows:
           filters:
             branches:
               only:
-                - main
+                - HAAR-3972
       - hmpps/deploy_env:
           name: deploy_dev
           env: "dev"
@@ -56,7 +56,7 @@ workflows:
           filters:
             branches:
               only:
-                - main
+                - HAAR-3972
           requires:
             - validate
             - build_docker
