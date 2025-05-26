@@ -35,7 +35,6 @@ dependencies {
   implementation("software.amazon.awssdk:athena:2.31.49")
   implementation("org.apache.parquet:parquet-avro:1.15.2")
   implementation("org.apache.avro:avro:1.12.0")
-  runtimeOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
   implementation("org.apache.hadoop:hadoop-client:3.4.1") {
     exclude(group = "com.google.protobuf", module = "protobuf-java")
     exclude(group = "org.apache.hadoop.thirdparty", module = "hadoop-shaded-protobuf_3_25")

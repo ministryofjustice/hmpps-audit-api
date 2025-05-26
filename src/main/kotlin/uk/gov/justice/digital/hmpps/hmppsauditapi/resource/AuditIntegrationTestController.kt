@@ -1,7 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -14,8 +12,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
 import java.time.Instant
 import java.time.LocalDate
-import java.util.*
-import kotlin.time.Duration.Companion.seconds
+import java.util.UUID
 
 @RestController
 @RequestMapping("/internal/test")
@@ -32,14 +29,14 @@ class AuditIntegrationTestController(
   )
 
   @PostMapping("/audit-end-to-end-test")
-  fun runAuditIntegrationTest(): ResponseEntity<IntegrationTestResult> = runBlocking {
+  fun runAuditIntegrationTest(): ResponseEntity<IntegrationTestResult> {
     val testEvent = createTestAuditEvent()
 
     // Step 1: Send event to SQS
     auditQueueService.sendAuditEvent(testEvent)
 
     // Step 2: Wait for ingestion + Athena readiness
-    delay(5.seconds) // crude but simple for now
+    Thread.sleep(5000) // crude but simple for now
 
     // Step 3: Update partitions
     athenaPartitionRepairService.repairPartitions()
@@ -64,12 +61,12 @@ class AuditIntegrationTestController(
     } ?: false
 
     if (matchFound) {
-      return@runBlocking ResponseEntity.ok(
+      return ResponseEntity.ok(
         IntegrationTestResult(true, "Audit event found in Athena", result),
       )
     }
 
-    ResponseEntity.internalServerError().body(
+    return ResponseEntity.internalServerError().body(
       IntegrationTestResult(false, "Audit event not found in Athena", result),
     )
   }
@@ -86,7 +83,7 @@ class AuditIntegrationTestController(
     details = "{\"key\": \"value\"}",
   )
 
-  private suspend fun pollUntilSucceeded(queryExecutionId: String): DigitalServicesQueryResponse {
+  private fun pollUntilSucceeded(queryExecutionId: String): DigitalServicesQueryResponse {
     var result: DigitalServicesQueryResponse
     repeat(12) {
       // retry for up to ~1 minute
@@ -94,7 +91,7 @@ class AuditIntegrationTestController(
       if (result.queryState.toString() == "SUCCEEDED") {
         return result
       }
-      delay(2.seconds)
+      Thread.sleep(2000)
     }
     throw IllegalStateException("Athena query $queryExecutionId did not complete in time")
   }
