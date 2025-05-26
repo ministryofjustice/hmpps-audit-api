@@ -58,11 +58,8 @@ class AuditIntegrationTestController(
     val matchFound = result.results?.any {
       it.`when` == testEvent.`when` &&
         it.who == testEvent.who &&
-        it.what == testEvent.what
-      it.subjectId == testEvent.subjectId
-//        it.subjectType == testEvent.subjectType &&
-//        it.correlationId == testEvent.correlationId &&
-//        it.service == testEvent.service
+        it.what == testEvent.what &&
+        it.details == testEvent.details
     } ?: false
 
     if (matchFound) {
