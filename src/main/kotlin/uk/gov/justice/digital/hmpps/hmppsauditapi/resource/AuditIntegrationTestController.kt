@@ -36,10 +36,11 @@ class AuditIntegrationTestController(
     auditQueueService.sendAuditEvent(testEvent)
 
     // Step 2: Wait for ingestion + Athena readiness
-    Thread.sleep(5000) // crude but simple for now
+    Thread.sleep(10000) // crude but simple for now
 
     // Step 3: Update partitions
     athenaPartitionRepairService.repairPartitions()
+    Thread.sleep(3000) // crude but simple for now
 
     // Step 4: Trigger query
     val queryRequest = DigitalServicesQueryRequest(
