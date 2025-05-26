@@ -36,11 +36,11 @@ class AuditIntegrationTestController(
     auditQueueService.sendAuditEvent(testEvent)
 
     // Step 2: Wait for ingestion + Athena readiness
-    Thread.sleep(10000) // crude but simple for now
+    Thread.sleep(10000)
 
     // Step 3: Update partitions
     athenaPartitionRepairService.repairPartitions()
-    Thread.sleep(3000) // crude but simple for now
+    Thread.sleep(2000)
 
     // Step 4: Trigger query
     val queryRequest = DigitalServicesQueryRequest(
@@ -68,7 +68,7 @@ class AuditIntegrationTestController(
     }
 
     return ResponseEntity.internalServerError().body(
-      IntegrationTestResult(false, "Audit event not found in Athena", result),
+      IntegrationTestResult(false, "ID: " + testEvent.id.toString() + ", who: " + testEvent.who + ", what: " + testEvent.what, result),
     )
   }
 
@@ -92,7 +92,7 @@ class AuditIntegrationTestController(
       if (result.queryState.toString() == "SUCCEEDED") {
         return result
       }
-      Thread.sleep(2000)
+      Thread.sleep(1000)
     }
     throw IllegalStateException("Athena query $queryExecutionId did not complete in time")
   }
