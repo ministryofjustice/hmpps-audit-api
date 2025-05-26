@@ -78,7 +78,7 @@ class AuditIntegrationTestController(
     subjectId = "some subject ID",
     subjectType = "some subjectType ID",
     correlationId = UUID.randomUUID().toString(),
-    who = "some user",
+    who = "INTEGRATION_TEST_USER",
     service = "some service",
     details = "{\"key\": \"value\"}",
   )
