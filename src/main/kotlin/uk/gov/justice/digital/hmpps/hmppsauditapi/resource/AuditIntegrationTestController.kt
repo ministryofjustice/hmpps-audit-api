@@ -19,7 +19,7 @@ import kotlin.time.Duration.Companion.seconds
 
 @RestController
 @RequestMapping("/internal/test")
-class AuditFlowTestController(
+class AuditIntegrationTestController(
   private val auditQueueService: AuditQueueService,
   private val athenaPartitionRepairService: AthenaPartitionRepairService,
   private val auditService: AuditService,
