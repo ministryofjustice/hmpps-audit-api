@@ -56,7 +56,7 @@ class AuditIntegrationTestController(
 
     // Step 6: Verify result
     val matchFound = result.results?.any {
-      it.id == testEvent.id &&
+        it.`when` == testEvent.`when` &&
         it.who == testEvent.who &&
         it.what == testEvent.what
     } ?: false
