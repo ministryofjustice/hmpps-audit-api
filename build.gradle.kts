@@ -11,6 +11,7 @@ configurations {
   all {
     resolutionStrategy {
       force("org.apache.commons:commons-configuration2:2.11.0")
+      force("commons-beanutils:commons-beanutils:1.11.0")
     }
   }
 }
