@@ -45,7 +45,7 @@ workflows:
           filters:
             branches:
               only:
-                - main
+                - security-fixes
       - hmpps/deploy_env:
           name: deploy_dev
           env: "dev"
