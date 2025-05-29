@@ -45,7 +45,7 @@ workflows:
           filters:
             branches:
               only:
-                - security-fixes
+                - main
       - hmpps/deploy_env:
           name: deploy_dev
           env: "dev"
@@ -98,11 +98,11 @@ workflows:
   security:
     triggers:
       - schedule:
-          cron: "0,10,20,35,45,55 * * * 1-5"
+          cron: "2 3 * * 1-5"
           filters:
             branches:
               only:
-                - security-fixes
+                - main
     jobs:
       - hmpps/gradle_owasp_dependency_check:
           jdk_tag: "21.0"
