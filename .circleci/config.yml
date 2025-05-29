@@ -98,7 +98,7 @@ workflows:
   security:
     triggers:
       - schedule:
-          cron: "0,10,20,35,40,50 * * * 1-5"
+          cron: "0,10,20,35,45,55 * * * 1-5"
           filters:
             branches:
               only:

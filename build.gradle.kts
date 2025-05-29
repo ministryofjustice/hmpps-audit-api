@@ -49,6 +49,7 @@ dependencies {
     exclude(group = "org.eclipse.jetty.websocket", module = "websocket-client")
     exclude(group = "commons-beanutils", module = "commons-beanutils")
   }
+  implementation("commons-beanutils:commons-beanutils:1.11.0")
 
   runtimeOnly("com.h2database:h2:2.3.232")
   runtimeOnly("org.flywaydb:flyway-core")
