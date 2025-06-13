@@ -37,6 +37,7 @@ jobs:
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/gradle_localstack_postgres_verify.yml@v2 # WORKFLOW_VERSION
     secrets: inherit
     with:
+      localstack-services: s3,sqs
       localstack-tag: "4"
       postgres-tag: "17"
       postgres-db: audit_db
