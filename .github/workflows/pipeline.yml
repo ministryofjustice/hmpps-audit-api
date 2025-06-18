@@ -72,7 +72,9 @@ jobs:
 
   integration_tests:
     name: Run integration tests after dev deploy
-    needs: deploy_dev
+    # needs: deploy_dev
+    needs:
+      - gradle-verify
     runs-on: ubuntu-latest
     steps:
       - name: Say hello
