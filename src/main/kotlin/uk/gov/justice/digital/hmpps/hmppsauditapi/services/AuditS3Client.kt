@@ -4,7 +4,6 @@ import org.apache.avro.Schema
 import org.apache.avro.generic.GenericData
 import org.apache.avro.generic.GenericRecord
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.Path
 import org.apache.parquet.avro.AvroParquetWriter
 import org.apache.parquet.hadoop.metadata.CompressionCodecName
 import org.springframework.beans.factory.annotation.Value
@@ -14,6 +13,7 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
 import java.nio.file.Files
+import java.nio.file.Paths
 import java.security.MessageDigest
 import java.time.ZoneId
 import java.util.Base64
@@ -47,7 +47,7 @@ class AuditS3Client(
   }
 
   private fun convertToParquetBytes(auditEvent: HMPPSAuditListener.AuditEvent): ByteArray {
-    val tempFileJavaPath = java.nio.file.Path.of(System.getProperty("java.io.tmpdir"), "${auditEvent.id}.parquet")
+    val tempFilePath = Paths.get(System.getProperty("java.io.tmpdir"), "${auditEvent.id}.parquet")
     try {
       val record: GenericRecord = GenericData.Record(schema).apply {
         put("id", auditEvent.id?.toString() ?: throw IllegalArgumentException("ID cannot be null"))
@@ -62,17 +62,17 @@ class AuditS3Client(
         put("details", auditEvent.details)
       }
 
-      val tempFilePath = Path(System.getProperty("java.io.tmpdir"), "${auditEvent.id}.parquet")
-      AvroParquetWriter.builder<GenericRecord>(tempFilePath)
+      val outputFile = LocalTempAuditFileOutput(tempFilePath)
+      AvroParquetWriter.builder<GenericRecord>(outputFile)
         .withSchema(schema)
         .withCompressionCodec(CompressionCodecName.SNAPPY)
         .withConf(Configuration())
         .build().use { writer ->
           writer.write(record)
         }
-      return Files.readAllBytes(tempFileJavaPath)
+      return Files.readAllBytes(tempFilePath)
     } finally {
-      Files.deleteIfExists(tempFileJavaPath)
+      Files.deleteIfExists(tempFilePath)
     }
   }
 }
