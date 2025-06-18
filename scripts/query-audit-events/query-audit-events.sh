@@ -2,20 +2,29 @@
 
 usage() {
     echo "Usage:"
-    echo "  /bin/sh query-audit-events.sh --s3-bucket <s3-bucket-name> --by-user-date <year> <month> <day> <user>"
-    echo "  /bin/sh query-audit-events.sh --s3-bucket <s3-bucket-name> --by-id <audit-event-id>"
+    echo "  /bin/sh query-audit-events.sh --s3-bucket <bucket> --database <db> --table <table> --workgroup <workgroup> --by-id <audit-event-id>"
+    echo "  /bin/sh query-audit-events.sh --s3-bucket <bucket> --database <db> --table <table> --workgroup <workgroup> --by-user-date <year> <month> <day> <user>"
     exit 1
 }
 
-if [ "$#" -lt 4 ]; then
+if [ "$#" -lt 8 ]; then
     usage
 fi
 
-if [ "$1" != "--s3-bucket" ]; then
-    usage
-fi
-
+if [ "$1" != "--s3-bucket" ]; then usage; fi
 S3_BUCKET_NAME=$2
+shift 2
+
+if [ "$1" != "--database" ]; then usage; fi
+DATABASE_NAME=$2
+shift 2
+
+if [ "$1" != "--table" ]; then usage; fi
+TABLE_NAME=$2
+shift 2
+
+if [ "$1" != "--workgroup" ]; then usage; fi
+WORKGROUP=$2
 shift 2
 
 if ! aws s3 ls "s3://$S3_BUCKET_NAME" > /dev/null 2>&1; then
@@ -23,25 +32,18 @@ if ! aws s3 ls "s3://$S3_BUCKET_NAME" > /dev/null 2>&1; then
     exit 1
 fi
 
-DATABASE_NAME="audit_dev_glue_catalog_database"
-TABLE_NAME="audit_event"
-
 FLAG=$1
 shift
 
 case "$FLAG" in
     --by-id)
-        if [ "$#" -ne 1 ]; then
-            usage
-        fi
+        if [ "$#" -ne 1 ]; then usage; fi
         ID=$1
         QUERY="SELECT * FROM $DATABASE_NAME.$TABLE_NAME WHERE id = '$ID' AND NOT (year = '2024' AND month = '8');"
         ;;
 
     --by-user-date)
-        if [ "$#" -ne 4 ]; then
-            usage
-        fi
+        if [ "$#" -ne 4 ]; then usage; fi
         YEAR=$1
         MONTH=$2
         DAY=$3
@@ -59,10 +61,12 @@ OUTPUT_LOCATION="s3://$S3_BUCKET_NAME/query_results/"
 echo "Bucket name: $S3_BUCKET_NAME"
 echo "Output location: $OUTPUT_LOCATION"
 echo "Query: $QUERY"
+echo "Workgroup: $WORKGROUP"
 
 QUERY_EXECUTION_ID=$(aws athena start-query-execution \
     --query-string "$QUERY" \
     --query-execution-context Database=$DATABASE_NAME \
+    --work-group "$WORKGROUP" \
     --result-configuration OutputLocation=$OUTPUT_LOCATION \
     --output text --query 'QueryExecutionId')
 

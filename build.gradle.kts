@@ -11,6 +11,7 @@ configurations {
   all {
     resolutionStrategy {
       force("org.apache.commons:commons-configuration2:2.11.0")
+      force("commons-beanutils:commons-beanutils:1.11.0")
     }
   }
 }
@@ -28,11 +29,11 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webflux")
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.5")
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
 
   implementation("org.apache.commons:commons-lang3:3.17.0")
-  implementation("software.amazon.awssdk:s3:2.31.49")
-  implementation("software.amazon.awssdk:athena:2.31.49")
+  implementation("software.amazon.awssdk:s3:2.31.62")
+  implementation("software.amazon.awssdk:athena:2.31.62")
   implementation("org.apache.parquet:parquet-avro:1.15.2")
   implementation("org.apache.avro:avro:1.12.0")
   implementation("org.apache.hadoop:hadoop-client:3.4.1") {
@@ -46,12 +47,14 @@ dependencies {
     exclude(group = "org.eclipse.jetty", module = "jetty-webapp")
     exclude(group = "org.eclipse.jetty.websocket", module = "websocket-common")
     exclude(group = "org.eclipse.jetty.websocket", module = "websocket-client")
+    exclude(group = "commons-beanutils", module = "commons-beanutils")
   }
+  implementation("commons-beanutils:commons-beanutils:1.11.0")
 
   runtimeOnly("com.h2database:h2:2.3.232")
   runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
-  runtimeOnly("org.postgresql:postgresql:42.7.5")
+  runtimeOnly("org.postgresql:postgresql:42.7.7")
 
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.6")
