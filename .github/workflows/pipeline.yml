@@ -72,13 +72,34 @@ jobs:
 
   integration_tests:
     name: Run integration tests after dev deploy
-    # needs: deploy_dev
     needs:
+      #- deploy_dev
       - gradle-verify
     runs-on: ubuntu-latest
+    env:
+      CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
+      CLIENT_SECRET: ${{ secrets.OAUTH_CLIENT_SECRET }}
+      TOKEN_URL: ${{ secrets.OAUTH_TOKEN_URL }}
     steps:
-      - name: Say hello
-        run: echo "hello world"
+      - name: Get OAuth token
+        id: get_token
+        run: |
+          RESPONSE=$(curl -s -X POST "$TOKEN_URL" \
+            -d "grant_type=client_credentials" \
+            -d "client_id=$CLIENT_ID" \
+            -d "client_secret=$CLIENT_SECRET")
+          TOKEN=$(echo "$RESPONSE" | jq -r '.access_token')
+          if [[ "$TOKEN" == "null" || -z "$TOKEN" ]]; then
+            echo "Failed to retrieve access token"
+            echo "Response: $RESPONSE"
+            exit 1
+          fi
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
+
+      - name: Call audit API endpoint
+        run: |
+          curl -i -X POST https://audit-api-dev.hmpps.service.justice.gov.uk/internal/test/audit-end-to-end-test \
+            -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}"
 
   deploy_preprod:
     name: Deploy to the preprod environment
