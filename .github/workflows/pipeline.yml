@@ -72,7 +72,7 @@ jobs:
 
   integration_tests:
     name: Run integration tests after dev deploy
-    #environment: 'dev'
+    environment: 'dev'
     needs:
       #- deploy_dev
       - gradle-verify
