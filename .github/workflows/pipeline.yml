@@ -38,6 +38,7 @@ jobs:
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/gradle_localstack_postgres_verify.yml@v2 # WORKFLOW_VERSION
     secrets: inherit
     with:
+      gradle-command: './gradlew check -x test'
       localstack-services: s3,sqs
       localstack-tag: "4"
       postgres-tag: "17"
@@ -85,6 +86,8 @@ jobs:
       - name: Get OAuth token
         id: get_token
         run: |
+          echo "token url"
+          echo $TOKEN_URL
           RESPONSE=$(curl -s -X POST "$TOKEN_URL" \
             -d "grant_type=client_credentials" \
             -d "client_id=$CLIENT_ID" \
