@@ -60,7 +60,7 @@ jobs:
 
   deploy_dev:
     name: Deploy to the dev environment
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/HAAR-3972'
     needs:
       - build
       - helm_lint
