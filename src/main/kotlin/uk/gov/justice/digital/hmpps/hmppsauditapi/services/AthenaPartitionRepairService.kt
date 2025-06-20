@@ -15,7 +15,7 @@ class AthenaPartitionRepairService(
   @Value("\${aws.athena.outputLocation}") private val outputLocation: String,
 ) {
 
-  @Scheduled(cron = "0 */2 * * * *")
+  @Scheduled(cron = "0 */30 * * * *")
   fun repairPartitions() {
     val repairQuery = "MSCK REPAIR TABLE $databaseName.$tableName;"
     val request = StartQueryExecutionRequest.builder()
