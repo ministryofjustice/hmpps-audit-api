@@ -81,7 +81,6 @@ jobs:
       - name: Get OAuth token
         id: get_token
         run: |
-          echo "token url: "$TOKEN_URL
           RESPONSE=$(curl -s -X POST "$TOKEN_URL" \
             -d "grant_type=client_credentials" \
             -d "OAUTH_CLIENT_ID=$CLIENT_ID" \
