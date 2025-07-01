@@ -32,7 +32,6 @@ jobs:
     secrets: inherit
     with:
       environment: ${{ matrix.environments }}
-
   gradle-verify:
     name: Run the tests
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/gradle_localstack_postgres_verify.yml@v2 # WORKFLOW_VERSION
@@ -44,7 +43,6 @@ jobs:
       postgres-db: audit_db
       postgres-username: admin
       postgres-password: admin_password
-
   build:
     name: Build docker image from hmpps-github-actions
     if: github.ref == 'refs/heads/HAAR-3972'
@@ -57,7 +55,6 @@ jobs:
       additional_docker_tag: ${{ inputs.additional_docker_tag }}
       push: ${{ inputs.push || true }}
       docker_multiplatform: false
-
   deploy_dev:
     name: Deploy to the dev environment
     if: github.ref == 'refs/heads/HAAR-3972'
@@ -113,7 +110,6 @@ jobs:
     with:
       environment: 'preprod'
       app_version: '${{ needs.build.outputs.app_version }}'
-
   deploy_prod:
     name: Deploy to the prod environment
     needs:
