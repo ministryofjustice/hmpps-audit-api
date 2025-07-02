@@ -81,7 +81,7 @@ jobs:
       - name: Get OAuth token
         id: get_token
         run: |
-          BASIC_AUTH="$(echo -n "$OAUTH_CLIENT_ID:$OAUTH_CLIENT_SECRET" | base64)
+          BASIC_AUTH=$(echo -n "$OAUTH_CLIENT_ID:$OAUTH_CLIENT_SECRET" | base64)
           RESPONSE=$(curl -s -X POST "$OAUTH_TOKEN_URL?grant_type=client_credentials" \
             -H "Content-Type: application/json" \
             -H "Authorization: Basic $BASIC_AUTH")
