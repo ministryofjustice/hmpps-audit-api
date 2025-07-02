@@ -82,10 +82,17 @@ jobs:
         id: get_token
         run: |
           BASIC_AUTH=$(echo -n "$OAUTH_CLIENT_ID:$OAUTH_CLIENT_SECRET" | base64)
-          RESPONSE=$(curl -s -X POST "$OAUTH_TOKEN_URL?grant_type=client_credentials" \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Basic $BASIC_AUTH")
+          TOKEN_URL="$OAUTH_TOKEN_URL?grant_type=client_credentials"
+          
+          echo "Token URL: $TOKEN_URL"
+          echo "Auth header: Basic $BASIC_AUTH"
+          
+          RESPONSE=$(curl --fail -s -X POST "$TOKEN_URL" \
+          -H "Content-Type: application/json" \
+          -H "Authorization: Basic $BASIC_AUTH")
+          
           echo "Raw response: $RESPONSE"
+          
           TOKEN=$(echo "$RESPONSE" | jq -r '.access_token')
           if [[ "$TOKEN" == "null" || -z "$TOKEN" ]]; then
             echo "Failed to retrieve access token"
