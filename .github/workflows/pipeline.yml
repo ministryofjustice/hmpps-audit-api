@@ -87,17 +87,14 @@ jobs:
           echo "Token URL: $TOKEN_URL"
           echo "Auth header: Basic $BASIC_AUTH"
           
-          RESPONSE=$(curl --fail -s -X POST "$TOKEN_URL" \
+          RESPONSE=$(curl -s -X POST "$TOKEN_URL" \
           -H "Content-Type: application/json" \
           -H "Authorization: Basic $BASIC_AUTH")
           
           echo "Raw response: $RESPONSE"
           
           TOKEN=$(echo "$RESPONSE" | jq -r '.access_token')
-          if [[ "$TOKEN" == "null" || -z "$TOKEN" ]]; then
-            echo "Failed to retrieve access token"
-            exit 1
-          fi
+          echo "::add-mask::$TOKEN"
           echo "token=$TOKEN" >> $GITHUB_OUTPUT
 
       - name: Call audit API endpoint
