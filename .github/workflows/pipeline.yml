@@ -97,7 +97,8 @@ jobs:
 
       - name: Call audit API endpoint
         run: |
-          curl -i -X POST https://audit-api-dev.hmpps.service.justice.gov.uk/internal/test/audit-end-to-end-test \
+          set -e
+          curl --fail -s -X POST https://audit-api-dev.hmpps.service.justice.gov.uk/internal/test/audit-end-to-end-test \
             -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}"
 
   deploy_preprod:
