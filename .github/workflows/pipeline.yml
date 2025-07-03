@@ -97,9 +97,18 @@ jobs:
 
       - name: Call audit API endpoint
         run: |
-          set -e
-          curl --fail -s -X POST https://audit-api-dev.hmpps.service.justice.gov.uk/internal/test/audit-end-to-end-test \
-            -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}"
+          RESPONSE=$(curl -s -w "%{http_code}" -o response.json -X POST https://audit-api-dev.hmpps.service.justice.gov.uk/internal/test/audit-end-to-end-test \
+            -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}")
+
+          echo "Response body:"
+          cat response.json
+          echo ""
+          echo "HTTP status: $RESPONSE"
+
+          if [[ "$RESPONSE" != "200" ]]; then
+            echo "Integration test failed with status $RESPONSE"
+            exit 1
+          fi
 
   deploy_preprod:
     name: Deploy to the preprod environment
