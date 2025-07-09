@@ -1,4 +1,3 @@
-import org.gradle.api.file.DuplicatesStrategy
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -35,7 +34,6 @@ dependencies {
   implementation("org.apache.commons:commons-lang3:3.17.0")
   implementation("software.amazon.awssdk:s3:2.31.77")
   implementation("software.amazon.awssdk:athena:2.31.77")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
   implementation("org.apache.parquet:parquet-avro:1.15.2")
   implementation("org.apache.avro:avro:1.12.0")
   implementation("org.apache.hadoop:hadoop-client:3.4.1") {
@@ -75,10 +73,6 @@ kotlin {
 tasks {
   withType<KotlinCompile> {
     compilerOptions.jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
-  }
-
-  named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
   }
 }
 
