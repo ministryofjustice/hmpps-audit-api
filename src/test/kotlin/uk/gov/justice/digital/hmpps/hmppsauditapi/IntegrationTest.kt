@@ -54,6 +54,10 @@ abstract class IntegrationTest {
     hmppsQueueService.findByQueueId("auditqueue") ?: throw MissingQueueException("HmppsQueue auditqueue not found")
   }
 
+  protected val prisonerAuditQueueConfig by lazy {
+    hmppsQueueService.findByQueueId("prisonerauditqueue") ?: throw MissingQueueException("HmppsQueue prisonerauditqueue not found")
+  }
+
   protected val auditUsersQueueConfig by lazy {
     hmppsQueueService.findByQueueId("auditusersqueue") ?: throw MissingQueueException("HmppsQueue auditusersqueue not found")
   }
@@ -61,6 +65,10 @@ abstract class IntegrationTest {
   protected val awsSqsDlqClient by lazy { auditQueueConfig.sqsDlqClient as SqsAsyncClient }
   protected val awsSqsUrl by lazy { auditQueueConfig.queueUrl }
   protected val awsSqsDlqUrl by lazy { auditQueueConfig.dlqUrl as String }
+
+  protected val awsSqsPrisonerAuditDlqClient by lazy { prisonerAuditQueueConfig.sqsDlqClient as SqsAsyncClient }
+  protected val awsSqsPrisonerAuditUrl by lazy { prisonerAuditQueueConfig.queueUrl }
+  protected val awsSqsPrisonerAuditDlqUrl by lazy { prisonerAuditQueueConfig.dlqUrl as String }
 
   @SpyBean
   @Qualifier("auditqueue-sqs-client")
@@ -76,6 +84,16 @@ abstract class IntegrationTest {
       val config = queues["auditqueue"]
         ?: throw MissingQueueException("HmppsSqsProperties config for auditqueue not found")
       hmppsQueueFactory.createSqsAsyncClient(config, hmppsSqsProperties, outboundQueueSqsDlqClient)
+    }
+
+    @Bean("prisonerauditqueue-sqs-client")
+    fun outboundPrisonerAuditQueueSqsClient(
+      hmppsSqsProperties: HmppsSqsProperties,
+      @Qualifier("prisonerauditqueue-sqs-dlq-client") outboundPrisonerAuditQueueSqsDlqClient: SqsAsyncClient,
+    ): SqsAsyncClient = with(hmppsSqsProperties) {
+      val config = queues["prisonerauditqueue"]
+        ?: throw MissingQueueException("HmppsSqsProperties config for prisonerauditqueue not found")
+      hmppsQueueFactory.createSqsAsyncClient(config, hmppsSqsProperties, outboundPrisonerAuditQueueSqsDlqClient)
     }
 
     @Bean("auditusersqueue-sqs-client")
