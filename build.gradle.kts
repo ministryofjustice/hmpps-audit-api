@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.gradle.api.file.DuplicatesStrategy
 
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.3.1"
@@ -13,7 +14,6 @@ configurations {
       force("org.apache.commons:commons-configuration2:2.11.0")
       force("commons-beanutils:commons-beanutils:1.11.0")
     }
-    exclude(group = "org.slf4j", module = "slf4j-reload4j")
   }
 }
 
@@ -35,10 +35,8 @@ dependencies {
   implementation("org.apache.commons:commons-lang3:3.17.0")
   implementation("software.amazon.awssdk:s3:2.31.77")
   implementation("software.amazon.awssdk:athena:2.31.77")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
   implementation("org.apache.parquet:parquet-avro:1.15.2")
   implementation("org.apache.avro:avro:1.12.0")
-  implementation("org.apache.hadoop:hadoop-common:3.4.1")
   implementation("org.apache.hadoop:hadoop-client:3.4.1") {
     exclude(group = "com.google.protobuf", module = "protobuf-java")
     exclude(group = "org.apache.hadoop.thirdparty", module = "hadoop-shaded-protobuf_3_25")
@@ -76,6 +74,10 @@ kotlin {
 tasks {
   withType<KotlinCompile> {
     compilerOptions.jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
+  }
+
+  named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
   }
 }
 
