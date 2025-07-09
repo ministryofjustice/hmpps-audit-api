@@ -11,6 +11,7 @@ configurations {
   all {
     resolutionStrategy {
       force("org.apache.commons:commons-configuration2:2.11.0")
+      force("commons-beanutils:commons-beanutils:1.11.0")
     }
     exclude(group = "org.slf4j", module = "slf4j-reload4j")
   }
@@ -35,7 +36,6 @@ dependencies {
   implementation("software.amazon.awssdk:s3:2.31.77")
   implementation("software.amazon.awssdk:athena:2.31.77")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.10.2")
   implementation("org.apache.parquet:parquet-avro:1.15.2")
   implementation("org.apache.avro:avro:1.12.0")
   implementation("org.apache.hadoop:hadoop-common:3.4.1")
@@ -50,7 +50,9 @@ dependencies {
     exclude(group = "org.eclipse.jetty", module = "jetty-webapp")
     exclude(group = "org.eclipse.jetty.websocket", module = "websocket-common")
     exclude(group = "org.eclipse.jetty.websocket", module = "websocket-client")
+    exclude(group = "commons-beanutils", module = "commons-beanutils")
   }
+  implementation("commons-beanutils:commons-beanutils:1.11.0")
 
   runtimeOnly("com.h2database:h2:2.3.232")
   runtimeOnly("org.flywaydb:flyway-core")
