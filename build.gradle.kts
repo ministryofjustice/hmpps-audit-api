@@ -12,6 +12,7 @@ configurations {
     resolutionStrategy {
       force("org.apache.commons:commons-configuration2:2.11.0")
     }
+    exclude(group = "org.slf4j", module = "slf4j-reload4j")
   }
 }
 
@@ -37,7 +38,6 @@ dependencies {
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.10.2")
   implementation("org.apache.parquet:parquet-avro:1.15.2")
   implementation("org.apache.avro:avro:1.12.0")
-  runtimeOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
   implementation("org.apache.hadoop:hadoop-common:3.4.1")
   implementation("org.apache.hadoop:hadoop-client:3.4.1") {
     exclude(group = "com.google.protobuf", module = "protobuf-java")
