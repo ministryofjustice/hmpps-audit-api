@@ -300,6 +300,7 @@ class AuditAthenaClientTest {
           queryState = QueryExecutionState.SUCCEEDED,
           results = listOf(expectedAuditDto),
           authorisedServices = listOf(HMPPS_MANAGE_USERS),
+          query = "",
         ),
       )
     }
