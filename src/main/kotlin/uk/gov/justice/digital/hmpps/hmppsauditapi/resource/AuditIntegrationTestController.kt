@@ -41,11 +41,11 @@ class AuditIntegrationTestController(
     auditQueueService.sendAuditEvent(testEvent)
 
     // Step 2: Wait for ingestion + Athena readiness
-    Thread.sleep(7000)
+    Thread.sleep(8000)
 
     // Step 3: Update partitions
     athenaPartitionRepairService.repairPartitions()
-    Thread.sleep(5000)
+    Thread.sleep(6000)
 
     // Step 4: Trigger query
     val queryRequest = DigitalServicesQueryRequest(
@@ -84,7 +84,7 @@ class AuditIntegrationTestController(
     subjectId = "some subject ID",
     subjectType = "some subjectType ID",
     correlationId = UUID.randomUUID().toString(),
-    who = "INTEGRATION_TEST_USER",
+    who = "audit-integration-test-user",
     service = "some service",
     details = "{\"key\": \"value\"}",
   )
