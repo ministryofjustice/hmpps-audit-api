@@ -80,6 +80,7 @@ jobs:
     steps:
       - name: Get OAuth token
         id: get_token
+        shell: bash
         run: |
           BASIC_AUTH=$(echo -n "$OAUTH_CLIENT_ID:$OAUTH_CLIENT_SECRET" | base64 | tr -d '\n')
           echo "Token URL: $OAUTH_TOKEN_URL?grant_type=client_credentials"
@@ -92,6 +93,12 @@ jobs:
           echo "Raw response: $RESPONSE"
           
           TOKEN=$(echo "$RESPONSE" | jq -r '.access_token')
+
+          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+            echo "Failed to extract access token."
+            exit 1
+          fi
+
           echo "::add-mask::$TOKEN"
           echo "token=$TOKEN" >> $GITHUB_OUTPUT
 
