@@ -9,7 +9,6 @@ data class DigitalServicesQueryResponse(
   val queryExecutionId: UUID,
   val queryState: QueryExecutionState,
   val authorisedServices: List<String>,
-  val query: String = "",
   @JsonInclude(JsonInclude.Include.NON_NULL)
   var results: List<AuditDto>? = null,
   @JsonInclude(JsonInclude.Include.NON_NULL)

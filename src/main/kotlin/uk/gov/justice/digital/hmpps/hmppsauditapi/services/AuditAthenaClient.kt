@@ -45,7 +45,6 @@ class AuditAthenaClient(
       queryExecutionId = UUID.fromString(queryExecutionId),
       queryState = QueryExecutionState.QUEUED,
       authorisedServices = authorisedServices,
-      query = query,
     )
   }
 
@@ -56,7 +55,6 @@ class AuditAthenaClient(
       queryExecutionId = UUID.fromString(queryExecutionId),
       queryState = queryState,
       authorisedServices = getAuthorisedServices(),
-      query = "",
     )
     if (queryState == QueryExecutionState.SUCCEEDED) {
       response.results = fetchQueryResults(queryExecutionId)

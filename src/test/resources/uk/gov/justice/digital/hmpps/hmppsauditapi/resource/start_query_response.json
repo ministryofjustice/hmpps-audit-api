@@ -1,8 +1,5 @@
 {
   "queryExecutionId": "b1231f6e-9653-4b3f-9507-793730932daf",
   "queryState": "QUEUED",
-  "authorisedServices": [
-    "hmpps-manage-users"
-  ],
-  "query": "SELECT * FROM the-database.the-table WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND subjectId = 'test-subject' AND subjectType = 'USER_ID' AND service IN ('hmpps-manage-users');"
+  "authorisedServices": ["hmpps-manage-users"]
 }

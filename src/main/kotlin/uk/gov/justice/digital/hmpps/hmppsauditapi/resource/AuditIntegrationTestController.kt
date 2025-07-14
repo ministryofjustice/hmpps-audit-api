@@ -14,7 +14,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
 
-// TODO only expose endpoint in dev
 @RestController
 @RequestMapping("/internal/test")
 class AuditIntegrationTestController(
