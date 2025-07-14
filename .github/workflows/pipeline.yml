@@ -87,11 +87,11 @@ jobs:
           echo "Auth header: Basic $BASIC_AUTH"
 
           # Remove when done debugging
-          curl -v -X POST "https://your-oauth2-server/token?grant_type=client_credentials" \
+          curl -v -X POST "$OAUTH_TOKEN_URL?grant_type=client_credentials" \
             -H "Content-Type: application/x-www-form-urlencoded" \
             -H "Authorization: Basic ${{ secrets.BASIC_AUTH }}"
           
-          RESPONSE=$(curl -v -X POST "https://your-oauth2-server/token?grant_type=client_credentials" \
+          RESPONSE=$(curl -v -X POST "$OAUTH_TOKEN_URL?grant_type=client_credentials" \
             -H "Content-Type: application/x-www-form-urlencoded" \
             -H "Authorization: Basic ${{ secrets.BASIC_AUTH }}")
 
