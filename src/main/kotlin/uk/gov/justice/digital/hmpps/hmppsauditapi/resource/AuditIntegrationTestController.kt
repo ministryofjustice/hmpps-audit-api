@@ -45,7 +45,7 @@ class AuditIntegrationTestController(
 
     // Step 3: Update partitions
     athenaPartitionRepairService.repairPartitions()
-    Thread.sleep(6000)
+    Thread.sleep(10000)
 
     // Step 4: Trigger query
     val queryRequest = DigitalServicesQueryRequest(
