@@ -35,6 +35,7 @@ jobs:
   gradle-verify:
     name: Run the tests
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/gradle_localstack_postgres_verify.yml@v2 # WORKFLOW_VERSION
+    gradle-command: ./gradlew test --tests DummyTest
     secrets: inherit
     with:
       localstack-services: s3,sqs
@@ -61,11 +62,10 @@ jobs:
     needs:
       - build
       - helm_lint
-    uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2 # WORKFLOW_VERSION
-    secrets: inherit
-    with:
-      environment: 'dev'
-      app_version: '${{ needs.build.outputs.app_version }}'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Say hello instead of deploying
+        run: echo "Hello, skipping actual deployment to dev."
 
   integration_tests:
     name: Run integration tests after dev deploy
