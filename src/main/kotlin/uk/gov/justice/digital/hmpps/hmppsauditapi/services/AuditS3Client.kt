@@ -7,7 +7,6 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.parquet.avro.AvroParquetWriter
 import org.apache.parquet.hadoop.metadata.CompressionCodecName
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
@@ -22,10 +21,9 @@ import java.util.Base64
 class AuditS3Client(
   private val s3Client: S3Client,
   private val schema: Schema,
-  @Value("\${aws.s3.auditBucketName}") private val bucketName: String,
 ) {
 
-  fun save(auditEvent: HMPPSAuditListener.AuditEvent) {
+  fun save(auditEvent: HMPPSAuditListener.AuditEvent, bucketName: String) {
     val fileName = generateFilename(auditEvent)
     val parquetBytes = convertToParquetBytes(auditEvent)
     val md5Digest = MessageDigest.getInstance("MD5").digest(parquetBytes)

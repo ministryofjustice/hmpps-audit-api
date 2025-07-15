@@ -11,7 +11,9 @@ import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
 import java.io.IOException
 import java.time.Instant
@@ -23,6 +25,8 @@ private const val DEFAULT_SUBJECT_TYPE = "NOT_APPLICABLE"
 class HMPPSAuditListener(
   private val auditService: AuditService,
   private val objectMapper: ObjectMapper,
+  @Value("\${aws.s3.auditBucketName}") private val auditBucketName: String,
+  @Value("\${aws.s3.prisonerAuditBucketName}") private val prisonerAuditBucketName: String,
 ) {
 
   @SqsListener("auditqueue", factory = "hmppsQueueContainerFactoryProxy")
@@ -33,8 +37,8 @@ class HMPPSAuditListener(
     val cleansedAuditEvent = auditEvent.copy(
       details = auditEvent.details?.jsonString(),
     )
-
-    auditService.saveAuditEvent(cleansedAuditEvent)
+    var bucketName = auditBucketName
+    auditService.saveAuditEvent(cleansedAuditEvent, auditBucketName, AuditEventType.STAFF)
   }
 
   @SqsListener("prisonerauditqueue", factory = "hmppsQueueContainerFactoryProxy")
@@ -46,7 +50,8 @@ class HMPPSAuditListener(
       details = auditEvent.details?.jsonString(),
     )
 
-    auditService.saveAuditEvent(cleansedAuditEvent)
+//    auditService.saveAuditEvent(cleansedAuditEvent, prisonerAuditBucketName, "hmpps-prisoner-audit",)
+    auditService.saveAuditEvent(cleansedAuditEvent, prisonerAuditBucketName, AuditEventType.PRISONER)
   }
 
   private fun patchSubjectTypeIfMissing(message: String): String = try {

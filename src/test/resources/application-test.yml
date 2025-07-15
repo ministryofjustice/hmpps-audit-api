@@ -14,6 +14,7 @@ aws:
     outputLocation: "the-location"
   s3:
     auditBucketName: "hmpps-audit-bucket"
+    prisonerAuditBucketName: "hmpps-prisoner-audit-bucket"
 
 hmpps.sqs:
   provider: localstack

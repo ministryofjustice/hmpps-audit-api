@@ -2,11 +2,14 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.listeners
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
 import org.mockito.kotlin.check
 import org.mockito.kotlin.doNothing
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 
 internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
@@ -24,7 +27,7 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
   """
     listener.onAuditEvent(message)
 
-    doNothing().whenever(auditService).saveAuditEvent(any())
+    doNothing().whenever(auditService).saveAuditEvent(any(), anyString(), any())
 
     verify(auditService).saveAuditEvent(
       check {
@@ -34,6 +37,8 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
         assertThat(it.who).isEqualTo("bobby.beans")
         assertThat(it.service).isEqualTo("offender-service")
       },
+      eq("hmpps-audit-bucket"),
+      eq(AuditEventType.STAFF),
     )
   }
 
@@ -49,7 +54,7 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
     }
   """
 
-    doNothing().whenever(auditService).saveAuditEvent(any())
+    doNothing().whenever(auditService).saveAuditEvent(any(), anyString(), any())
 
     listener.onAuditEvent(message)
 
@@ -61,6 +66,8 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
         assertThat(it.who).isEqualTo("alice.jones")
         assertThat(it.service).isEqualTo("auth-service")
       },
+      eq("hmpps-audit-bucket"),
+      eq(AuditEventType.STAFF),
     )
   }
 
@@ -77,7 +84,7 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
     }
   """
 
-    doNothing().whenever(auditService).saveAuditEvent(any())
+    doNothing().whenever(auditService).saveAuditEvent(any(), anyString(), any())
 
     listener.onAuditEvent(message)
 
@@ -90,6 +97,8 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
         assertThat(it.service).isEqualTo("auth-service")
         assertThat(it.subjectType).isEqualTo("NOT_APPLICABLE")
       },
+      eq("hmpps-audit-bucket"),
+      eq(AuditEventType.STAFF),
     )
   }
 }

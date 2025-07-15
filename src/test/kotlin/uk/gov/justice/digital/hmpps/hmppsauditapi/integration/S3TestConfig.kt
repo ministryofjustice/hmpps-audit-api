@@ -19,7 +19,7 @@ import java.net.URI
 class S3TestConfig {
 
   @Value("\${aws.s3.auditBucketName}")
-  private lateinit var bucketName: String
+  private lateinit var auditBucketName: String
 
   @Bean
   @Profile("!circleci")
@@ -31,7 +31,7 @@ class S3TestConfig {
       .forcePathStyle(true)
       .build()
     if (s3Client.listBuckets().buckets().size == 0) {
-      s3Client.createBucket(CreateBucketRequest.builder().bucket(bucketName).build())
+      s3Client.createBucket(CreateBucketRequest.builder().bucket(auditBucketName).build())
     }
     return s3Client
   }

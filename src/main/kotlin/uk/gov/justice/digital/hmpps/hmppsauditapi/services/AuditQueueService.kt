@@ -53,6 +53,16 @@ class AuditQueueService(
         .build(),
     )
   }
+
+  fun sendPrisonerAuditEvent(auditEvent: AuditEvent) {
+    log.debug("Prisoner Audit queue name {} {} {}", prisonerAuditQueueUrl, auditEvent, prisonerAuditSqsClient)
+    auditSqsClient.sendMessage(
+      SendMessageRequest.builder()
+        .queueUrl(prisonerAuditQueueUrl)
+        .messageBody(objectMapper.writeValueAsString(auditEvent))
+        .build(),
+    )
+  }
 }
 
 fun MutableMap<String, String>.addIfNotNull(key: String, value: String?) {
