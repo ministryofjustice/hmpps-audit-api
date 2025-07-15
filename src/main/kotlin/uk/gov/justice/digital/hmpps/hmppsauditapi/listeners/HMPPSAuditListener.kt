@@ -46,7 +46,7 @@ class HMPPSAuditListener(
       details = auditEvent.details?.jsonString(),
     )
 
-    auditService.saveAuditEvent(cleansedAuditEvent)
+//    auditService.saveAuditEvent(cleansedAuditEvent)
   }
 
   private fun patchSubjectTypeIfMissing(message: String): String = try {
