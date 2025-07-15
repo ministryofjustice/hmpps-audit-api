@@ -43,10 +43,9 @@ jobs:
       postgres-db: audit_db
       postgres-username: admin
       postgres-password: admin_password
-      gradle-command: ./gradlew test --tests DummyTest
   build:
     name: Build docker image from hmpps-github-actions
-    if: github.ref == 'refs/heads/HAAR-3972'
+    if: github.ref == 'refs/heads/main'
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/docker_build.yml@v2 # WORKFLOW_VERSION
     needs:
       - gradle-verify
@@ -58,7 +57,7 @@ jobs:
       docker_multiplatform: false
   deploy_dev:
     name: Deploy to the dev environment
-    if: github.ref == 'refs/heads/HAAR-3972'
+    if: github.ref == 'refs/heads/main'
     needs:
       - build
       - helm_lint

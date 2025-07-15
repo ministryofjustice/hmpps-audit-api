@@ -16,6 +16,5 @@
       "service": "auth-service",
       "details": "some details"
     }
-  ],
-  "executionTimeInMillis": 100
+  ]
 }
