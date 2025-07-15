@@ -82,6 +82,19 @@ jobs:
         id: get_token
         shell: bash
         run: |
+          # Remove this when done debugging-----------------------------------------------------------------------------
+          echo "Step 1: Set client ID and secret"
+          client_id="$OAUTH_CLIENT_ID"
+          client_secret="$OAUTH_CLIENT_SECRET"
+          echo "Client ID: $client_id"
+          echo "Client secret length: ${#client_secret}" 
+          
+          echo ""
+          echo "Step 2: Base64 encode credentials"
+          credentials=$(echo -n "$client_id:$client_secret" | base64 | tr -d '\n')
+          echo "Encoded credentials: $credentials"
+          # ------------------------------------------------------------------------------------------------------------
+          
           BASIC_AUTH=$(echo -n "$OAUTH_CLIENT_ID:$OAUTH_CLIENT_SECRET" | base64 | tr -d '\n')
           echo "Token URL: $OAUTH_TOKEN_URL?grant_type=client_credentials"
           echo "Auth header: Basic $BASIC_AUTH"
