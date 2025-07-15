@@ -35,7 +35,6 @@ jobs:
   gradle-verify:
     name: Run the tests
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/gradle_localstack_postgres_verify.yml@v2 # WORKFLOW_VERSION
-    gradle-command: ./gradlew test --tests DummyTest
     secrets: inherit
     with:
       localstack-services: s3,sqs
@@ -44,6 +43,7 @@ jobs:
       postgres-db: audit_db
       postgres-username: admin
       postgres-password: admin_password
+      gradle-command: ./gradlew test --tests DummyTest
   build:
     name: Build docker image from hmpps-github-actions
     if: github.ref == 'refs/heads/HAAR-3972'
