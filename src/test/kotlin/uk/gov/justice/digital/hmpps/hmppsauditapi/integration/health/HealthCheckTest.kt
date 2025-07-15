@@ -35,6 +35,20 @@ class HealthCheckTest : IntegrationTest() {
   }
 
   @Test
+  fun `Queue health reports prisoner audit queue details`() {
+    webTestClient.get().uri("/health")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody()
+      .jsonPath("components.prisonerauditqueue-health.details.queueName").isEqualTo(prisonerAuditQueueConfig.queueName)
+      .jsonPath("components.prisonerauditqueue-health.details.messagesOnQueue").isEqualTo(0)
+      .jsonPath("components.prisonerauditqueue-health.details.messagesInFlight").isEqualTo(0)
+      .jsonPath("components.prisonerauditqueue-health.details.messagesOnDlq").isEqualTo(0)
+      .jsonPath("components.prisonerauditqueue-health.details.dlqStatus").isEqualTo("UP")
+      .jsonPath("components.prisonerauditqueue-health.details.dlqName").isEqualTo(prisonerAuditQueueConfig.dlqName!!)
+  }
+
+  @Test
   fun `Queue health reports new user queue details`() {
     webTestClient.get().uri("/health")
       .exchange()

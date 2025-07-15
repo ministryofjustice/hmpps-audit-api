@@ -37,6 +37,18 @@ class HMPPSAuditListener(
     auditService.saveAuditEvent(cleansedAuditEvent)
   }
 
+  @SqsListener("prisonerauditqueue", factory = "hmppsQueueContainerFactoryProxy")
+  fun onPrisonerAuditEvent(message: String) {
+    val patchedJson = patchSubjectTypeIfMissing(message)
+    val auditEvent: AuditEvent = objectMapper.readValue(patchedJson, AuditEvent::class.java)
+
+    val cleansedAuditEvent = auditEvent.copy(
+      details = auditEvent.details?.jsonString(),
+    )
+
+    auditService.saveAuditEvent(cleansedAuditEvent)
+  }
+
   private fun patchSubjectTypeIfMissing(message: String): String = try {
     val tree = jacksonObjectMapper().readTree(message)
     if (!tree.has("subjectType") || tree.get("subjectType").isNull) {

@@ -31,7 +31,15 @@ abstract class QueueListenerIntegrationTest : IntegrationTest() {
   internal val auditSqsDlqClient by lazy { auditQueue.sqsDlqClient as SqsAsyncClient }
   internal val auditDlqUrl by lazy { auditQueue.dlqUrl as String }
 
+  internal val prisonerAuditQueue by lazy { hmppsQueueService.findByQueueId("prisonerauditqueue") as HmppsQueue }
+  internal val prisonerAuditQueueSqsClient by lazy { prisonerAuditQueue.sqsClient }
+  internal val prisonerAuditQueueUrl by lazy { prisonerAuditQueue.queueUrl }
+  internal val prisonerAuditSqsDlqClient by lazy { prisonerAuditQueue.sqsDlqClient as SqsAsyncClient }
+  internal val prisonerAuditDlqUrl by lazy { prisonerAuditQueue.dlqUrl as String }
+
   fun getNumberOfMessagesCurrentlyOnQueue(): Int = auditQueueSqsClient.countAllMessagesOnQueue(auditQueueUrl).get()
+  fun getNumberOfMessagesCurrentlyOnPrisonerAuditQueue(): Int = prisonerAuditQueueSqsClient.countAllMessagesOnQueue(prisonerAuditQueueUrl).get()
 
   fun getNumberOfMessagesCurrentlyOnDlq(): Int = auditSqsDlqClient.countAllMessagesOnQueue(auditDlqUrl).get()
+  fun getNumberOfMessagesCurrentlyOnPrisonerAuditDlq(): Int = prisonerAuditSqsDlqClient.countAllMessagesOnQueue(prisonerAuditDlqUrl).get()
 }

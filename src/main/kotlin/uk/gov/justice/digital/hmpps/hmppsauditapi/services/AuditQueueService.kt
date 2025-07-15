@@ -24,6 +24,12 @@ class AuditQueueService(
   private val auditQueueUrl by lazy { auditQueue.queueUrl }
   private val auditSqsClient by lazy { auditQueue.sqsClient }
 
+  private val prisonerAuditQueue by lazy {
+    hmppsQueueService.findByQueueId("prisonerauditqueue") ?: throw RuntimeException("Queue with name audit doesn't exist")
+  }
+  private val prisonerAuditQueueUrl by lazy { prisonerAuditQueue.queueUrl }
+  private val prisonerAuditSqsClient by lazy { prisonerAuditQueue.sqsClient }
+
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }

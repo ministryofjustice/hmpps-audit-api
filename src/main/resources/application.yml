@@ -87,6 +87,7 @@ aws:
     outputLocation: ${HMPPS_ATHENA_OUTPUT_LOCATION}
   s3:
     auditBucketName: ${HMPPS_S3_AUDIT_BUCKET_NAME}
+#    prisonerAuditBucketName: ${HMPPS_S3_PRISONER_AUDIT_BUCKET_NAME}
 
 cloud:
   aws:
@@ -102,10 +103,13 @@ hmpps:
     queues:
       auditqueue:
         asyncQueueClient: true
+      prisonerauditqueue:
+        asyncQueueClient: true
       auditusersqueue:
         asyncQueueClient: true
   repository:
     saveToS3Bucket: ${SAVE_TO_S3_BUCKET}
+    saveToPrisonerS3Bucket: ${SAVE_TO_PRISONER_S3_BUCKET}
   audit:
     queriesStartDate: 2024-01-01
 
