@@ -13,7 +13,7 @@ import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 
-@TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=false"])
+@TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=true"])
 class RetryPrisonerAuditDlqTest : QueueListenerIntegrationTest() {
 
   @Nested
@@ -85,7 +85,7 @@ class RetryPrisonerAuditDlqTest : QueueListenerIntegrationTest() {
       await untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditDlq() } matches { it == 0 }
       await untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditQueue() } matches { it == 0 }
 
-      verify(auditRepository).save(any<AuditEvent>())
+      verify(auditS3Client).save(any<AuditEvent>(), any())
     }
   }
 
@@ -119,7 +119,7 @@ class RetryPrisonerAuditDlqTest : QueueListenerIntegrationTest() {
       await untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditDlq() } matches { it == 0 }
       await untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditQueue() } matches { it == 0 }
 
-      verify(auditRepository).save(any<AuditEvent>())
+      verify(auditS3Client).save(any<AuditEvent>(), any())
     }
   }
 }

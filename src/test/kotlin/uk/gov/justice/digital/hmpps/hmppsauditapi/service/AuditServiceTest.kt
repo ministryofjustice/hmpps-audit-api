@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditFilterDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditAthenaClient
@@ -351,7 +352,17 @@ class AuditServiceTest {
         ),
       )
 
-      verify(auditRepository).findPage(pageDetails, startDate, endDate, "offender-service", "fedea6d876c62e2f5264c94c7b50873w", "PERSON", "3rdea6d876c62e2f5264c94c7b508548", "Another Event", "Hola T")
+      verify(auditRepository).findPage(
+        pageDetails,
+        startDate,
+        endDate,
+        "offender-service",
+        "fedea6d876c62e2f5264c94c7b50873w",
+        "PERSON",
+        "3rdea6d876c62e2f5264c94c7b508548",
+        "Another Event",
+        "Hola T",
+      )
     }
   }
 
@@ -377,6 +388,8 @@ class AuditServiceTest {
 
       auditService.saveAuditEvent(
         auditEvent,
+        "bucket",
+        AuditEventType.STAFF,
       )
 
       verify(auditRepository).save(auditEvent)
@@ -388,6 +401,51 @@ class AuditServiceTest {
 
       auditService.saveAuditEvent(
         auditEvent,
+        "bucket",
+        AuditEventType.STAFF,
+      )
+
+      then(auditRepository).shouldHaveNoInteractions()
+    }
+  }
+
+  @Nested
+  inner class SaveAuditEventPrisoner {
+
+    val auditEvent = AuditEvent(
+      UUID.fromString("03a1624a-54e7-453e-8c79-816dbe02fd3c"),
+      "homepage views",
+      Instant.parse("2020-12-31T08:11:30Z"),
+      "dadea6d876c62e2f5264c94c7b50875e",
+      "fedea6d876c62e2f5264c94c7b50873w",
+      "PERSON",
+      "3rdea6d876c62e2f5264c94c7b508548",
+      "freddy.frog",
+      "hmpps-launchpad",
+      "{\"offenderId\": \"98\"}",
+    )
+
+    @Test
+    fun `save audit event to database when saveToS3Bucket is false`() {
+      auditService = AuditService(telemetryClient, auditRepository, auditS3Client, auditAthenaClient, false)
+
+      auditService.saveAuditEvent(
+        auditEvent,
+        "bucket",
+        AuditEventType.STAFF,
+      )
+
+      verify(auditRepository).save(auditEvent)
+    }
+
+    @Test
+    fun `save audit event to S3 bucket when saveToS3Bucket is true`() {
+      auditService = AuditService(telemetryClient, auditRepository, auditS3Client, auditAthenaClient, true)
+
+      auditService.saveAuditEvent(
+        auditEvent,
+        "bucket",
+        AuditEventType.STAFF,
       )
 
       then(auditRepository).shouldHaveNoInteractions()

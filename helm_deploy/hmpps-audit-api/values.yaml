@@ -68,16 +68,16 @@ generic-service:
       HMPPS_SQS_QUEUES_PRISONERAUDITQUEUE_QUEUE_NAME: "sqs_queue_name"
     sqs-prisoner-audit-queue-dl-secret:
       HMPPS_SQS_QUEUES_PRISONERAUDITQUEUE_DLQ_NAME: "sqs_queue_name"
-#    hmpps_prisoner_audit_s3:
-#      HMPPS_S3_PRISONER_AUDIT_BUCKET_NAME: "bucket_name"
-#    prisoner-audit-glue-database-name:
-#      HMPPS_PRISONER_AUDIT_GLUE_DATABASE_NAME: "database_name"
-#    prisoner-audit-glue-catalog-table-name:
-#      HMPPS_PRISONER_AUDIT_GLUE_TABLE_NAME: "table_name"
-#    prisoner-audit-athena-workgroup-secret:
-#      HMPPS_PRISONER_AUDIT_ATHENA_WORKGROUP_NAME: "workgroup_name"
-#    prisoner-audit-athena-output-location-secret:
-#      HMPPS_PRISONER_AUDIT_ATHENA_OUTPUT_LOCATION: "output_location"
+    hmpps_prisoner_audit_s3:
+      HMPPS_S3_PRISONER_AUDIT_BUCKET_NAME: "bucket_name"
+    prisoner-audit-glue-database-name:
+      HMPPS_PRISONER_AUDIT_GLUE_DATABASE_NAME: "database_name"
+    prisoner-audit-glue-catalog-table-name:
+      HMPPS_PRISONER_AUDIT_GLUE_TABLE_NAME: "table_name"
+    prisoner-audit-athena-workgroup-secret:
+      HMPPS_PRISONER_AUDIT_ATHENA_WORKGROUP_NAME: "workgroup_name"
+    prisoner-audit-athena-output-location-secret:
+      HMPPS_PRISONER_AUDIT_ATHENA_OUTPUT_LOCATION: "output_location"
 
 
   allowlist:

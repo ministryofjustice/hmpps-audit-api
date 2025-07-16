@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditFilterDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryResponse
@@ -29,14 +30,14 @@ class AuditService(
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 
-  fun saveAuditEvent(auditEvent: AuditEvent) {
-    if (saveToS3Bucket) {
+  fun saveAuditEvent(auditEvent: AuditEvent, bucketName: String, eventType: AuditEventType) {
+    if (saveToS3Bucket || eventType == AuditEventType.PRISONER) {
       auditEvent.id = UUID.randomUUID()
-      auditS3Client.save(auditEvent)
+      auditS3Client.save(auditEvent, bucketName)
     } else {
       auditRepository.save(auditEvent)
     }
-    telemetryClient.trackEvent("hmpps-audit", auditEvent.asMap())
+    telemetryClient.trackEvent(eventType.description, auditEvent.asMap())
   }
 
   fun findAll(): List<AuditDto> = auditRepository.findAll(Sort.by(DESC, "when")).map { AuditDto(it) }
