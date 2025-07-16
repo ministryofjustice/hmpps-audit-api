@@ -74,9 +74,9 @@ generic-service:
       HMPPS_PRISONER_AUDIT_GLUE_DATABASE_NAME: "database_name"
     prisoner-audit-glue-catalog-table-name:
       HMPPS_PRISONER_AUDIT_GLUE_TABLE_NAME: "table_name"
-    prisoner-audit-athena-workgroup-secret:
+    prisoner-athena-workgroup-secret:
       HMPPS_PRISONER_AUDIT_ATHENA_WORKGROUP_NAME: "workgroup_name"
-    prisoner-audit-athena-output-location-secret:
+    prisoner-athena-output-location-secret:
       HMPPS_PRISONER_AUDIT_ATHENA_OUTPUT_LOCATION: "output_location"
 
 
