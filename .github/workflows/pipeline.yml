@@ -45,7 +45,7 @@ jobs:
       postgres-password: admin_password
   build:
     name: Build docker image from hmpps-github-actions
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/cleanup'
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/docker_build.yml@v2 # WORKFLOW_VERSION
     needs:
       - gradle-verify
@@ -57,7 +57,7 @@ jobs:
       docker_multiplatform: false
   deploy_dev:
     name: Deploy to the dev environment
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/cleanup'
     needs:
       - build
       - helm_lint
