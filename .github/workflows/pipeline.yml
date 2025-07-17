@@ -101,7 +101,7 @@ jobs:
 
       - name: Call audit API endpoint
         run: |
-          RESPONSE=$(curl --fail -s -w "%{http_code}" -o response.json -X POST https://audit-api-dev.hmpps.service.justice.gov.uk/internal/test/audit-end-to-end-test \
+          RESPONSE=$(curl --fail --verbose -s -w "%{http_code}" -o response.json -X POST https://audit-api-dev.hmpps.service.justice.gov.uk/internal/test/audit-end-to-end-test \
             -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}")
 
           echo "Response body:"
