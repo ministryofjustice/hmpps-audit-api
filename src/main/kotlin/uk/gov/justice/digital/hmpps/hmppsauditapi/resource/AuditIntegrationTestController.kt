@@ -43,7 +43,7 @@ class AuditIntegrationTestController(
     auditQueueService.sendAuditEvent(testEvent)
 
     // Step 2: Wait for ingestion + Athena readiness
-    Thread.sleep(8000)
+    Thread.sleep(10000)
 
     // Step 3: Update partitions
     athenaPartitionRepairService.repairPartitions()
