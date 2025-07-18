@@ -67,6 +67,6 @@ class PrisonerDigitalServicesResource(
   @PreAuthorize("hasRole('ROLE_PRISONER_AUDIT')")
   @PostMapping("/prisoner/repair-partitions")
   fun repairPrisonerPartitions() {
-    athenaPartitionRepairService.repairPartitions()
+    athenaPartitionRepairService.repairPartitions(AuditEventType.PRISONER)
   }
 }

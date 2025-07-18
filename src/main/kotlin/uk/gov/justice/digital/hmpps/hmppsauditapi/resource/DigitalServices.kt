@@ -67,6 +67,6 @@ class DigitalServices(
   @PreAuthorize("hasRole('ROLE_AUDIT')")
   @PostMapping("/query/repair-partitions")
   fun repairPartitions() {
-    athenaPartitionRepairService.repairPartitions()
+    athenaPartitionRepairService.repairPartitions(AuditEventType.STAFF)
   }
 }

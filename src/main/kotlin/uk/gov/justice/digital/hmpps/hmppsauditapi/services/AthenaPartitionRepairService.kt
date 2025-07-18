@@ -1,45 +1,35 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import software.amazon.awssdk.services.athena.AthenaClient
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 
 @Component
 class AthenaPartitionRepairService(
   private val athenaClient: AthenaClient,
-  @Value("\${aws.athena.database}") private val databaseName: String,
-  @Value("\${aws.athena.table}") private val tableName: String,
-  @Value("\${aws.athena.workgroup}") private val workGroupName: String,
-  @Value("\${aws.athena.outputLocation}") private val outputLocation: String,
-  @Value("\${aws.athena.prisonerDatabase}") private val prisonerDatabaseName: String,
-  @Value("\${aws.athena.prisonerTable}") private val prisonerTableName: String,
-  @Value("\${aws.athena.prisonerWorkgroup}") private val prisonerWorkGroupName: String,
-  @Value("\${aws.athena.prisonerOutputLocation}") private val prisonerOutputLocation: String,
+  private val athenaPropertiesFactory: AthenaPropertiesFactory,
 ) {
 
-  @Scheduled(cron = "0 0 * * * *")
-  fun repairPartitions() {
+  fun repairPartitions(auditEventType: AuditEventType) {
+    val athenaProperties = athenaPropertiesFactory.getProperties(auditEventType)
+    val databaseName = athenaProperties.databaseName
+    val tableName = athenaProperties.tableName
     val repairQuery = "MSCK REPAIR TABLE $databaseName.$tableName;"
     val request = StartQueryExecutionRequest.builder()
       .queryString(repairQuery)
       .queryExecutionContext { it.database(databaseName) }
-      .workGroup(workGroupName)
-      .resultConfiguration { it.outputLocation(outputLocation) }
+      .workGroup(athenaProperties.workGroupName)
+      .resultConfiguration { it.outputLocation(athenaProperties.outputLocation) }
       .build()
     athenaClient.startQueryExecution(request)
   }
 
   @Scheduled(cron = "0 0 * * * *")
-  fun repairPrisonerPartitions() {
-    val repairQuery = "MSCK REPAIR TABLE $prisonerDatabaseName.$prisonerTableName;"
-    val request = StartQueryExecutionRequest.builder()
-      .queryString(repairQuery)
-      .queryExecutionContext { it.database(prisonerDatabaseName) }
-      .workGroup(prisonerWorkGroupName)
-      .resultConfiguration { it.outputLocation(prisonerOutputLocation) }
-      .build()
-    athenaClient.startQueryExecution(request)
-  }
+  fun triggerRepairPartitions() = repairPartitions(AuditEventType.STAFF)
+
+  @Scheduled(cron = "0 15 * * * *")
+  fun triggerPrisonerRepairPartitions() = repairPartitions(AuditEventType.PRISONER)
 }

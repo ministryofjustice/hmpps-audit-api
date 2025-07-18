@@ -7,17 +7,24 @@ import org.mockito.BDDMockito.given
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.whenever
 import software.amazon.awssdk.services.athena.AthenaClient
 import software.amazon.awssdk.services.athena.model.QueryExecutionContext
 import software.amazon.awssdk.services.athena.model.ResultConfiguration
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionResponse
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 
 @ExtendWith(MockitoExtension::class)
 class AthenaPartitionRepairServiceTest {
 
   @Mock
   private lateinit var athenaClient: AthenaClient
+
+  @Mock
+  private lateinit var athenaPropertiesFactory: AthenaPropertiesFactory
 
   private val databaseName = "databaseName"
   private val tableName = "tableName"
@@ -48,14 +55,7 @@ class AthenaPartitionRepairServiceTest {
   fun setup() {
     service = AthenaPartitionRepairService(
       athenaClient,
-      databaseName,
-      tableName,
-      workGroupName,
-      outputLocation,
-      prisonerDatabaseName,
-      prisonerTableName,
-      prisonerWorkGroupName,
-      prisonerOutputLocation,
+      athenaPropertiesFactory,
     )
   }
 
@@ -69,7 +69,15 @@ class AthenaPartitionRepairServiceTest {
     )
 
     // When
-    service.repairPartitions()
+    whenever(athenaPropertiesFactory.getProperties(AuditEventType.STAFF)).thenReturn(
+      AthenaProperties(
+        databaseName = "databaseName",
+        tableName = "tableName",
+        workGroupName = "workGroupName",
+        outputLocation = "outputLocation",
+      ),
+    )
+    service.repairPartitions(AuditEventType.STAFF)
 
     // Then
     verify(athenaClient).startQueryExecution(startQueryExecutionRequest)
@@ -85,7 +93,15 @@ class AthenaPartitionRepairServiceTest {
     )
 
     // When
-    service.repairPrisonerPartitions()
+    whenever(athenaPropertiesFactory.getProperties(AuditEventType.PRISONER)).thenReturn(
+      AthenaProperties(
+        databaseName = "prisonerDatabaseName",
+        tableName = "prisonerTableName",
+        workGroupName = "prisonerWorkGroupName",
+        outputLocation = "prisonerOutputLocation",
+      ),
+    )
+    service.repairPartitions(AuditEventType.PRISONER)
 
     // Then
     verify(athenaClient).startQueryExecution(startQueryExecutionRequest)
