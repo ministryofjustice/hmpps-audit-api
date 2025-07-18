@@ -31,7 +31,7 @@ class PrisonerAuditIntegrationTestController(
     val actualResult: AthenaQueryResponse?,
   )
 
-  @PostMapping("/Prisoner/audit-end-to-end-test")
+  @PostMapping("/prisoner/audit-end-to-end-test")
   fun runAuditIntegrationTest(): ResponseEntity<IntegrationTestResult> {
     val testEvent = createTestAuditEvent()
 
