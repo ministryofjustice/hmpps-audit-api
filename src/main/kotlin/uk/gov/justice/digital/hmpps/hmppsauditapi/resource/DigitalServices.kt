@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.swagger.StandardApiResponses
+import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AthenaPartitionRepairService
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
 import java.util.UUID
@@ -23,6 +24,7 @@ import java.util.UUID
 class DigitalServices(
   private val auditService: AuditService,
   private val auditQueueService: AuditQueueService,
+  private val athenaPartitionRepairService: AthenaPartitionRepairService,
 ) {
 
   @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_read')")
@@ -59,5 +61,10 @@ class DigitalServices(
       queryExecutionId,
     )
     return auditService.getQueryResults(queryExecutionId.toString())
+  }
+
+  @PostMapping("/repair-partitions")
+  fun repairPartitions() {
+    athenaPartitionRepairService.repairPartitions()
   }
 }

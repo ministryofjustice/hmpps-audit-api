@@ -30,11 +30,6 @@ class AuditIntegrationTestController(
     val actualResult: DigitalServicesQueryResponse?,
   )
 
-  @PostMapping("/repair-partitions")
-  fun repairPartitions() {
-    athenaPartitionRepairService.repairPartitions()
-  }
-
   @PostMapping("/audit-end-to-end-test")
   fun runAuditIntegrationTest(): ResponseEntity<IntegrationTestResult> {
     val testEvent = createTestAuditEvent()
