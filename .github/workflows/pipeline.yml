@@ -84,7 +84,7 @@ jobs:
         run: |
           BASIC_AUTH=$(echo -n "$OAUTH_CLIENT_ID:$OAUTH_CLIENT_SECRET" | base64 | tr -d '\n')
 
-          RESPONSE=$(curl --fail -s -X POST "$OAUTH_TOKEN_URL?grant_type=client_credentials" \
+          RESPONSE=$(curl --fail --verbose -s -X POST "$OAUTH_TOKEN_URL?grant_type=client_credentials" \
             -H "Content-Type: application/json" \
             -H "Authorization: Basic $BASIC_AUTH")
 
@@ -101,7 +101,7 @@ jobs:
 
       - name: Call audit API endpoint
         run: |
-          RESPONSE=$(curl --fail -s -w "%{http_code}" -o response.json -X POST https://audit-api-dev.hmpps.service.justice.gov.uk/internal/test/audit-end-to-end-test \
+          RESPONSE=$(curl --fail --verbose -s -w "%{http_code}" -o response.json -X POST https://audit-api-dev.hmpps.service.justice.gov.uk/internal/test/audit-end-to-end-test \
             -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}")
 
           echo "Response body:"

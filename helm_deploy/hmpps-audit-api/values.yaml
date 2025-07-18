@@ -31,6 +31,7 @@ generic-service:
     SPRING_PROFILES_ACTIVE: "logstash"
     HMPPS_SQS_USE_WEB_TOKEN: true
     SAVE_TO_S3_BUCKET: false
+    EXPOSE_INTEGRATION_TEST_ENDPOINT: false
 
   # Pre-existing kubernetes secrets to load as environment variables in the deployment.
   # namespace_secrets:

@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -16,6 +17,7 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/internal/test")
+@ConditionalOnProperty(name = ["expose.integration.test.endpoint"], havingValue = "true", matchIfMissing = false)
 class AuditIntegrationTestController(
   private val auditQueueService: AuditQueueService,
   private val athenaPartitionRepairService: AthenaPartitionRepairService,
@@ -28,11 +30,6 @@ class AuditIntegrationTestController(
     val actualResult: DigitalServicesQueryResponse?,
   )
 
-  @PostMapping("/repair-partitions")
-  fun repairPartitions() {
-    athenaPartitionRepairService.repairPartitions()
-  }
-
   @PostMapping("/audit-end-to-end-test")
   fun runAuditIntegrationTest(): ResponseEntity<IntegrationTestResult> {
     val testEvent = createTestAuditEvent()
@@ -41,7 +38,7 @@ class AuditIntegrationTestController(
     auditQueueService.sendAuditEvent(testEvent)
 
     // Step 2: Wait for ingestion + Athena readiness
-    Thread.sleep(8000)
+    Thread.sleep(10000)
 
     // Step 3: Update partitions
     athenaPartitionRepairService.repairPartitions()
