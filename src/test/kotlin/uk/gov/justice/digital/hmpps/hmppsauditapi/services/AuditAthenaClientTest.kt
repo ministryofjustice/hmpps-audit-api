@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.BDDMockito.given
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.whenever
 import org.springframework.security.authentication.TestingAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
@@ -33,8 +34,11 @@ import software.amazon.awssdk.services.athena.model.ResultSetMetadata
 import software.amazon.awssdk.services.athena.model.Row
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionResponse
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AthenaQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
-import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import java.time.Clock
 import java.time.Instant
@@ -67,6 +71,9 @@ class AuditAthenaClientTest {
   private lateinit var athenaClient: AthenaClient
 
   @Mock
+  private lateinit var athenaPropertiesFactory: AthenaPropertiesFactory
+
+  @Mock
   private lateinit var clock: Clock
 
   @BeforeEach
@@ -75,11 +82,8 @@ class AuditAthenaClientTest {
 
     auditAthenaClient = AuditAthenaClient(
       athenaClient,
+      athenaPropertiesFactory,
       clock,
-      databaseName,
-      tableName,
-      workGroupName,
-      outputLocation,
       MOCK_START_DATE,
     )
   }
@@ -94,22 +98,40 @@ class AuditAthenaClientTest {
   @TestInstance(TestInstance.Lifecycle.PER_CLASS)
   @Nested
   inner class TriggerQuery {
-    private val startQueryExecutionRequestBuilder: StartQueryExecutionRequest.Builder = StartQueryExecutionRequest.builder()
-      .queryExecutionContext(QueryExecutionContext.builder().database(databaseName).build())
-      .resultConfiguration(ResultConfiguration.builder().outputLocation(outputLocation).build())
-      .workGroup(workGroupName)
+    private val startQueryExecutionRequestBuilder: StartQueryExecutionRequest.Builder =
+      StartQueryExecutionRequest.builder()
+        .queryExecutionContext(QueryExecutionContext.builder().database(databaseName).build())
+        .resultConfiguration(ResultConfiguration.builder().outputLocation(outputLocation).build())
+        .workGroup(workGroupName)
 
     @ParameterizedTest
     @MethodSource("triggerQueryParameters")
-    fun triggerQuery(digitalServicesQueryRequest: DigitalServicesQueryRequest, roles: List<String>, expectedQuery: String, expectedServices: List<String>) {
+    fun triggerQuery(
+      digitalServicesQueryRequest: DigitalServicesQueryRequest,
+      roles: List<String>,
+      expectedQuery: String,
+      expectedServices: List<String>,
+    ) {
       // Given
-      SecurityContextHolder.getContext().authentication = TestingAuthenticationToken("user", "credentials", roles.map { SimpleGrantedAuthority(it) })
+      SecurityContextHolder.getContext().authentication =
+        TestingAuthenticationToken("user", "credentials", roles.map { SimpleGrantedAuthority(it) })
 
       given(athenaClient.startQueryExecution(startQueryExecutionRequestBuilder.queryString(expectedQuery).build()))
         .willReturn(StartQueryExecutionResponse.builder().queryExecutionId(queryExecutionId).build())
 
       // When
-      val response: DigitalServicesQueryResponse = auditAthenaClient.triggerQuery(digitalServicesQueryRequest)
+      whenever(athenaPropertiesFactory.getProperties(AuditEventType.STAFF)).thenReturn(
+        AthenaProperties(
+          databaseName = "databaseName",
+          tableName = "tableName",
+          workGroupName = "workGroupName",
+          outputLocation = "outputLocation",
+        ),
+      )
+      val response: AthenaQueryResponse = auditAthenaClient.triggerQuery(
+        digitalServicesQueryRequest,
+        AuditEventType.STAFF,
+      )
 
       // Then
       assertThat(response.queryExecutionId).isEqualTo(UUID.fromString(queryExecutionId))
@@ -276,8 +298,10 @@ class AuditAthenaClientTest {
           ).build(),
         ),
       ).build()
-    private val getQueryExecutionRequest: GetQueryExecutionRequest = GetQueryExecutionRequest.builder().queryExecutionId(queryExecutionId).build()
-    private val getQueryResultsRequest: GetQueryResultsRequest = GetQueryResultsRequest.builder().queryExecutionId(queryExecutionId).build()
+    private val getQueryExecutionRequest: GetQueryExecutionRequest =
+      GetQueryExecutionRequest.builder().queryExecutionId(queryExecutionId).build()
+    private val getQueryResultsRequest: GetQueryResultsRequest =
+      GetQueryResultsRequest.builder().queryExecutionId(queryExecutionId).build()
     private val getQueryResultsResponse = GetQueryResultsResponse.builder().resultSet(resultSet).build()
 
     @Test
@@ -295,7 +319,7 @@ class AuditAthenaClientTest {
 
       // Then
       assertThat(digitalServicesAuditQueryResponse).isEqualTo(
-        DigitalServicesQueryResponse(
+        AthenaQueryResponse(
           queryExecutionId = UUID.fromString(queryExecutionId),
           queryState = QueryExecutionState.SUCCEEDED,
           results = listOf(expectedAuditDto),
