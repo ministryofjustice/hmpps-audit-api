@@ -22,39 +22,39 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/audit", produces = [MediaType.APPLICATION_JSON_VALUE])
-class DigitalServices(
+class PrisonerDigitalServicesResource(
   private val auditService: AuditService,
   private val auditQueueService: AuditQueueService,
   private val athenaPartitionRepairService: AthenaPartitionRepairService,
 ) {
 
-  @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_read')")
+  @PreAuthorize("hasRole('ROLE_PRISONER_AUDIT') and hasAuthority('SCOPE_read')")
   @Operation(
-    summary = "Trigger query to get audit events for staff member",
-    description = "Trigger query to get audit events given who, or subject ID and subject type, role required is ROLE_AUDIT",
-    security = [SecurityRequirement(name = "ROLE_AUDIT")],
+    summary = "Trigger query to get audit events for prisoner",
+    description = "Trigger query to get audit events given who, or subject ID and subject type, role required is ROLE_PRISONER_AUDIT",
+    security = [SecurityRequirement(name = "ROLE_PRISONER_AUDIT")],
   )
   @StandardApiResponses
-  @PostMapping("/query")
-  fun startQuery(
+  @PostMapping("/prisoner/query")
+  fun startPrisonerQuery(
     @RequestBody @Valid auditFilterDto: DigitalServicesQueryRequest,
   ): AthenaQueryResponse {
     auditQueueService.sendAuditAuditEvent(
       AuditType.AUDIT_GET_BY_USER.name,
       auditFilterDto,
     )
-    return auditService.triggerQuery(auditFilterDto, AuditEventType.STAFF)
+    return auditService.triggerQuery(auditFilterDto, AuditEventType.PRISONER)
   }
 
-  @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_read')")
+  @PreAuthorize("hasRole('ROLE_PRISONER_AUDIT') and hasAuthority('SCOPE_read')")
   @Operation(
-    summary = "Get audit events for staff member",
-    description = "Get audit events given who, or subject ID and subject type, role required is ROLE_AUDIT",
-    security = [SecurityRequirement(name = "ROLE_AUDIT")],
+    summary = "Get audit events for prisoner",
+    description = "Get audit events given who, or subject ID and subject type, role required is ROLE_PRISONER_AUDIT",
+    security = [SecurityRequirement(name = "ROLE_PRISONER_AUDIT")],
   )
   @StandardApiResponses
-  @GetMapping("/query/{queryExecutionId}")
-  fun getQueryResults(
+  @GetMapping("/prisoner/query/{queryExecutionId}")
+  fun getPrisonerQueryResults(
     @PathVariable queryExecutionId: UUID,
   ): AthenaQueryResponse {
     auditQueueService.sendAuditAuditEvent(
@@ -64,9 +64,9 @@ class DigitalServices(
     return auditService.getQueryResults(queryExecutionId.toString())
   }
 
-  @PreAuthorize("hasRole('ROLE_AUDIT')")
-  @PostMapping("/query/repair-partitions")
-  fun repairPartitions() {
+  @PreAuthorize("hasRole('ROLE_PRISONER_AUDIT')")
+  @PostMapping("/prisoner/repair-partitions")
+  fun repairPrisonerPartitions() {
     athenaPartitionRepairService.repairPartitions()
   }
 }

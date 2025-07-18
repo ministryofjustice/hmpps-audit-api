@@ -19,7 +19,7 @@ import java.util.UUID
 @RestController
 @RequestMapping("/internal/test")
 @ConditionalOnProperty(name = ["expose.integration.test.endpoint"], havingValue = "true", matchIfMissing = false)
-class AuditIntegrationTestController(
+class PrisonerAuditIntegrationTestController(
   private val auditQueueService: AuditQueueService,
   private val athenaPartitionRepairService: AthenaPartitionRepairService,
   private val auditService: AuditService,
@@ -31,18 +31,18 @@ class AuditIntegrationTestController(
     val actualResult: AthenaQueryResponse?,
   )
 
-  @PostMapping("/audit-end-to-end-test")
+  @PostMapping("/Prisoner/audit-end-to-end-test")
   fun runAuditIntegrationTest(): ResponseEntity<IntegrationTestResult> {
     val testEvent = createTestAuditEvent()
 
     // Step 1: Send event to SQS
-    auditQueueService.sendAuditEvent(testEvent)
+    auditQueueService.sendPrisonerAuditEvent(testEvent)
 
     // Step 2: Wait for ingestion + Athena readiness
     Thread.sleep(10000)
 
     // Step 3: Update partitions
-    athenaPartitionRepairService.repairPartitions()
+    athenaPartitionRepairService.repairPrisonerPartitions()
     Thread.sleep(10000)
 
     // Step 4: Trigger query
@@ -50,7 +50,7 @@ class AuditIntegrationTestController(
       who = testEvent.who,
       startDate = LocalDate.now(),
     )
-    val queryResponse = auditService.triggerQuery(queryRequest, AuditEventType.STAFF)
+    val queryResponse = auditService.triggerQuery(queryRequest, AuditEventType.PRISONER)
 
     // Step 5: Poll Athena until query succeeds or times out
     val queryId = queryResponse.queryExecutionId.toString()
@@ -76,7 +76,7 @@ class AuditIntegrationTestController(
   }
 
   private fun createTestAuditEvent(): HMPPSAuditListener.AuditEvent = HMPPSAuditListener.AuditEvent(
-    what = "INTEGRATION_TEST",
+    what = "PRISONER_INTEGRATION_TEST",
     `when` = Instant.now(),
     operationId = UUID.randomUUID().toString(),
     subjectId = "some subject ID",
