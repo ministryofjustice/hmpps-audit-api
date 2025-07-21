@@ -73,7 +73,7 @@ jobs:
     with:
       job_name: "Run integration tests after dev deploy"
       environment: "dev"
-      env_host_url: "https://audit-api-dev.hmpps.service.justice.gov.uk"
+      env_test_url: "https://audit-api-dev.hmpps.service.justice.gov.uk/internal/test/audit-end-to-end-test"
     secrets:
       OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
       OAUTH_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
@@ -87,7 +87,7 @@ jobs:
     with:
       job_name: "Run prisoner_audit integration tests after dev deploy"
       environment: "dev"
-      env_host_url: "https://audit-api-dev.hmpps.service.justice.gov.uk"
+      env_test_url: "https://audit-api-dev.hmpps.service.justice.gov.uk/internal/test/prisoner/audit-end-to-end-test"
     secrets:
       OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
       OAUTH_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}

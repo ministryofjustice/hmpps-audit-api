@@ -3,7 +3,7 @@ name: environment_integration_test.yml
 on:
   workflow_call:
     inputs:
-      env_host_url:
+      env_test_url:
         required: true
         type: string
       job_name:
@@ -32,7 +32,7 @@ jobs:
       OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
       OAUTH_CLIENT_SECRET: ${{ secrets.OAUTH_CLIENT_SECRET }}
       OAUTH_TOKEN_URL: ${{ secrets.OAUTH_TOKEN_URL }}
-      ENV_HOST_URL: ${{ inputs.env_host_url }}
+      ENV_TEST_URL: ${{ inputs.env_test_url }}
     steps:
       - name: Get OAuth token
         id: get_token
@@ -53,7 +53,7 @@ jobs:
 
       - name: Call API endpoint
         run: |
-          RESPONSE=$(curl --fail --verbose -s -w -X "%{http_code}" -o response.json -X POST $ENV_HOST_URL/internal/test/audit-end-to-end-test \
+          RESPONSE=$(curl --fail --verbose -s -w -X "%{http_code}" -o response.json -X POST "$ENV_TEST_URL" \
             -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}")
 
           echo "Response body:"
