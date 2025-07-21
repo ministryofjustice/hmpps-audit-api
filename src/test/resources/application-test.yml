@@ -12,6 +12,10 @@ aws:
     table: "the-table"
     workgroup: "the-workgroup"
     outputLocation: "the-location"
+    prisonerDatabase: "the-prisoner-database"
+    prisonerTable: "the-prisoner-table"
+    prisonerWorkgroup: "the-prisoner-workgroup"
+    prisonerOutputLocation: "the-prisoner-location"
   s3:
     auditBucketName: "hmpps-audit-bucket"
     prisonerAuditBucketName: "hmpps-prisoner-audit-bucket"

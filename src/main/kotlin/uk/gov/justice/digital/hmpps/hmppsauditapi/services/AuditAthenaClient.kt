@@ -9,8 +9,10 @@ import software.amazon.awssdk.services.athena.model.GetQueryExecutionRequest
 import software.amazon.awssdk.services.athena.model.GetQueryResultsRequest
 import software.amazon.awssdk.services.athena.model.QueryExecutionState
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AthenaQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
-import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import java.time.Clock
 import java.time.Instant
@@ -22,15 +24,12 @@ private const val AUTHORISED_SERVICE_ROLE_PREFIX = "ROLE_QUERY_AUDIT__"
 @Service
 class AuditAthenaClient(
   private val athenaClient: AthenaClient,
+  private val athenaPropertiesFactory: AthenaPropertiesFactory,
   private val clock: Clock,
-  @Value("\${aws.athena.database}") private val databaseName: String,
-  @Value("\${aws.athena.table}") private val tableName: String,
-  @Value("\${aws.athena.workgroup}") private val workGroup: String,
-  @Value("\${aws.athena.outputLocation}") private val outputLocation: String,
   @Value("\${hmpps.audit.queriesStartDate}") private val queriesStartDate: LocalDate,
 ) {
 
-  fun triggerQuery(filter: DigitalServicesQueryRequest): DigitalServicesQueryResponse {
+  fun triggerQuery(filter: DigitalServicesQueryRequest, auditEventType: AuditEventType): AthenaQueryResponse {
     if (filter.startDate == null) {
       filter.startDate = queriesStartDate
     }
@@ -38,20 +37,20 @@ class AuditAthenaClient(
       filter.endDate = LocalDate.now(clock)
     }
     val authorisedServices = getAuthorisedServices()
-    val query = buildAthenaQuery(filter, authorisedServices)
-    val queryExecutionId = startAthenaQuery(query)
+    val query = buildAthenaQuery(filter, authorisedServices, auditEventType)
+    val queryExecutionId = startAthenaQuery(query, auditEventType)
 
-    return DigitalServicesQueryResponse(
+    return AthenaQueryResponse(
       queryExecutionId = UUID.fromString(queryExecutionId),
       queryState = QueryExecutionState.QUEUED,
       authorisedServices = authorisedServices,
     )
   }
 
-  fun getQueryResults(queryExecutionId: String): DigitalServicesQueryResponse {
+  fun getQueryResults(queryExecutionId: String): AthenaQueryResponse {
     val queryExecution = athenaClient.getQueryExecution(GetQueryExecutionRequest.builder().queryExecutionId(queryExecutionId).build()).queryExecution()
     val queryState = queryExecution.status().state()
-    val response = DigitalServicesQueryResponse(
+    val response = AthenaQueryResponse(
       queryExecutionId = UUID.fromString(queryExecutionId),
       queryState = queryState,
       authorisedServices = getAuthorisedServices(),
@@ -63,8 +62,11 @@ class AuditAthenaClient(
     return response
   }
 
-  private fun buildAthenaQuery(filter: DigitalServicesQueryRequest, services: List<String>): String {
+  private fun buildAthenaQuery(filter: DigitalServicesQueryRequest, services: List<String>, auditEventType: AuditEventType): String {
+    val athenaProperties = athenaPropertiesFactory.getProperties(auditEventType)
     val conditions = mutableListOf<String>()
+    val databaseName = athenaProperties.databaseName
+    val tableName = athenaProperties.tableName
 
     if (services.isEmpty()) {
       return "SELECT * FROM $databaseName.$tableName WHERE 1 = 0;"
@@ -101,12 +103,13 @@ class AuditAthenaClient(
       .toList()
   }
 
-  private fun startAthenaQuery(query: String): String {
+  private fun startAthenaQuery(query: String, auditEventType: AuditEventType): String {
+    val athenaProperties = athenaPropertiesFactory.getProperties(auditEventType)
     val request = StartQueryExecutionRequest.builder()
       .queryString(query)
-      .queryExecutionContext { it.database(databaseName) }
-      .workGroup(workGroup)
-      .resultConfiguration { it.outputLocation(outputLocation) }
+      .queryExecutionContext { it.database(athenaProperties.databaseName) }
+      .workGroup(athenaProperties.workGroupName)
+      .resultConfiguration { it.outputLocation(athenaProperties.outputLocation) }
       .build()
 
     val response = athenaClient.startQueryExecution(request)
