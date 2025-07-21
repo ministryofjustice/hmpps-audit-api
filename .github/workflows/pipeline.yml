@@ -67,99 +67,31 @@ jobs:
       environment: 'dev'
       app_version: '${{ needs.build.outputs.app_version }}'
 
-  integration_tests:
-    name: Run integration tests after dev deploy
-    environment: 'dev'
+  staff_audit_integration_tests:
+    needs: deploy_dev
+    uses: ./.github/workflows/environment_integration_test.yml
+    with:
+      job_name: "Run integration tests after dev deploy"
+      environment: "dev"
+      env_host_url: "https://audit-api-dev.hmpps.service.justice.gov.uk"
+#    secrets:
+#      OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
+#      OAUTH_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+#      OAUTH_TOKEN_URL: ${{ secrets.OAUTH_TOKEN_URL }}
+
+  prisoner_audit_integration_tests:
     needs:
       - deploy_dev
-    runs-on: [self-hosted, hmpps-github-actions-runner]
-    env:
-      OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
-      OAUTH_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
-      OAUTH_TOKEN_URL: ${{ secrets.OAUTH_TOKEN_URL }}
-    steps:
-      - name: Get OAuth token
-        id: get_token
-        shell: bash
-        run: |
-          BASIC_AUTH=$(echo -n "$OAUTH_CLIENT_ID:$OAUTH_CLIENT_SECRET" | base64 | tr -d '\n')
-
-          RESPONSE=$(curl --fail --verbose -s -X POST "$OAUTH_TOKEN_URL?grant_type=client_credentials" \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Basic $BASIC_AUTH")
-
-          TOKEN=$(echo "$RESPONSE" | jq -r '.access_token')
-
-          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
-            echo "Failed to extract access token."
-            echo "Response was: $RESPONSE"
-            exit 1
-          fi
-
-          echo "::add-mask::$TOKEN"
-          echo "token=$TOKEN" >> $GITHUB_OUTPUT
-
-      - name: Call audit API endpoint
-        run: |
-          RESPONSE=$(curl --fail --verbose -s -w "%{http_code}" -o response.json -X POST https://audit-api-dev.hmpps.service.justice.gov.uk/internal/test/audit-end-to-end-test \
-            -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}")
-
-          echo "Response body:"
-          cat response.json
-          echo ""
-          echo "HTTP status: $RESPONSE"
-
-          if [[ "$RESPONSE" != "200" ]]; then
-            echo "Integration test failed with status $RESPONSE"
-            exit 1
-          fi
-
-  prisoner_integration_tests:
-    name: Run integration tests after dev deploy
-    environment: 'dev'
-    needs:
-      - deploy_dev
-    runs-on: [ self-hosted, hmpps-github-actions-runner ]
-    env:
-      OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
-      OAUTH_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
-      OAUTH_TOKEN_URL: ${{ secrets.OAUTH_TOKEN_URL }}
-    steps:
-      - name: Get OAuth token
-        id: get_token
-        shell: bash
-        run: |
-          BASIC_AUTH=$(echo -n "$OAUTH_CLIENT_ID:$OAUTH_CLIENT_SECRET" | base64 | tr -d '\n')
-
-          RESPONSE=$(curl --fail --verbose -s -X POST "$OAUTH_TOKEN_URL?grant_type=client_credentials" \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Basic $BASIC_AUTH")
-
-          TOKEN=$(echo "$RESPONSE" | jq -r '.access_token')
-
-          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
-            echo "Failed to extract access token."
-            echo "Response was: $RESPONSE"
-            exit 1
-          fi
-
-          echo "::add-mask::$TOKEN"
-          echo "token=$TOKEN" >> $GITHUB_OUTPUT
-
-      - name: Call audit API endpoint
-        run: |
-          RESPONSE=$(curl --fail --verbose -s -w "%{http_code}" -o response.json -X POST https://audit-api-dev.hmpps.service.justice.gov.uk/internal/test/prisoner/audit-end-to-end-test \
-            -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}")
-
-          echo "Response body:"
-          cat response.json
-          echo ""
-          echo "HTTP status: $RESPONSE"
-
-          if [[ "$RESPONSE" != "200" ]]; then
-            echo "Integration test failed with status $RESPONSE"
-            exit 1
-          fi
+      - staff_audit_integration_tests
+    uses: ./.github/workflows/environment_integration_test.yml
+    with:
+      job_name: "Run prisoner_audit integration tests after dev deploy"
+      environment: "dev"
+      env_host_url: "https://audit-api-dev.hmpps.service.justice.gov.uk"
+#    secrets:
+#      OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
+#      OAUTH_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+#      OAUTH_TOKEN_URL: ${{ secrets.OAUTH_TOKEN_URL }}
 
   deploy_preprod:
     name: Deploy to the preprod environment
@@ -167,6 +99,8 @@ jobs:
       - build
       - helm_lint
       - deploy_dev
+      - staff_audit_integration_tests
+      - prisoner_audit_integration_tests
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2 # WORKFLOW_VERSION
     secrets: inherit
     with:

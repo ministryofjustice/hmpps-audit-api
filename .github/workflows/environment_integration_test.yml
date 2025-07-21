@@ -1,0 +1,67 @@
+name: environment_integration_test.yml
+
+on:
+  workflow_call:
+    inputs:
+      env_host_url:
+        required: true
+        type: string
+      job_name:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+#    secrets:
+#      OAUTH_CLIENT_ID:
+#        required: true
+#      OAUTH_CLIENT_SECRET:
+#        required: true
+#      OAUTH_TOKEN_URL:
+#        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  run-integration-test:
+    name: ${{ inputs.job_name }}
+    environment: ${{ inputs.environment }}
+    runs-on: [self-hosted, bob-github-actions-runner]
+    env:
+      OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
+      OAUTH_CLIENT_SECRET: ${{ secrets.OAUTH_CLIENT_SECRET }}
+      OAUTH_TOKEN_URL: ${{ secrets.OAUTH_TOKEN_URL }}
+      ENV_HOST_URL: ${{ inputs.env_host_url }}
+    steps:
+      - name: Get OAuth token
+        id: get_token
+        shell: bash
+        run: |
+          BASIC_AUTH=$(echo -n "$OAUTH_CLIENT_ID:$OAUTH_CLIENT_SECRET" | base64 | tr -d '\n')
+          RESPONSE=$(curl --fail --verbose -s -X POST "$OAUTH_TOKEN_URL?grant_type=client_credentials" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Basic $BASIC_AUTH")
+          TOKEN=$(echo "$RESPONSE" | jq -r '.access_token')
+          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+            echo "Failed to extract access token."
+            echo "Response was: $RESPONSE"
+            exit 1
+          fi
+          echo "::add-mask::$TOKEN"
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
+
+      - name: Call API endpoint
+        run: |
+          RESPONSE=$(curl --fail --verbose -s -w -X "%{http_code}" -o response.json -X POST $ENV_HOST_URL/internal/test/audit-end-to-end-test \
+            -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}")
+
+          echo "Response body:"
+          cat response.json
+          echo ""
+          echo "HTTP status: $RESPONSE"
+
+          if [[ "$RESPONSE" != "200" ]]; then
+            echo "Integration test failed with status $RESPONSE"
+            exit 1
+          fix
