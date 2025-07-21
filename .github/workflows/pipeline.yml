@@ -74,10 +74,10 @@ jobs:
       job_name: "Run integration tests after dev deploy"
       environment: "dev"
       env_host_url: "https://audit-api-dev.hmpps.service.justice.gov.uk"
-#    secrets:
-#      OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
-#      OAUTH_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
-#      OAUTH_TOKEN_URL: ${{ secrets.OAUTH_TOKEN_URL }}
+    secrets:
+      OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
+      OAUTH_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+      OAUTH_TOKEN_URL: ${{ secrets.OAUTH_TOKEN_URL }}
 
   prisoner_audit_integration_tests:
     needs:
@@ -88,10 +88,10 @@ jobs:
       job_name: "Run prisoner_audit integration tests after dev deploy"
       environment: "dev"
       env_host_url: "https://audit-api-dev.hmpps.service.justice.gov.uk"
-#    secrets:
-#      OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
-#      OAUTH_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
-#      OAUTH_TOKEN_URL: ${{ secrets.OAUTH_TOKEN_URL }}
+    secrets:
+      OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
+      OAUTH_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+      OAUTH_TOKEN_URL: ${{ secrets.OAUTH_TOKEN_URL }}
 
   deploy_preprod:
     name: Deploy to the preprod environment
