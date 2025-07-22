@@ -83,7 +83,7 @@ class PrisonerAuditIntegrationTestController(
     subjectType = "some subjectType ID",
     correlationId = UUID.randomUUID().toString(),
     who = "audit-integration-test-user",
-    service = "some service",
+    service = "test-prisoner-service",
     details = "{\"key\": \"value\"}",
   )
 

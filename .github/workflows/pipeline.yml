@@ -82,7 +82,7 @@ jobs:
   prisoner_audit_integration_tests:
     needs:
       - deploy_dev
-      - staff_audit_integration_tests
+#      - staff_audit_integration_tests
     uses: ./.github/workflows/environment_integration_test.yml
     with:
       job_name: "Run prisoner_audit integration tests after dev deploy"
