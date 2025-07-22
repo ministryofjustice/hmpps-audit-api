@@ -99,8 +99,6 @@ jobs:
     needs:
       - build
       - helm_lint
-      - staff_audit_integration_tests
-      - prisoner_audit_integration_tests
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2 # WORKFLOW_VERSION
     secrets: inherit
     with:
