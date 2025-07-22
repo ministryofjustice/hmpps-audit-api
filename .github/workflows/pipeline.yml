@@ -45,7 +45,7 @@ jobs:
       postgres-password: admin_password
   build:
     name: Build docker image from hmpps-github-actions
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/preprod'
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/docker_build.yml@v2 # WORKFLOW_VERSION
     needs:
       - gradle-verify
@@ -95,10 +95,10 @@ jobs:
 
   deploy_preprod:
     name: Deploy to the preprod environment
+    if: github.ref == 'refs/heads/preprod'
     needs:
       - build
       - helm_lint
-      - deploy_dev
       - staff_audit_integration_tests
       - prisoner_audit_integration_tests
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2 # WORKFLOW_VERSION
