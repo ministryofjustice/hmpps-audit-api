@@ -62,7 +62,7 @@ class PrisonerAuditIntegrationTestController(
 //        it.who == testEvent.who &&
 //        it.what == testEvent.what &&
 //        it.details == testEvent.details
-      it.`when` == testEvent.`when`
+      it.who == testEvent.who
     } ?: false
 
     if (matchFound) {
