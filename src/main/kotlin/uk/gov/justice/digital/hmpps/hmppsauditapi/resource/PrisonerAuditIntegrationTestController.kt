@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AthenaQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
@@ -28,6 +28,7 @@ class PrisonerAuditIntegrationTestController(
   data class IntegrationTestResult(
     val passed: Boolean,
     val message: String,
+    val testEvent: AuditEvent,
     val actualResult: AthenaQueryResponse?,
   )
 
@@ -66,16 +67,16 @@ class PrisonerAuditIntegrationTestController(
 
     if (matchFound) {
       return ResponseEntity.ok(
-        IntegrationTestResult(true, "Test successful. Prisoner Audit event found in Athena", result),
+        IntegrationTestResult(true, "Test successful. Prisoner Audit event found in Athena", testEvent, result),
       )
     }
 
     return ResponseEntity.internalServerError().body(
-      IntegrationTestResult(false, "Test failed. Prisoner Audit event not found in Athena", result),
+      IntegrationTestResult(false, "Test failed. Prisoner Audit event not found in Athena", testEvent, result),
     )
   }
 
-  private fun createTestAuditEvent(): HMPPSAuditListener.AuditEvent = HMPPSAuditListener.AuditEvent(
+  private fun createTestAuditEvent(): AuditEvent = AuditEvent(
     what = "PRISONER_INTEGRATION_TEST",
     `when` = Instant.now(),
     operationId = UUID.randomUUID().toString(),
