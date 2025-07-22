@@ -59,20 +59,19 @@ class PrisonerAuditIntegrationTestController(
     // Step 6: Verify result
     val matchFound = result.results?.any {
 //      it.`when` == testEvent.`when` &&
-//        it.who == testEvent.who &&
-//        it.what == testEvent.what &&
-//        it.details == testEvent.details
-      it.who == testEvent.who
+      it.who == testEvent.who &&
+        it.what == testEvent.what &&
+        it.details == testEvent.details
     } ?: false
 
     if (matchFound) {
       return ResponseEntity.ok(
-        IntegrationTestResult(true, "Test successful. Audit event found in Athena", result),
+        IntegrationTestResult(true, "Test successful. Prisoner Audit event found in Athena", result),
       )
     }
 
     return ResponseEntity.internalServerError().body(
-      IntegrationTestResult(false, "Test failed. Audit event not found in Athena", result),
+      IntegrationTestResult(false, "Test failed. Prisoner Audit event not found in Athena", result),
     )
   }
 
