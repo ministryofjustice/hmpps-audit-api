@@ -3,17 +3,22 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import software.amazon.awssdk.services.athena.AthenaClient
+import software.amazon.awssdk.services.athena.model.QueryExecutionState.QUEUED
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AthenaQueryResponse
+import java.util.UUID
 
 @Component
 class AthenaPartitionRepairService(
   private val athenaClient: AthenaClient,
   private val athenaPropertiesFactory: AthenaPropertiesFactory,
+  private val auditAthenaClient: AuditAthenaClient,
 ) {
 
-  fun repairPartitions(auditEventType: AuditEventType) {
+  // TODO test
+  fun triggerRepairPartitions(auditEventType: AuditEventType): AthenaQueryResponse {
     val athenaProperties = athenaPropertiesFactory.getProperties(auditEventType)
     val databaseName = athenaProperties.databaseName
     val tableName = athenaProperties.tableName
@@ -24,12 +29,20 @@ class AthenaPartitionRepairService(
       .workGroup(athenaProperties.workGroupName)
       .resultConfiguration { it.outputLocation(athenaProperties.outputLocation) }
       .build()
-    athenaClient.startQueryExecution(request)
+    val startQueryExecutionResponse = athenaClient.startQueryExecution(request)
+    return AthenaQueryResponse(
+      queryExecutionId = UUID.fromString(startQueryExecutionResponse.queryExecutionId()),
+      queryState = QUEUED,
+      authorisedServices = emptyList(),
+    )
   }
 
+  // TODO test
+  fun getRepairPartitionsResult(queryExecutionId: UUID): AthenaQueryResponse = auditAthenaClient.getQueryResults(queryExecutionId.toString())
+
   @Scheduled(cron = "0 0 * * * *")
-  fun triggerRepairPartitions() = repairPartitions(AuditEventType.STAFF)
+  fun triggerRepairPartitions() = triggerRepairPartitions(AuditEventType.STAFF)
 
   @Scheduled(cron = "0 15 * * * *")
-  fun triggerPrisonerRepairPartitions() = repairPartitions(AuditEventType.PRISONER)
+  fun triggerPrisonerRepairPartitions() = triggerRepairPartitions(AuditEventType.PRISONER)
 }

@@ -42,7 +42,7 @@ class AuditIntegrationTestController(
     Thread.sleep(10000)
 
     // Step 3: Update partitions
-    athenaPartitionRepairService.repairPartitions(AuditEventType.STAFF)
+    athenaPartitionRepairService.triggerRepairPartitions(AuditEventType.STAFF)
     Thread.sleep(10000)
 
     // Step 4: Trigger query

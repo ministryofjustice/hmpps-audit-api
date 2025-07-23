@@ -66,7 +66,16 @@ class PrisonerDigitalServicesResource(
 
   @PreAuthorize("hasRole('ROLE_PRISONER_AUDIT')")
   @PostMapping("/prisoner/repair-partitions")
-  fun repairPrisonerPartitions() {
-    athenaPartitionRepairService.repairPartitions(AuditEventType.PRISONER)
+  fun triggerRepairPrisonerPartitions() {
+    athenaPartitionRepairService.triggerRepairPartitions(AuditEventType.PRISONER)
+  }
+
+  // TODO test
+  @PreAuthorize("hasRole('ROLE_PRISONER_AUDIT')")
+  @GetMapping("/prisoner/repair-partitions/{queryExecutionId}")
+  fun getRepairPrisonerPartitionsQueryResults(
+    @PathVariable queryExecutionId: UUID,
+  ) {
+    athenaPartitionRepairService.getRepairPartitionsResult(queryExecutionId)
   }
 }

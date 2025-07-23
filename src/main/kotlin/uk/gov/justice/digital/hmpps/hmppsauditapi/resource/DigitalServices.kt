@@ -66,7 +66,15 @@ class DigitalServices(
 
   @PreAuthorize("hasRole('ROLE_AUDIT')")
   @PostMapping("/query/repair-partitions")
-  fun repairPartitions() {
-    athenaPartitionRepairService.repairPartitions(AuditEventType.STAFF)
+  fun triggerRepairPartitions() {
+    athenaPartitionRepairService.triggerRepairPartitions(AuditEventType.STAFF)
+  }
+
+  @PreAuthorize("hasRole('ROLE_AUDIT')")
+  @GetMapping("/query/repair-partitions/{queryExecutionId}")
+  fun repairPartitions(
+    @PathVariable queryExecutionId: UUID,
+  ) {
+    athenaPartitionRepairService.getRepairPartitionsResult(queryExecutionId)
   }
 }
