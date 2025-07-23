@@ -66,10 +66,10 @@ class AuditIntegrationTestController(
 
     val matchFound = results?.any {
 //      it.`when` == expectedAuditEvent.`when` &&
-      it.who == expectedAuditEvent.who &&
-        it.what == expectedAuditEvent.what &&
-        it.details == expectedAuditEvent.details
-    } ?: false
+        it.who == expectedAuditEvent.who &&
+                it.what == expectedAuditEvent.what &&
+                it.details == expectedAuditEvent.details
+    } == true
 
     if (matchFound) {
       return ResponseEntity.ok(
@@ -126,7 +126,7 @@ class AuditIntegrationTestController(
 //    )
 //  }
 
-  private fun createTestAuditEvent(): HMPPSAuditListener.AuditEvent = HMPPSAuditListener.AuditEvent(
+  private fun createTestAuditEvent(): AuditEvent = HMPPSAuditListener.AuditEvent(
     what = "INTEGRATION_TEST",
     `when` = Instant.now(),
     operationId = UUID.randomUUID().toString(),
