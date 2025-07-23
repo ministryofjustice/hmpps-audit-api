@@ -64,11 +64,11 @@ class DigitalServices(
     return auditService.getQueryResults(queryExecutionId.toString())
   }
 
-  @PreAuthorize("hasRole('ROLE_AUDIT')")
+  @PreAuthorize("hasRole('ROLE_AUDIT') or hasRole('ROLE_AUDIT_INTEGRATION_TEST')")
   @PostMapping("/query/repair-partitions") // TODO test
   fun triggerRepairPartitions(): AthenaQueryResponse = athenaPartitionRepairService.triggerRepairPartitions(AuditEventType.STAFF)
 
-  @PreAuthorize("hasRole('ROLE_AUDIT')")
+  @PreAuthorize("hasRole('ROLE_AUDIT') or hasRole('ROLE_AUDIT_INTEGRATION_TEST')")
   @GetMapping("/query/repair-partitions/{queryExecutionId}") // TODO test
   fun repairPartitions(
     @PathVariable queryExecutionId: UUID,

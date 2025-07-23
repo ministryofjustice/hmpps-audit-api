@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -30,6 +31,7 @@ class AuditIntegrationTestController(
   )
 
   @PostMapping("/audit-event")
+  @PreAuthorize("hasRole('ROLE_AUDIT_INTEGRATION_TEST')")
   fun createAuditEvent(): HMPPSAuditListener.AuditEvent {
     val createdAuditEvent = createTestAuditEvent()
     auditQueueService.sendAuditEvent(createdAuditEvent)
