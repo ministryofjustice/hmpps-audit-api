@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AthenaQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
@@ -15,6 +16,8 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
 import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
+
+private const val WHO = "audit-integration-test-user"
 
 @RestController
 @RequestMapping("/internal/integration-test")
@@ -32,12 +35,22 @@ class AuditIntegrationTestController(
 
   @PostMapping("/audit-event")
   @PreAuthorize("hasRole('ROLE_AUDIT_INTEGRATION_TEST')")
-  fun createAuditEvent(): HMPPSAuditListener.AuditEvent {
+  fun createAuditEvent(): AuditEvent {
     val createdAuditEvent = createTestAuditEvent()
     auditQueueService.sendAuditEvent(createdAuditEvent)
     Thread.sleep(10000) // Time needed for event to be processed by SQS
     return createdAuditEvent
   }
+
+  @PostMapping("/query")
+  @PreAuthorize("hasRole('ROLE_AUDIT_INTEGRATION_TEST')")
+  fun queryTestAuditEvent(): AthenaQueryResponse = auditService.triggerQuery(
+    DigitalServicesQueryRequest(
+      startDate = LocalDate.now(),
+      who = WHO,
+    ),
+    AuditEventType.STAFF,
+  )
 
   @PostMapping("/audit-end-to-end-test")
   fun runAuditIntegrationTest(): ResponseEntity<IntegrationTestResult> {
@@ -90,7 +103,7 @@ class AuditIntegrationTestController(
     subjectId = "some subject ID",
     subjectType = "some subjectType ID",
     correlationId = UUID.randomUUID().toString(),
-    who = "audit-integration-test-user",
+    who = WHO,
     service = "some service",
     details = "{\"key\": \"value\"}",
   )

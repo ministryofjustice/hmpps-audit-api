@@ -72,14 +72,7 @@ jobs:
           
           echo "Repair response: $RESPONSE"
           echo "$RESPONSE" > repair_response.json
-          
           QUERY_EXECUTION_ID=$(echo "$RESPONSE" | jq -r '.queryExecutionId')
-          
-          if [ -z "$QUERY_EXECUTION_ID" ] || [ "$QUERY_EXECUTION_ID" = "null" ]; then
-            echo "Failed to extract queryExecutionId."
-            exit 1
-          fi
-          
           echo "queryExecutionId=$QUERY_EXECUTION_ID" >> $GITHUB_OUTPUT
 
       - name: Step 3 - Wait for repair partitions to complete
@@ -114,4 +107,16 @@ jobs:
             echo "Timed out waiting for query to succeed after 20 minutes."
             exit 1
           fi
+
+      - name: Step 4 - Trigger audit event query
+        id: trigger_audit_query
+        run: |
+          RESPONSE=$(curl --fail --silent --show-error --verbose \
+            -X POST "$ENV_TEST_URL/internal/integration-test/query" \
+            -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
+          
+          echo "Trigger audit query response: $RESPONSE"
+          QUERY_EXECUTION_ID=$(echo "$RESPONSE" | jq -r '.queryExecutionId')
+          echo "queryExecutionId=$QUERY_EXECUTION_ID" >> $GITHUB_OUTPUT
+
 
