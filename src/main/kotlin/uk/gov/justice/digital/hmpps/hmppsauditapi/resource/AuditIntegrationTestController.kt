@@ -17,7 +17,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 @RestController
-@RequestMapping("/internal/test")
+@RequestMapping("/internal/integration-test")
 @ConditionalOnProperty(name = ["expose.integration.test.endpoint"], havingValue = "true", matchIfMissing = false)
 class AuditIntegrationTestController(
   private val auditQueueService: AuditQueueService,
@@ -30,6 +30,12 @@ class AuditIntegrationTestController(
     val message: String,
     val actualResult: AthenaQueryResponse?,
   )
+
+  @PostMapping("/audit-event")
+  fun createAuditEvent() {
+    auditQueueService.sendAuditEvent(createTestAuditEvent())
+    Thread.sleep(10000)
+  }
 
   @PostMapping("/audit-end-to-end-test")
   fun runAuditIntegrationTest(): ResponseEntity<IntegrationTestResult> {

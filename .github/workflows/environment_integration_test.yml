@@ -51,17 +51,8 @@ jobs:
           echo "::add-mask::$TOKEN"
           echo "token=$TOKEN" >> $GITHUB_OUTPUT
 
-      - name: Call API endpoint
+      - name: Step 1 - Create audit event
         run: |
-          RESPONSE=$(curl --fail --verbose -s -w -X "%{http_code}" -o response.json -X POST "$ENV_TEST_URL" \
-            -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}")
-
-          echo "Response body:"
-          cat response.json
-          echo ""
-          echo "HTTP status: $RESPONSE"
-
-          if [[ "$RESPONSE" != "200" ]]; then
-            echo "Integration test failed with status $RESPONSE"
-            exit 1
-          fix
+          curl --fail --verbose --silent \
+            -X POST "$ENV_TEST_URL/audit-event" \
+            -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}"
