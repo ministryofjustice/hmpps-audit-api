@@ -65,16 +65,12 @@ class DigitalServices(
   }
 
   @PreAuthorize("hasRole('ROLE_AUDIT')")
-  @PostMapping("/query/repair-partitions")
-  fun triggerRepairPartitions() {
-    athenaPartitionRepairService.triggerRepairPartitions(AuditEventType.STAFF)
-  }
+  @PostMapping("/query/repair-partitions") // TODO test
+  fun triggerRepairPartitions(): AthenaQueryResponse = athenaPartitionRepairService.triggerRepairPartitions(AuditEventType.STAFF)
 
   @PreAuthorize("hasRole('ROLE_AUDIT')")
-  @GetMapping("/query/repair-partitions/{queryExecutionId}")
+  @GetMapping("/query/repair-partitions/{queryExecutionId}") // TODO test
   fun repairPartitions(
     @PathVariable queryExecutionId: UUID,
-  ) {
-    athenaPartitionRepairService.getRepairPartitionsResult(queryExecutionId)
-  }
+  ): AthenaQueryResponse = athenaPartitionRepairService.getRepairPartitionsResult(queryExecutionId)
 }
