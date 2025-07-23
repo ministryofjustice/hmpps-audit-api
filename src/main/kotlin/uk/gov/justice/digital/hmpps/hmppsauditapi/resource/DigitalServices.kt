@@ -46,7 +46,7 @@ class DigitalServices(
     return auditService.triggerQuery(auditFilterDto, AuditEventType.STAFF)
   }
 
-  @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_read')")
+  @PreAuthorize("hasRole('ROLE_AUDIT') or hasRole('ROLE_AUDIT_INTEGRATION_TEST')")
   @Operation(
     summary = "Get audit events for staff member",
     description = "Get audit events given who, or subject ID and subject type, role required is ROLE_AUDIT",
