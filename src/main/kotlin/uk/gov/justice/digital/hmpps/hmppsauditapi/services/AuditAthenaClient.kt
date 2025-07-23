@@ -48,11 +48,9 @@ class AuditAthenaClient(
   }
 
   fun getAuditEventsQueryResults(queryExecutionId: String): AthenaQueryResponse {
-    val queryExecution = athenaClient.getQueryExecution(GetQueryExecutionRequest.builder().queryExecutionId(queryExecutionId).build()).queryExecution()
     val response = getQueryResults(queryExecutionId)
     if (response.queryState == QueryExecutionState.SUCCEEDED) {
       response.results = fetchQueryResults(queryExecutionId)
-      response.executionTimeInMillis = queryExecution.statistics().totalExecutionTimeInMillis()
     }
     return response
   }
