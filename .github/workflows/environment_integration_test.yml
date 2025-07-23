@@ -55,9 +55,28 @@ jobs:
         id: create_event
         run: |
           RESPONSE=$(curl --fail --verbose --silent --show-error \
-            -X POST "$ENV_TEST_URL/audit-event" \
+            -X POST "$ENV_TEST_URL/internal/integration-test/audit-event" \
             -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
             -H "Content-Type: application/json")
           
           echo "Audit event response: $RESPONSE"
           echo "$RESPONSE" > audit_event.json
+
+      - name: Step 2 - Trigger repair partitions
+        id: trigger_repair
+        run: |
+          RESPONSE=$(curl --fail --silent -X POST "$ENV_TEST_URL/audit/query/repair-partitions" \
+            -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
+            -H "Content-Type: application/json")
+          
+          echo "Repair response: $RESPONSE"
+          echo "$RESPONSE" > repair_response.json
+          
+          QUERY_EXECUTION_ID=$(echo "$RESPONSE" | jq -r '.queryExecutionId')
+          
+          if [ -z "$QUERY_EXECUTION_ID" ] || [ "$QUERY_EXECUTION_ID" = "null" ]; then
+            echo "Failed to extract queryExecutionId."
+            exit 1
+          fi
+          
+          echo "queryExecutionId=$QUERY_EXECUTION_ID" >> $GITHUB_OUTPUT
