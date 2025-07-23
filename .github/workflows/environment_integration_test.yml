@@ -52,7 +52,12 @@ jobs:
           echo "token=$TOKEN" >> $GITHUB_OUTPUT
 
       - name: Step 1 - Create audit event
+        id: create_event
         run: |
-          curl --fail --verbose --silent \
+          RESPONSE=$(curl --fail --verbose --silent --show-error \
             -X POST "$ENV_TEST_URL/audit-event" \
-            -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}"
+            -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
+            -H "Content-Type: application/json")
+          
+          echo "Audit event response: $RESPONSE"
+          echo "$RESPONSE" > audit_event.json

@@ -30,9 +30,11 @@ class AuditIntegrationTestController(
   )
 
   @PostMapping("/audit-event")
-  fun createAuditEvent() {
-    auditQueueService.sendAuditEvent(createTestAuditEvent())
-    Thread.sleep(10000)
+  fun createAuditEvent(): HMPPSAuditListener.AuditEvent {
+    val createdAuditEvent = createTestAuditEvent()
+    auditQueueService.sendAuditEvent(createdAuditEvent)
+    Thread.sleep(10000) // Time needed for event to be processed by SQS
+    return createdAuditEvent
   }
 
   @PostMapping("/audit-end-to-end-test")
