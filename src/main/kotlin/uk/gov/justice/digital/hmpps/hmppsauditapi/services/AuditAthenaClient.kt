@@ -64,6 +64,7 @@ class AuditAthenaClient(
       queryExecutionId = UUID.fromString(queryExecutionId),
       queryState = queryState,
       authorisedServices = getAuthorisedServices(),
+      executionTimeInMillis = queryExecution.statistics().totalExecutionTimeInMillis(),
     )
     return response
   }
