@@ -155,7 +155,7 @@ jobs:
           
       - name: Step 6 - Assert audit event exists
         run: |
-          QUERY_ID=${{ steps.wait_audit_query.outputs.queryExecutionId }}
+          QUERY_ID=${{ steps.trigger_audit_query.outputs.queryExecutionId }}
           echo "Asserting audit event is present in the results for queryExecutionId: $QUERY_ID"
       
           RESPONSE=$(curl --fail --silent --show-error --verbose \
