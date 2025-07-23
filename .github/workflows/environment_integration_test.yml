@@ -155,10 +155,11 @@ jobs:
           
       - name: Step 6 - Assert audit event exists
         run: |
-          echo "Asserting audit event is present in the results..."
+          QUERY_ID=${{ steps.wait_audit_query.outputs.queryExecutionId }}
+          echo "Asserting audit event is present in the results for queryExecutionId: $QUERY_ID"
       
           RESPONSE=$(curl --fail --silent --show-error --verbose \
-            -X POST "$ENV_TEST_URL/internal/integration-test/assertion" \
+            -X POST "$ENV_TEST_URL/internal/integration-test/assertion/$QUERY_ID" \
             -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
             -H "Content-Type: application/json" \
             --data @audit_event.json)
