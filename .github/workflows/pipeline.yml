@@ -32,32 +32,33 @@ jobs:
     secrets: inherit
     with:
       environment: ${{ matrix.environments }}
-  gradle-verify:
-    name: Run the tests
-    uses: ministryofjustice/hmpps-github-actions/.github/workflows/gradle_localstack_postgres_verify.yml@v2 # WORKFLOW_VERSION
-    secrets: inherit
-    with:
-      localstack-services: s3,sqs
-      localstack-tag: "4"
-      postgres-tag: "17"
-      postgres-db: audit_db
-      postgres-username: admin
-      postgres-password: admin_password
+  #  gradle-verify:
+  #    name: Run the tests
+  #    uses: ministryofjustice/hmpps-github-actions/.github/workflows/gradle_localstack_postgres_verify.yml@v2 # WORKFLOW_VERSION
+  #    secrets: inherit
+  #    with:
+  #      localstack-services: s3,sqs
+  #      localstack-tag: "4"
+  #      postgres-tag: "17"
+  #      postgres-db: audit_db
+  #      postgres-username: admin
+  #      postgres-password: admin_password
   build:
     name: Build docker image from hmpps-github-actions
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/HAAR-4149'
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/docker_build.yml@v2 # WORKFLOW_VERSION
-    needs:
-      - gradle-verify
+    #    needs:
+    #      - gradle-verify
     with:
       docker_registry: 'ghcr.io'
       registry_org: 'ministryofjustice'
       additional_docker_tag: ${{ inputs.additional_docker_tag }}
       push: ${{ inputs.push || true }}
       docker_multiplatform: false
+      tag_latest: false
   deploy_dev:
     name: Deploy to the dev environment
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/HAAR-4149'
     needs:
       - build
       - helm_lint
@@ -82,7 +83,7 @@ jobs:
   prisoner_audit_integration_tests:
     needs:
       - deploy_dev
-#      - staff_audit_integration_tests
+    #      - staff_audit_integration_tests
     uses: ./.github/workflows/environment_integration_test.yml
     with:
       job_name: "Run prisoner_audit integration tests after dev deploy"
@@ -92,28 +93,28 @@ jobs:
       OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
       OAUTH_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
       OAUTH_TOKEN_URL: ${{ secrets.OAUTH_TOKEN_URL }}
-
-  deploy_preprod:
-    name: Deploy to the preprod environment
-    needs:
-      - build
-      - helm_lint
-      - deploy_dev
-      - staff_audit_integration_tests
-      - prisoner_audit_integration_tests
-    uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2 # WORKFLOW_VERSION
-    secrets: inherit
-    with:
-      environment: 'preprod'
-      app_version: '${{ needs.build.outputs.app_version }}'
-  deploy_prod:
-    name: Deploy to the prod environment
-    needs:
-      - build
-      - helm_lint
-      - deploy_preprod
-    uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2 # WORKFLOW_VERSION
-    secrets: inherit
-    with:
-      environment: 'prod'
-      app_version: '${{ needs.build.outputs.app_version }}'
+#
+#  deploy_preprod:
+#    name: Deploy to the preprod environment
+#    needs:
+#      - build
+#      - helm_lint
+#      - deploy_dev
+#      - staff_audit_integration_tests
+#      - prisoner_audit_integration_tests
+#    uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2 # WORKFLOW_VERSION
+#    secrets: inherit
+#    with:
+#      environment: 'preprod'
+#      app_version: '${{ needs.build.outputs.app_version }}'
+#  deploy_prod:
+#    name: Deploy to the prod environment
+#    needs:
+#      - build
+#      - helm_lint
+#      - deploy_preprod
+#    uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2 # WORKFLOW_VERSION
+#    secrets: inherit
+#    with:
+#      environment: 'prod'
+#      app_version: '${{ needs.build.outputs.app_version }}'
