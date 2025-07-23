@@ -62,24 +62,37 @@ class AuditIntegrationTestController(
     @RequestBody expectedAuditEvent: AuditEvent,
     @PathVariable queryExecutionId: String,
   ): ResponseEntity<IntegrationTestResult> {
-    val results = auditAthenaClient.getQueryResults(queryExecutionId).results
+    return try {
+      val results = auditAthenaClient.getQueryResults(queryExecutionId).results
 
-    val matchFound = results?.any {
-//      it.`when` == expectedAuditEvent.`when` &&
+      if (results == null) {
+        return ResponseEntity.internalServerError().body(
+          IntegrationTestResult(false, "Test failed. Athena results were null", null),
+        )
+      }
+
+      val matchFound = results.any {
+        // it.`when` == expectedAuditEvent.`when` &&
         it.who == expectedAuditEvent.who &&
-                it.what == expectedAuditEvent.what &&
-                it.details == expectedAuditEvent.details
-    } == true
+          it.what == expectedAuditEvent.what &&
+          it.details == expectedAuditEvent.details
+      }
 
-    if (matchFound) {
-      return ResponseEntity.ok(
-        IntegrationTestResult(true, "Test successful. Audit event found in Athena", results),
+      if (matchFound) {
+        ResponseEntity.ok(
+          IntegrationTestResult(true, "Test successful. Audit event found in Athena", results),
+        )
+      } else {
+        ResponseEntity.internalServerError().body(
+          IntegrationTestResult(false, "Test failed. Audit event not found in Athena", results),
+        )
+      }
+    } catch (ex: Exception) {
+      ex.printStackTrace()
+      ResponseEntity.internalServerError().body(
+        IntegrationTestResult(false, "Exception during test: ${ex.message}", null),
       )
     }
-
-    return ResponseEntity.internalServerError().body(
-      IntegrationTestResult(false, "Test failed. Audit event not found in Athena", results),
-    )
   }
 
 //  @PostMapping("/audit-end-to-end-test")
