@@ -113,7 +113,7 @@ jobs:
         run: |
           RESPONSE=$(curl --fail --silent --show-error --verbose \
             -X POST "$ENV_TEST_URL/internal/integration-test/query" \
-            -H "Authorization: Bearer ${{ steps.get_token.outputs.token }})" \
+            -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}")
           
           echo "Trigger audit query response: $RESPONSE"
           QUERY_EXECUTION_ID=$(echo "$RESPONSE" | jq -r '.queryExecutionId')
