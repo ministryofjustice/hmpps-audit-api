@@ -65,7 +65,8 @@ jobs:
       - name: Step 2 - Trigger repair partitions
         id: trigger_repair
         run: |
-          RESPONSE=$(curl --fail --silent -X POST "$ENV_TEST_URL/audit/query/repair-partitions" \
+          RESPONSE=$(curl --fail --verbose --silent --show-error \
+            -X POST "$ENV_TEST_URL/audit/query/repair-partitions" \
             -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
             -H "Content-Type: application/json")
           
