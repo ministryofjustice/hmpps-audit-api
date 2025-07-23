@@ -152,6 +152,18 @@ jobs:
             echo "Timed out waiting for audit query to succeed after 3 minutes."
             exit 1
           fi
+          
+          - name: Step 6 - Assert audit event exists
+            run: |
+              echo "Asserting audit event is present in the results..."
+          
+              RESPONSE=$(curl --fail --silent --show-error --verbose \
+                -X POST "$ENV_TEST_URL/internal/integration-test/assertion" \
+                -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
+                -H "Content-Type: application/json" \
+                --data @audit_event.json)
+          
+              echo "Assertion response: $RESPONSE"
 
 
 
