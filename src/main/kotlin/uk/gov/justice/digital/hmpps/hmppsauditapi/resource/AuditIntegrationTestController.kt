@@ -63,7 +63,7 @@ class AuditIntegrationTestController(
     @PathVariable queryExecutionId: String,
   ): ResponseEntity<IntegrationTestResult> {
     return try {
-      val results = auditAthenaClient.getQueryResults(queryExecutionId).results
+      val results = auditAthenaClient.getAuditEventsQueryResults(queryExecutionId).results
 
       if (results == null) {
         return ResponseEntity.internalServerError().body(
