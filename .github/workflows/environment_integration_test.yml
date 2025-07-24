@@ -82,7 +82,7 @@ jobs:
           echo "Polling query execution status for ID: $QUERY_ID"
 
           for attempt in {1..60}; do
-            RESPONSE=$(curl --fail --verbose --show-error \
+            RESPONSE=$(curl --fail --show-error \
               -X GET "$ENV_TEST_URL/audit/query/repair-partitions/$QUERY_ID" \
               -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
               -H "Content-Type: application/json")
