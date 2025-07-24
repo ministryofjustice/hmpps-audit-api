@@ -43,33 +43,33 @@ jobs:
   #      postgres-db: audit_db
   #      postgres-username: admin
   #      postgres-password: admin_password
-  build:
-    name: Build docker image from hmpps-github-actions
-    if: github.ref == 'refs/heads/HAAR-4149'
-    uses: ministryofjustice/hmpps-github-actions/.github/workflows/docker_build.yml@v2 # WORKFLOW_VERSION
-    #    needs:
-    #      - gradle-verify
-    with:
-      docker_registry: 'ghcr.io'
-      registry_org: 'ministryofjustice'
-      additional_docker_tag: ${{ inputs.additional_docker_tag }}
-      push: ${{ inputs.push || true }}
-      docker_multiplatform: false
-      tag_latest: false
-  deploy_dev:
-    name: Deploy to the dev environment
-    if: github.ref == 'refs/heads/HAAR-4149'
-    needs:
-      - build
-      - helm_lint
-    uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2 # WORKFLOW_VERSION
-    secrets: inherit
-    with:
-      environment: 'dev'
-      app_version: '${{ needs.build.outputs.app_version }}'
+#  build:
+#    name: Build docker image from hmpps-github-actions
+#    if: github.ref == 'refs/heads/HAAR-4149'
+#    uses: ministryofjustice/hmpps-github-actions/.github/workflows/docker_build.yml@v2 # WORKFLOW_VERSION
+#    #    needs:
+#    #      - gradle-verify
+#    with:
+#      docker_registry: 'ghcr.io'
+#      registry_org: 'ministryofjustice'
+#      additional_docker_tag: ${{ inputs.additional_docker_tag }}
+#      push: ${{ inputs.push || true }}
+#      docker_multiplatform: false
+#      tag_latest: false
+#  deploy_dev:
+#    name: Deploy to the dev environment
+#    if: github.ref == 'refs/heads/HAAR-4149'
+#    needs:
+#      - build
+#      - helm_lint
+#    uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2 # WORKFLOW_VERSION
+#    secrets: inherit
+#    with:
+#      environment: 'dev'
+#      app_version: '${{ needs.build.outputs.app_version }}'
 
   staff_audit_integration_tests:
-    needs: deploy_dev
+#    needs: deploy_dev
     uses: ./.github/workflows/environment_integration_test.yml
     with:
       job_name: "Run integration tests after dev deploy"
