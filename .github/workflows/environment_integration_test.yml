@@ -65,7 +65,7 @@ jobs:
       - name: Step 2 - Trigger repair partitions
         id: trigger_repair
         run: |
-          RESPONSE=$(curl --fail --verbose --silent --show-error \
+          RESPONSE=$(curl --fail --verbose --show-error \
             -X POST "$ENV_TEST_URL/audit/query/repair-partitions" \
             -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
             -H "Content-Type: application/json")
@@ -82,7 +82,7 @@ jobs:
           echo "Polling query execution status for ID: $QUERY_ID"
 
           for attempt in {1..60}; do
-            RESPONSE=$(curl --fail --silent --show-error \
+            RESPONSE=$(curl --fail --verbose --show-error \
               -X GET "$ENV_TEST_URL/audit/query/repair-partitions/$QUERY_ID" \
               -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
               -H "Content-Type: application/json")
@@ -111,10 +111,10 @@ jobs:
       - name: Step 4 - Trigger audit event query
         id: trigger_audit_query
         run: |
-          RESPONSE=$(curl --fail --silent --show-error --verbose \
+          RESPONSE=$(curl --fail --show-error --verbose \
             -X POST "$ENV_TEST_URL/internal/integration-test/query" \
             -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}")
-          
+
           echo "Trigger audit query response: $RESPONSE"
           QUERY_EXECUTION_ID=$(echo "$RESPONSE" | jq -r '.queryExecutionId')
           echo "queryExecutionId=$QUERY_EXECUTION_ID" >> $GITHUB_OUTPUT
@@ -126,7 +126,7 @@ jobs:
           echo "Polling audit query status for ID: $QUERY_ID"
           
           for attempt in {1..36}; do
-            RESPONSE=$(curl --fail --silent --show-error \
+            RESPONSE=$(curl --fail --show-error \
               -X GET "$ENV_TEST_URL/audit/query/$QUERY_ID" \
               -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
               -H "Content-Type: application/json")
