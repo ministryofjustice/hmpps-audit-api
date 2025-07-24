@@ -72,8 +72,8 @@ class AuditIntegrationTestController(
       }
 
       val matchFound = results.any {
-        // it.`when` == expectedAuditEvent.`when` &&
-        it.who == expectedAuditEvent.who &&
+        it.`when` == expectedAuditEvent.`when` &&
+          it.who == expectedAuditEvent.who &&
           it.what == expectedAuditEvent.what &&
           it.details == expectedAuditEvent.details
       }
