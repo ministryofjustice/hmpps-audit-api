@@ -54,7 +54,7 @@ jobs:
       - name: Step 1 - Create audit event
         id: create_event
         run: |
-          RESPONSE=$(curl --fail --verbose --silent --show-error \
+          RESPONSE=$(curl --fail --verbose --show-error \
             -X POST "$ENV_TEST_URL/internal/integration-test/audit-event" \
             -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
             -H "Content-Type: application/json")
@@ -158,7 +158,7 @@ jobs:
           QUERY_ID=${{ steps.trigger_audit_query.outputs.queryExecutionId }}
           echo "Asserting audit event is present in the results for queryExecutionId: $QUERY_ID"
       
-          RESPONSE=$(curl --fail --silent --show-error --verbose \
+          RESPONSE=$(curl --fail --show-error --verbose \
             -X POST "$ENV_TEST_URL/internal/integration-test/assertion/$QUERY_ID" \
             -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
             -H "Content-Type: application/json" \
