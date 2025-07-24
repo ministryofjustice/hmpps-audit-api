@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 
 @Component
-public class AthenaPropertiesFactory(
+class AthenaPropertiesFactory(
   @Qualifier("staffAthenaProperties") private val staffAthenaProperties: AthenaProperties,
   @Qualifier("prisonerAthenaProperties") private val prisonerAthenaProperties: AthenaProperties,
 ) {

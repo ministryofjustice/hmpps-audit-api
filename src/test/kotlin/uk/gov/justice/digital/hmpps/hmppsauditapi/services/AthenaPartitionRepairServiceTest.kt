@@ -26,6 +26,9 @@ class AthenaPartitionRepairServiceTest {
   @Mock
   private lateinit var athenaPropertiesFactory: AthenaPropertiesFactory
 
+  @Mock
+  private lateinit var auditAthenaClient: AuditAthenaClient
+
   private val databaseName = "databaseName"
   private val tableName = "tableName"
   private val workGroupName = "workGroupName"
@@ -56,6 +59,7 @@ class AthenaPartitionRepairServiceTest {
     service = AthenaPartitionRepairService(
       athenaClient,
       athenaPropertiesFactory,
+      auditAthenaClient,
     )
   }
 
@@ -77,7 +81,7 @@ class AthenaPartitionRepairServiceTest {
         outputLocation = "outputLocation",
       ),
     )
-    service.repairPartitions(AuditEventType.STAFF)
+    service.triggerRepairPartitions(AuditEventType.STAFF)
 
     // Then
     verify(athenaClient).startQueryExecution(startQueryExecutionRequest)
@@ -101,7 +105,7 @@ class AthenaPartitionRepairServiceTest {
         outputLocation = "prisonerOutputLocation",
       ),
     )
-    service.repairPartitions(AuditEventType.PRISONER)
+    service.triggerRepairPartitions(AuditEventType.PRISONER)
 
     // Then
     verify(athenaClient).startQueryExecution(startQueryExecutionRequest)

@@ -79,7 +79,7 @@ class AuditService(
     auditEventType: AuditEventType,
   ): AthenaQueryResponse = auditAthenaClient.triggerQuery(queryRequest, auditEventType)
 
-  fun getQueryResults(queryExecutionId: String): AthenaQueryResponse = auditAthenaClient.getQueryResults(queryExecutionId)
+  fun getQueryResults(queryExecutionId: String): AthenaQueryResponse = auditAthenaClient.getAuditEventsQueryResults(queryExecutionId)
 }
 
 private fun AuditEvent.asMap(): Map<String, String> {

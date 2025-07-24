@@ -7,8 +7,9 @@ import java.util.UUID
 
 data class AthenaQueryResponse(
   val queryExecutionId: UUID,
-  val queryState: QueryExecutionState,
-  val authorisedServices: List<String>,
+  var queryState: QueryExecutionState,
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  var authorisedServices: List<String>? = null,
   @JsonInclude(JsonInclude.Include.NON_NULL)
   var results: List<AuditDto>? = null,
   @JsonInclude(JsonInclude.Include.NON_NULL)

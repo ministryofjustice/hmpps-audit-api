@@ -46,7 +46,7 @@ class DigitalServices(
     return auditService.triggerQuery(auditFilterDto, AuditEventType.STAFF)
   }
 
-  @PreAuthorize("hasRole('ROLE_AUDIT') and hasAuthority('SCOPE_read')")
+  @PreAuthorize("hasRole('ROLE_AUDIT') or hasRole('ROLE_AUDIT_INTEGRATION_TEST')")
   @Operation(
     summary = "Get audit events for staff member",
     description = "Get audit events given who, or subject ID and subject type, role required is ROLE_AUDIT",
@@ -64,9 +64,13 @@ class DigitalServices(
     return auditService.getQueryResults(queryExecutionId.toString())
   }
 
-  @PreAuthorize("hasRole('ROLE_AUDIT')")
-  @PostMapping("/query/repair-partitions")
-  fun repairPartitions() {
-    athenaPartitionRepairService.repairPartitions(AuditEventType.STAFF)
-  }
+  @PreAuthorize("hasRole('ROLE_AUDIT') or hasRole('ROLE_AUDIT_INTEGRATION_TEST')")
+  @PostMapping("/query/repair-partitions") // TODO test
+  fun triggerRepairPartitions(): AthenaQueryResponse = athenaPartitionRepairService.triggerRepairPartitions(AuditEventType.STAFF)
+
+  @PreAuthorize("hasRole('ROLE_AUDIT') or hasRole('ROLE_AUDIT_INTEGRATION_TEST')")
+  @GetMapping("/query/repair-partitions/{queryExecutionId}") // TODO test
+  fun repairPartitions(
+    @PathVariable queryExecutionId: UUID,
+  ): AthenaQueryResponse = athenaPartitionRepairService.getRepairPartitionsResult(queryExecutionId)
 }
