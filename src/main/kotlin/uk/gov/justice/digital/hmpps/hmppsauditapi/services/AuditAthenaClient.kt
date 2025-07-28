@@ -47,6 +47,14 @@ class AuditAthenaClient(
     )
   }
 
+  fun getAuditEventsQueryResults(queryExecutionId: String): AthenaQueryResponse {
+    val response = getQueryResults(queryExecutionId)
+    if (response.queryState == QueryExecutionState.SUCCEEDED) {
+      response.results = fetchQueryResults(queryExecutionId)
+    }
+    return response
+  }
+
   fun getQueryResults(queryExecutionId: String): AthenaQueryResponse {
     val queryExecution = athenaClient.getQueryExecution(GetQueryExecutionRequest.builder().queryExecutionId(queryExecutionId).build()).queryExecution()
     val queryState = queryExecution.status().state()
@@ -54,11 +62,8 @@ class AuditAthenaClient(
       queryExecutionId = UUID.fromString(queryExecutionId),
       queryState = queryState,
       authorisedServices = getAuthorisedServices(),
+      executionTimeInMillis = queryExecution.statistics().totalExecutionTimeInMillis(),
     )
-    if (queryState == QueryExecutionState.SUCCEEDED) {
-      response.results = fetchQueryResults(queryExecutionId)
-      response.executionTimeInMillis = queryExecution.statistics().totalExecutionTimeInMillis()
-    }
     return response
   }
 

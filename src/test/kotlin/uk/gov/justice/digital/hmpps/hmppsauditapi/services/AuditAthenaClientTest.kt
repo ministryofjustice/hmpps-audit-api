@@ -305,7 +305,7 @@ class AuditAthenaClientTest {
     private val getQueryResultsResponse = GetQueryResultsResponse.builder().resultSet(resultSet).build()
 
     @Test
-    fun getQueryResults() {
+    fun getAuditEventsQueryResults() {
       // Given
       val authorities = listOf(SimpleGrantedAuthority(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS))
       SecurityContextHolder.getContext().authentication =
@@ -315,7 +315,7 @@ class AuditAthenaClientTest {
       given(athenaClient.getQueryResults(getQueryResultsRequest)).willReturn(getQueryResultsResponse)
 
       // When
-      val digitalServicesAuditQueryResponse = auditAthenaClient.getQueryResults(queryExecutionId)
+      val digitalServicesAuditQueryResponse = auditAthenaClient.getAuditEventsQueryResults(queryExecutionId)
 
       // Then
       assertThat(digitalServicesAuditQueryResponse).isEqualTo(
