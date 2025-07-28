@@ -1,30 +1,30 @@
-//package uk.gov.justice.digital.hmpps.hmppsauditapi.integration.endtoend
+// package uk.gov.justice.digital.hmpps.hmppsauditapi.integration.endtoend
 //
-//import org.awaitility.kotlin.await
-//import org.awaitility.kotlin.matches
-//import org.awaitility.kotlin.untilCallTo
-//import org.junit.jupiter.api.Test
-//import org.mockito.kotlin.any
-//import org.mockito.kotlin.argThat
-//import org.mockito.kotlin.eq
-//import org.mockito.kotlin.isNull
-//import org.mockito.kotlin.mockingDetails
-//import org.mockito.kotlin.verify
-//import org.mockito.kotlin.verifyNoInteractions
-//import org.springframework.beans.factory.annotation.Autowired
-//import org.springframework.test.context.ActiveProfiles
-//import org.springframework.test.context.TestPropertySource
-//import org.springframework.test.web.reactive.server.WebTestClient
-//import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
-//import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
-//import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
+// import org.awaitility.kotlin.await
+// import org.awaitility.kotlin.matches
+// import org.awaitility.kotlin.untilCallTo
+// import org.junit.jupiter.api.Test
+// import org.mockito.kotlin.any
+// import org.mockito.kotlin.argThat
+// import org.mockito.kotlin.eq
+// import org.mockito.kotlin.isNull
+// import org.mockito.kotlin.mockingDetails
+// import org.mockito.kotlin.verify
+// import org.mockito.kotlin.verifyNoInteractions
+// import org.springframework.beans.factory.annotation.Autowired
+// import org.springframework.test.context.ActiveProfiles
+// import org.springframework.test.context.TestPropertySource
+// import org.springframework.test.web.reactive.server.WebTestClient
+// import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+// import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
+// import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
 //
-//@TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=true"])
-//@ActiveProfiles(resolver = CommandLineProfilesResolver::class, inheritProfiles = false)
-//class AuditTestPrisonerAuditS3Bucket @Autowired constructor(
+// @TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=true"])
+// @ActiveProfiles(resolver = CommandLineProfilesResolver::class, inheritProfiles = false)
+// class AuditTestPrisonerAuditS3Bucket @Autowired constructor(
 //  override var webTestClient: WebTestClient,
 //  auditQueueService: AuditQueueService,
-//) : QueueListenerIntegrationTest() {
+// ) : QueueListenerIntegrationTest() {
 //
 //  private val prisonerAuditEvent = AuditEvent(
 //    id = null,
@@ -40,13 +40,13 @@
 //
 //  @Test
 //  fun `save basic audit entry to S3 bucket`() {
-////    webTestClient.post()
-////      .uri("/audit")
-////      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT_TEST"), scopes = listOf("write")))
-////      .contentType(MediaType.APPLICATION_JSON)
-////      .body(BodyInserters.fromValue(basicAuditEvent))
-////      .exchange()
-////      .expectStatus().isAccepted
+// //    webTestClient.post()
+// //      .uri("/audit")
+// //      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT_TEST"), scopes = listOf("write")))
+// //      .contentType(MediaType.APPLICATION_JSON)
+// //      .body(BodyInserters.fromValue(basicAuditEvent))
+// //      .exchange()
+// //      .expectStatus().isAccepted
 //
 //    auditQueueService.sendPrisonerAuditEvent(prisonerAuditEvent)
 //
@@ -64,4 +64,4 @@
 //    )
 //    verifyNoInteractions(auditRepository)
 //  }
-//}
+// }

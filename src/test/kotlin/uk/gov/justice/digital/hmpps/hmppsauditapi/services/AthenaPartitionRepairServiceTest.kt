@@ -1,24 +1,24 @@
-//package uk.gov.justice.digital.hmpps.hmppsauditapi.services
+// package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 //
-//import org.junit.jupiter.api.BeforeEach
-//import org.junit.jupiter.api.Test
-//import org.junit.jupiter.api.extension.ExtendWith
-//import org.mockito.BDDMockito.given
-//import org.mockito.Mock
-//import org.mockito.Mockito.verify
-//import org.mockito.junit.jupiter.MockitoExtension
-//import org.mockito.kotlin.whenever
-//import software.amazon.awssdk.services.athena.AthenaClient
-//import software.amazon.awssdk.services.athena.model.QueryExecutionContext
-//import software.amazon.awssdk.services.athena.model.ResultConfiguration
-//import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
-//import software.amazon.awssdk.services.athena.model.StartQueryExecutionResponse
-//import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
-//import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
-//import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
+// import org.junit.jupiter.api.BeforeEach
+// import org.junit.jupiter.api.Test
+// import org.junit.jupiter.api.extension.ExtendWith
+// import org.mockito.BDDMockito.given
+// import org.mockito.Mock
+// import org.mockito.Mockito.verify
+// import org.mockito.junit.jupiter.MockitoExtension
+// import org.mockito.kotlin.whenever
+// import software.amazon.awssdk.services.athena.AthenaClient
+// import software.amazon.awssdk.services.athena.model.QueryExecutionContext
+// import software.amazon.awssdk.services.athena.model.ResultConfiguration
+// import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
+// import software.amazon.awssdk.services.athena.model.StartQueryExecutionResponse
+// import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
+// import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
+// import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 //
-//@ExtendWith(MockitoExtension::class)
-//class AthenaPartitionRepairServiceTest {
+// @ExtendWith(MockitoExtension::class)
+// class AthenaPartitionRepairServiceTest {
 //
 //  @Mock
 //  private lateinit var athenaClient: AthenaClient
@@ -110,4 +110,4 @@
 //    // Then
 //    verify(athenaClient).startQueryExecution(startQueryExecutionRequest)
 //  }
-//}
+// }

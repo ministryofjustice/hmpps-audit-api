@@ -1,62 +1,62 @@
-//package uk.gov.justice.digital.hmpps.hmppsauditapi.services
+// package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 //
-//import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
-//import org.junit.jupiter.api.BeforeEach
-//import org.junit.jupiter.api.Nested
-//import org.junit.jupiter.api.Test
-//import org.junit.jupiter.api.TestInstance
-//import org.junit.jupiter.api.extension.ExtendWith
-//import org.junit.jupiter.params.ParameterizedTest
-//import org.junit.jupiter.params.provider.Arguments
-//import org.junit.jupiter.params.provider.MethodSource
-//import org.mockito.BDDMockito.given
-//import org.mockito.Mock
-//import org.mockito.junit.jupiter.MockitoExtension
-//import org.mockito.kotlin.whenever
-//import org.springframework.security.authentication.TestingAuthenticationToken
-//import org.springframework.security.core.authority.SimpleGrantedAuthority
-//import org.springframework.security.core.context.SecurityContextHolder
-//import software.amazon.awssdk.services.athena.AthenaClient
-//import software.amazon.awssdk.services.athena.model.ColumnInfo
-//import software.amazon.awssdk.services.athena.model.Datum
-//import software.amazon.awssdk.services.athena.model.GetQueryExecutionRequest
-//import software.amazon.awssdk.services.athena.model.GetQueryExecutionResponse
-//import software.amazon.awssdk.services.athena.model.GetQueryResultsRequest
-//import software.amazon.awssdk.services.athena.model.GetQueryResultsResponse
-//import software.amazon.awssdk.services.athena.model.QueryExecution
-//import software.amazon.awssdk.services.athena.model.QueryExecutionContext
-//import software.amazon.awssdk.services.athena.model.QueryExecutionState
-//import software.amazon.awssdk.services.athena.model.QueryExecutionStatistics
-//import software.amazon.awssdk.services.athena.model.QueryExecutionStatus
-//import software.amazon.awssdk.services.athena.model.ResultConfiguration
-//import software.amazon.awssdk.services.athena.model.ResultSet
-//import software.amazon.awssdk.services.athena.model.ResultSetMetadata
-//import software.amazon.awssdk.services.athena.model.Row
-//import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
-//import software.amazon.awssdk.services.athena.model.StartQueryExecutionResponse
-//import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
-//import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
-//import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
-//import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AthenaQueryResponse
-//import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
-//import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
-//import java.time.Clock
-//import java.time.Instant
-//import java.time.LocalDate
-//import java.time.ZoneId
-//import java.util.UUID
-//import java.util.stream.Stream
+// import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
+// import org.junit.jupiter.api.BeforeEach
+// import org.junit.jupiter.api.Nested
+// import org.junit.jupiter.api.Test
+// import org.junit.jupiter.api.TestInstance
+// import org.junit.jupiter.api.extension.ExtendWith
+// import org.junit.jupiter.params.ParameterizedTest
+// import org.junit.jupiter.params.provider.Arguments
+// import org.junit.jupiter.params.provider.MethodSource
+// import org.mockito.BDDMockito.given
+// import org.mockito.Mock
+// import org.mockito.junit.jupiter.MockitoExtension
+// import org.mockito.kotlin.whenever
+// import org.springframework.security.authentication.TestingAuthenticationToken
+// import org.springframework.security.core.authority.SimpleGrantedAuthority
+// import org.springframework.security.core.context.SecurityContextHolder
+// import software.amazon.awssdk.services.athena.AthenaClient
+// import software.amazon.awssdk.services.athena.model.ColumnInfo
+// import software.amazon.awssdk.services.athena.model.Datum
+// import software.amazon.awssdk.services.athena.model.GetQueryExecutionRequest
+// import software.amazon.awssdk.services.athena.model.GetQueryExecutionResponse
+// import software.amazon.awssdk.services.athena.model.GetQueryResultsRequest
+// import software.amazon.awssdk.services.athena.model.GetQueryResultsResponse
+// import software.amazon.awssdk.services.athena.model.QueryExecution
+// import software.amazon.awssdk.services.athena.model.QueryExecutionContext
+// import software.amazon.awssdk.services.athena.model.QueryExecutionState
+// import software.amazon.awssdk.services.athena.model.QueryExecutionStatistics
+// import software.amazon.awssdk.services.athena.model.QueryExecutionStatus
+// import software.amazon.awssdk.services.athena.model.ResultConfiguration
+// import software.amazon.awssdk.services.athena.model.ResultSet
+// import software.amazon.awssdk.services.athena.model.ResultSetMetadata
+// import software.amazon.awssdk.services.athena.model.Row
+// import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
+// import software.amazon.awssdk.services.athena.model.StartQueryExecutionResponse
+// import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
+// import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
+// import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
+// import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AthenaQueryResponse
+// import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
+// import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
+// import java.time.Clock
+// import java.time.Instant
+// import java.time.LocalDate
+// import java.time.ZoneId
+// import java.util.UUID
+// import java.util.stream.Stream
 //
-//private const val ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS = "ROLE_QUERY_AUDIT__HMPPS_MANAGE_USERS"
-//private const val ROLE_QUERY_AUDIT__HMPPS_EXTERNAL_USERS = "ROLE_QUERY_AUDIT__HMPPS_EXTERNAL_USERS"
-//private const val ROLE_QUERY_AUDIT__HMPPS_ALL_SERVICES = "ROLE_QUERY_AUDIT__ALL_SERVICES"
-//private const val HMPPS_MANAGE_USERS = "hmpps-manage-users"
-//private const val HMPPS_EXTERNAL_USERS = "hmpps-external-users"
-//private val MOCK_START_DATE = LocalDate.parse("2025-01-01")
-//private val MOCK_END_DATE = LocalDate.parse("2025-02-28")
+// private const val ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS = "ROLE_QUERY_AUDIT__HMPPS_MANAGE_USERS"
+// private const val ROLE_QUERY_AUDIT__HMPPS_EXTERNAL_USERS = "ROLE_QUERY_AUDIT__HMPPS_EXTERNAL_USERS"
+// private const val ROLE_QUERY_AUDIT__HMPPS_ALL_SERVICES = "ROLE_QUERY_AUDIT__ALL_SERVICES"
+// private const val HMPPS_MANAGE_USERS = "hmpps-manage-users"
+// private const val HMPPS_EXTERNAL_USERS = "hmpps-external-users"
+// private val MOCK_START_DATE = LocalDate.parse("2025-01-01")
+// private val MOCK_END_DATE = LocalDate.parse("2025-02-28")
 //
-//@ExtendWith(MockitoExtension::class)
-//class AuditAthenaClientTest {
+// @ExtendWith(MockitoExtension::class)
+// class AuditAthenaClientTest {
 //  private val databaseName = "databaseName"
 //  private val tableName = "tableName"
 //  private val workGroupName = "workGroupName"
@@ -330,4 +330,4 @@
 //  }
 //
 //  private fun columnInfo(name: String): ColumnInfo = ColumnInfo.builder().name(name).type("string").build()
-//}
+// }

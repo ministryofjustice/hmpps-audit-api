@@ -1,34 +1,34 @@
-//package uk.gov.justice.digital.hmpps.hmppsauditapi.services
+// package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 //
-//import org.apache.avro.Schema
-//import org.apache.avro.generic.GenericRecord
-//import org.apache.hadoop.fs.Path
-//import org.apache.parquet.avro.AvroParquetReader
-//import org.assertj.core.api.Assertions.assertThat
-//import org.junit.jupiter.api.BeforeEach
-//import org.junit.jupiter.api.Nested
-//import org.junit.jupiter.api.Test
-//import org.junit.jupiter.api.assertThrows
-//import org.junit.jupiter.api.extension.ExtendWith
-//import org.mockito.ArgumentCaptor
-//import org.mockito.Captor
-//import org.mockito.Mock
-//import org.mockito.Mockito.verify
-//import org.mockito.junit.jupiter.MockitoExtension
-//import org.mockito.kotlin.then
-//import software.amazon.awssdk.core.sync.RequestBody
-//import software.amazon.awssdk.services.s3.S3Client
-//import software.amazon.awssdk.services.s3.model.PutObjectRequest
-//import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
-//import java.nio.file.Files
-//import java.security.MessageDigest
-//import java.time.LocalDateTime
-//import java.time.ZoneOffset
-//import java.util.Base64
-//import java.util.UUID
+// import org.apache.avro.Schema
+// import org.apache.avro.generic.GenericRecord
+// import org.apache.hadoop.fs.Path
+// import org.apache.parquet.avro.AvroParquetReader
+// import org.assertj.core.api.Assertions.assertThat
+// import org.junit.jupiter.api.BeforeEach
+// import org.junit.jupiter.api.Nested
+// import org.junit.jupiter.api.Test
+// import org.junit.jupiter.api.assertThrows
+// import org.junit.jupiter.api.extension.ExtendWith
+// import org.mockito.ArgumentCaptor
+// import org.mockito.Captor
+// import org.mockito.Mock
+// import org.mockito.Mockito.verify
+// import org.mockito.junit.jupiter.MockitoExtension
+// import org.mockito.kotlin.then
+// import software.amazon.awssdk.core.sync.RequestBody
+// import software.amazon.awssdk.services.s3.S3Client
+// import software.amazon.awssdk.services.s3.model.PutObjectRequest
+// import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+// import java.nio.file.Files
+// import java.security.MessageDigest
+// import java.time.LocalDateTime
+// import java.time.ZoneOffset
+// import java.util.Base64
+// import java.util.UUID
 //
-//@ExtendWith(MockitoExtension::class)
-//class AuditS3ClientTest {
+// @ExtendWith(MockitoExtension::class)
+// class AuditS3ClientTest {
 //
 //  @Mock
 //  private lateinit var s3Client: S3Client
@@ -184,4 +184,4 @@
 //    val expectedMd5Base64 = Base64.getEncoder().encodeToString(expectedMd5)
 //    assertThat(putObjectRequest.contentMD5()).isEqualTo(expectedMd5Base64)
 //  }
-//}
+// }

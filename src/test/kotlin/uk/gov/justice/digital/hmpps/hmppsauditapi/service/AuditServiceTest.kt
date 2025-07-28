@@ -1,30 +1,30 @@
-//package uk.gov.justice.digital.hmpps.hmppsauditapi.service
+// package uk.gov.justice.digital.hmpps.hmppsauditapi.service
 //
-//import com.microsoft.applicationinsights.TelemetryClient
-//import org.assertj.core.api.Assertions.assertThat
-//import org.junit.jupiter.api.Nested
-//import org.junit.jupiter.api.Test
-//import org.mockito.kotlin.any
-//import org.mockito.kotlin.anyOrNull
-//import org.mockito.kotlin.mock
-//import org.mockito.kotlin.then
-//import org.mockito.kotlin.verify
-//import org.mockito.kotlin.whenever
-//import org.springframework.data.domain.PageImpl
-//import org.springframework.data.domain.Pageable
-//import org.springframework.data.domain.Sort
-//import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
-//import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
-//import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
-//import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditFilterDto
-//import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
-//import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditAthenaClient
-//import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditS3Client
-//import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
-//import java.time.Instant
-//import java.util.UUID
+// import com.microsoft.applicationinsights.TelemetryClient
+// import org.assertj.core.api.Assertions.assertThat
+// import org.junit.jupiter.api.Nested
+// import org.junit.jupiter.api.Test
+// import org.mockito.kotlin.any
+// import org.mockito.kotlin.anyOrNull
+// import org.mockito.kotlin.mock
+// import org.mockito.kotlin.then
+// import org.mockito.kotlin.verify
+// import org.mockito.kotlin.whenever
+// import org.springframework.data.domain.PageImpl
+// import org.springframework.data.domain.Pageable
+// import org.springframework.data.domain.Sort
+// import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
+// import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+// import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
+// import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditFilterDto
+// import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
+// import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditAthenaClient
+// import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditS3Client
+// import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
+// import java.time.Instant
+// import java.util.UUID
 //
-//class AuditServiceTest {
+// class AuditServiceTest {
 //  private val telemetryClient: TelemetryClient = mock()
 //  private val auditRepository: AuditRepository = mock()
 //  private val auditS3Client: AuditS3Client = mock()
@@ -451,4 +451,4 @@
 //      then(auditRepository).shouldHaveNoInteractions()
 //    }
 //  }
-//}
+// }
