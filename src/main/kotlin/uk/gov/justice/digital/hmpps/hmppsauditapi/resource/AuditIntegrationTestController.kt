@@ -103,5 +103,4 @@ class AuditIntegrationTestController(
     service = "some service",
     details = "{\"key\": \"value\"}",
   )
-
 }
