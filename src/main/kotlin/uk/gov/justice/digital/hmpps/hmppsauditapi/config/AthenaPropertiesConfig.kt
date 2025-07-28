@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class AthenaPropertiesConfig(
+  @Value("\${aws.s3.auditBucketName}") private val auditBucketName: String,
+  @Value("\${aws.s3.prisonerAuditBucketName}") private val prisonerAuditBucketName: String,
   @Value("\${aws.athena.database}") private val databaseName: String,
   @Value("\${aws.athena.table}") private val tableName: String,
   @Value("\${aws.athena.workgroup}") private val workGroupName: String,
@@ -20,6 +22,7 @@ class AthenaPropertiesConfig(
   @Bean
   @Qualifier("staffAthenaProperties")
   fun staffProperties(): AthenaProperties = AthenaProperties(
+    s3BucketName = auditBucketName,
     databaseName = databaseName,
     tableName = tableName,
     workGroupName = workGroupName,
@@ -29,6 +32,7 @@ class AthenaPropertiesConfig(
   @Bean
   @Qualifier("prisonerAthenaProperties")
   fun prisonProperties(): AthenaProperties = AthenaProperties(
+    s3BucketName = prisonerAuditBucketName,
     databaseName = prisonerDatabaseName,
     tableName = prisonerTableName,
     workGroupName = prisonerWorkGroupName,
@@ -37,6 +41,7 @@ class AthenaPropertiesConfig(
 }
 
 data class AthenaProperties(
+  val s3BucketName: String,
   val databaseName: String,
   val tableName: String,
   val workGroupName: String,

@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.Direction.DESC
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
@@ -31,10 +32,10 @@ class AuditService(
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 
-  fun saveAuditEvent(auditEvent: AuditEvent, bucketName: String, eventType: AuditEventType) {
+  fun saveAuditEvent(auditEvent: AuditEvent, athenaProperties: AthenaProperties, eventType: AuditEventType) {
     if (saveToS3Bucket || eventType == AuditEventType.PRISONER) {
       auditEvent.id = UUID.randomUUID()
-      auditS3Client.save(auditEvent, bucketName)
+      auditS3Client.save(auditEvent, athenaProperties)
     } else {
       auditRepository.save(auditEvent)
     }

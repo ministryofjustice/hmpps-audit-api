@@ -11,7 +11,8 @@ import org.springframework.stereotype.Service
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
-import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import java.nio.file.Files
 import java.security.MessageDigest
 import java.time.ZoneId
@@ -20,31 +21,33 @@ import java.util.Base64
 @Service
 class AuditS3Client(
   private val s3Client: S3Client,
+  private val auditAthenaClient: AuditAthenaClient,
   private val schema: Schema,
 ) {
 
-  fun save(auditEvent: HMPPSAuditListener.AuditEvent, bucketName: String) {
+  fun save(auditEvent: AuditEvent, athenaProperties: AthenaProperties) {
     val fileName = generateFilename(auditEvent)
     val parquetBytes = convertToParquetBytes(auditEvent)
     val md5Digest = MessageDigest.getInstance("MD5").digest(parquetBytes)
     val md5Base64 = Base64.getEncoder().encodeToString(md5Digest)
 
     val putObjectRequest = PutObjectRequest.builder()
-      .bucket(bucketName)
+      .bucket(athenaProperties.s3BucketName)
       .key(fileName)
       .contentMD5(md5Base64)
       .build()
 
     s3Client.putObject(putObjectRequest, RequestBody.fromBytes(parquetBytes))
+    auditAthenaClient.addPartitionForEvent(auditEvent, athenaProperties)
   }
 
-  private fun generateFilename(auditEvent: HMPPSAuditListener.AuditEvent): String {
+  private fun generateFilename(auditEvent: AuditEvent): String {
     val whenDateTime = auditEvent.`when`.atZone(ZoneId.systemDefault()).toLocalDateTime()
     return "year=${whenDateTime.year}/month=${whenDateTime.monthValue}/day=${whenDateTime.dayOfMonth}/user=${auditEvent.who}/" +
       "${auditEvent.id}.parquet"
   }
 
-  private fun convertToParquetBytes(auditEvent: HMPPSAuditListener.AuditEvent): ByteArray {
+  private fun convertToParquetBytes(auditEvent: AuditEvent): ByteArray {
     val tempFileJavaPath = java.nio.file.Path.of(System.getProperty("java.io.tmpdir"), "${auditEvent.id}.parquet")
     try {
       val record: GenericRecord = GenericData.Record(schema).apply {
