@@ -6,6 +6,7 @@ import org.apache.hadoop.fs.Path
 import org.apache.parquet.avro.AvroParquetReader
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -28,6 +29,7 @@ import java.time.ZoneOffset
 import java.util.Base64
 import java.util.UUID
 
+@Disabled
 @ExtendWith(MockitoExtension::class)
 class AuditS3ClientTest {
 

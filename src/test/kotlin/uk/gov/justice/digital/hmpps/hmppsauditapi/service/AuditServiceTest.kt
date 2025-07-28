@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.service
 
 import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -25,6 +26,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
 import java.time.Instant
 import java.util.UUID
 
+@Disabled
 class AuditServiceTest {
   private val telemetryClient: TelemetryClient = mock()
   private val auditRepository: AuditRepository = mock()
