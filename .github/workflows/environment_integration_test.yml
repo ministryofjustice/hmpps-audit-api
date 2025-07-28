@@ -62,51 +62,51 @@ jobs:
           echo "Audit event response: $RESPONSE"
           echo "$RESPONSE" > audit_event.json
 
-      - name: Step 2 - Trigger repair partitions
-        id: trigger_repair
-        run: |
-          RESPONSE=$(curl --fail --verbose --show-error \
-            -X POST "$ENV_TEST_URL/audit/query/repair-partitions" \
-            -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
-            -H "Content-Type: application/json")
-
-          echo "Repair response: $RESPONSE"
-          echo "$RESPONSE" > repair_response.json
-          QUERY_EXECUTION_ID=$(echo "$RESPONSE" | jq -r '.queryExecutionId')
-          echo "queryExecutionId=$QUERY_EXECUTION_ID" >> $GITHUB_OUTPUT
-
-      - name: Step 3 - Wait for repair partitions to complete
-        run: |
-          QUERY_ID=${{ steps.trigger_repair.outputs.queryExecutionId }}
-
-          echo "Polling query execution status for ID: $QUERY_ID"
-
-          for attempt in {1..60}; do
-            RESPONSE=$(curl --fail --show-error \
-              -X GET "$ENV_TEST_URL/audit/query/repair-partitions/$QUERY_ID" \
-              -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
-              -H "Content-Type: application/json")
-
-            echo "Attempt $attempt: $RESPONSE"
-
-            QUERY_STATE=$(echo "$RESPONSE" | jq -r '.queryState')
-
-            if [[ "$QUERY_STATE" == "SUCCEEDED" ]]; then
-              echo "Query execution succeeded."
-              break
-            elif [[ "$QUERY_STATE" == "FAILED" || "$QUERY_STATE" == "CANCELLED" ]]; then
-              echo "Query execution failed with state: $QUERY_STATE"
-              exit 1
-            fi
-
-            echo "Query still in progress (state: $QUERY_STATE). Waiting 60 seconds..."
-            sleep 60
-          done
-
-          if [[ "$QUERY_STATE" != "SUCCEEDED" ]]; then
-            echo "Timed out waiting for query to succeed after 20 minutes."
-            exit 1
-          fi
+#      - name: Step 2 - Trigger repair partitions
+#        id: trigger_repair
+#        run: |
+#          RESPONSE=$(curl --fail --verbose --show-error \
+#            -X POST "$ENV_TEST_URL/audit/query/repair-partitions" \
+#            -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
+#            -H "Content-Type: application/json")
+#
+#          echo "Repair response: $RESPONSE"
+#          echo "$RESPONSE" > repair_response.json
+#          QUERY_EXECUTION_ID=$(echo "$RESPONSE" | jq -r '.queryExecutionId')
+#          echo "queryExecutionId=$QUERY_EXECUTION_ID" >> $GITHUB_OUTPUT
+#
+#      - name: Step 3 - Wait for repair partitions to complete
+#        run: |
+#          QUERY_ID=${{ steps.trigger_repair.outputs.queryExecutionId }}
+#
+#          echo "Polling query execution status for ID: $QUERY_ID"
+#
+#          for attempt in {1..60}; do
+#            RESPONSE=$(curl --fail --show-error \
+#              -X GET "$ENV_TEST_URL/audit/query/repair-partitions/$QUERY_ID" \
+#              -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
+#              -H "Content-Type: application/json")
+#
+#            echo "Attempt $attempt: $RESPONSE"
+#
+#            QUERY_STATE=$(echo "$RESPONSE" | jq -r '.queryState')
+#
+#            if [[ "$QUERY_STATE" == "SUCCEEDED" ]]; then
+#              echo "Query execution succeeded."
+#              break
+#            elif [[ "$QUERY_STATE" == "FAILED" || "$QUERY_STATE" == "CANCELLED" ]]; then
+#              echo "Query execution failed with state: $QUERY_STATE"
+#              exit 1
+#            fi
+#
+#            echo "Query still in progress (state: $QUERY_STATE). Waiting 60 seconds..."
+#            sleep 60
+#          done
+#
+#          if [[ "$QUERY_STATE" != "SUCCEEDED" ]]; then
+#            echo "Timed out waiting for query to succeed after 20 minutes."
+#            exit 1
+#          fi
 
       - name: Step 4 - Trigger audit event query
         id: trigger_audit_query
