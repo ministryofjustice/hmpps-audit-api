@@ -12,13 +12,13 @@ hmpps.sqs:
       asyncQueueClient: true
       dlqName: mainDlq
     auditusersqueue:
-      queueName: mainQueue
+      queueName: auditUsersQueue
       asyncQueueClient: true
-      dlqName: mainDlq
+      dlqName: auditUsersDlq
     prisonerauditqueue:
-      queueName: mainQueue
+      queueName: prisonerQueue
       asyncQueueClient: true
-      dlqName: mainDlq
+      dlqName: prisonerDlq
 
 spring:
   jpa:
