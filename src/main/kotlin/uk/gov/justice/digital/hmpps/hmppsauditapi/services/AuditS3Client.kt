@@ -38,7 +38,7 @@ class AuditS3Client(
       .build()
 
     s3Client.putObject(putObjectRequest, RequestBody.fromBytes(parquetBytes))
-    // auditAthenaClient.addPartitionForEvent(auditEvent, athenaProperties)
+    auditAthenaClient.addPartitionForEvent(auditEvent, athenaProperties)
   }
 
   private fun generateFilename(auditEvent: AuditEvent): String {
