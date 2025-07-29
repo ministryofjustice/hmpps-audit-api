@@ -97,7 +97,7 @@ class AuditIntegrationTestController(
     subjectId = "some subject ID",
     subjectType = "some subjectType ID",
     correlationId = UUID.randomUUID().toString(),
-    who = (1..5).map { ('A'..'Z').random() }.joinToString(""), // Random 5-character string to create a unique partition on every run
+    who = "TEST_" + (1..5).map { ('A'..'Z').random() }.joinToString(""), // Random who to create a unique partition on every run
     service = "some service",
     details = "{\"key\": \"value\"}",
   )
