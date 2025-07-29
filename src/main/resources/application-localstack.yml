@@ -12,6 +12,9 @@ aws:
     prisonerTable: prisoner-table
     prisonerWorkgroup: prisonerWorkgroup
     prisonerOutputLocation: prisonerOutputLocation
+  s3:
+    auditBucketName: audit-bucket
+    prisonerAuditBucketName: prisoner-audit-bucket
 
 hmpps.sqs:
   provider: localstack
