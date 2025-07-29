@@ -3,6 +3,15 @@ graceful:
 
 aws:
   provider: localstack
+  athena:
+    database: database_name
+    table: table
+    workgroup: workgroup
+    outputLocation: output-location
+    prisonerDatabase: prisoner-database
+    prisonerTable: prisoner-table
+    prisonerWorkgroup: prisonerWorkgroup
+    prisonerOutputLocation: prisonerOutputLocation
 
 hmpps.sqs:
   provider: localstack
