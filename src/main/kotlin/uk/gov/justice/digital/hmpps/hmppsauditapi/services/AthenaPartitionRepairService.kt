@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import software.amazon.awssdk.services.athena.AthenaClient
 import software.amazon.awssdk.services.athena.model.QueryExecutionState.QUEUED
@@ -38,4 +39,10 @@ class AthenaPartitionRepairService(
 
   // TODO test
   fun getRepairPartitionsResult(queryExecutionId: UUID): AthenaQueryResponse = auditAthenaClient.getQueryResults(queryExecutionId.toString())
+
+  @Scheduled(cron = "0 0 0 1 * *")
+  fun triggerRepairPartitions() = triggerRepairPartitions(AuditEventType.STAFF)
+
+  @Scheduled(cron = "0 0 0 1 * *")
+  fun triggerPrisonerRepairPartitions() = triggerRepairPartitions(AuditEventType.PRISONER)
 }
