@@ -12,9 +12,9 @@ hmpps.sqs:
       asyncQueueClient: true
       dlqName: mainDlq
     auditusersqueue:
-      queueName: mainQueue
+      queueName: auditUsersQueue
       asyncQueueClient: true
-      dlqName: mainDlq
+      dlqName: auditUsersDlq
     prisonerauditqueue:
       queueName: prisonerQueue
       asyncQueueClient: true
