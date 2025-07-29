@@ -111,8 +111,11 @@ jobs:
       - name: Step 4 - Trigger audit event query
         id: trigger_audit_query
         run: |
+          WHO=$(jq -r '.who' audit_event.json)
+          echo "Using 'who' value for query: $WHO"
+
           RESPONSE=$(curl --fail --show-error --verbose \
-            -X POST "$ENV_TEST_URL/internal/integration-test/query" \
+            -X POST "$ENV_TEST_URL/internal/integration-test/query/$WHO" \
             -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}")
 
           echo "Trigger audit query response: $RESPONSE"
