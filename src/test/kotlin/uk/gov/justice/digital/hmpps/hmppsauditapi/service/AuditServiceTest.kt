@@ -13,6 +13,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
@@ -25,6 +26,15 @@ import java.time.Instant
 import java.util.UUID
 
 class AuditServiceTest {
+  private val athenaProperties = AthenaProperties(
+    auditEventType = AuditEventType.STAFF,
+    s3BucketName = "hmpps-audit-bucket",
+    databaseName = "the-database",
+    tableName = "the-table",
+    workGroupName = "the-workgroup",
+    outputLocation = "the-location",
+  )
+
   private val telemetryClient: TelemetryClient = mock()
   private val auditRepository: AuditRepository = mock()
   private val auditS3Client: AuditS3Client = mock()
@@ -386,25 +396,21 @@ class AuditServiceTest {
     fun `save audit event to database when saveToS3Bucket is false`() {
       auditService = AuditService(telemetryClient, auditRepository, auditS3Client, auditAthenaClient, false)
 
-      auditService.saveAuditEvent(
-        auditEvent,
-        "bucket",
-        AuditEventType.STAFF,
-      )
+      auditService.saveAuditEvent(auditEvent, athenaProperties)
 
-      verify(auditRepository).save(auditEvent)
+      then(auditRepository).should().save(auditEvent)
+      then(auditS3Client).shouldHaveNoInteractions()
+      then(auditAthenaClient).shouldHaveNoInteractions()
     }
 
     @Test
     fun `save audit event to S3 bucket when saveToS3Bucket is true`() {
       auditService = AuditService(telemetryClient, auditRepository, auditS3Client, auditAthenaClient, true)
 
-      auditService.saveAuditEvent(
-        auditEvent,
-        "bucket",
-        AuditEventType.STAFF,
-      )
+      auditService.saveAuditEvent(auditEvent, athenaProperties)
 
+      then(auditS3Client).should().save(auditEvent, athenaProperties.s3BucketName)
+      then(auditAthenaClient).should().addPartitionForEvent(auditEvent, athenaProperties)
       then(auditRepository).shouldHaveNoInteractions()
     }
   }
@@ -429,26 +435,22 @@ class AuditServiceTest {
     fun `save audit event to database when saveToS3Bucket is false`() {
       auditService = AuditService(telemetryClient, auditRepository, auditS3Client, auditAthenaClient, false)
 
-      auditService.saveAuditEvent(
-        auditEvent,
-        "bucket",
-        AuditEventType.STAFF,
-      )
+      auditService.saveAuditEvent(auditEvent, athenaProperties)
 
-      verify(auditRepository).save(auditEvent)
+      then(auditS3Client).shouldHaveNoInteractions()
+      then(auditAthenaClient).shouldHaveNoInteractions()
+      then(auditRepository).should().save(auditEvent)
     }
 
     @Test
     fun `save audit event to S3 bucket when saveToS3Bucket is true`() {
       auditService = AuditService(telemetryClient, auditRepository, auditS3Client, auditAthenaClient, true)
 
-      auditService.saveAuditEvent(
-        auditEvent,
-        "bucket",
-        AuditEventType.STAFF,
-      )
+      auditService.saveAuditEvent(auditEvent, athenaProperties)
 
       then(auditRepository).shouldHaveNoInteractions()
+      then(auditS3Client).should().save(auditEvent, athenaProperties.s3BucketName)
+      then(auditAthenaClient).should().addPartitionForEvent(auditEvent, athenaProperties)
     }
   }
 }

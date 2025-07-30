@@ -14,10 +14,8 @@ import java.util.UUID
 class AthenaPartitionRepairService(
   private val athenaClient: AthenaClient,
   private val athenaPropertiesFactory: AthenaPropertiesFactory,
-  private val auditAthenaClient: AuditAthenaClient,
 ) {
 
-  // TODO test
   fun triggerRepairPartitions(auditEventType: AuditEventType): AthenaQueryResponse {
     val athenaProperties = athenaPropertiesFactory.getProperties(auditEventType)
     val databaseName = athenaProperties.databaseName
@@ -37,12 +35,9 @@ class AthenaPartitionRepairService(
     )
   }
 
-  // TODO test
-  fun getRepairPartitionsResult(queryExecutionId: UUID): AthenaQueryResponse = auditAthenaClient.getQueryResults(queryExecutionId.toString())
-
-  @Scheduled(cron = "0 0 * * * *")
+  @Scheduled(cron = "0 0 0 1 * *")
   fun triggerRepairPartitions() = triggerRepairPartitions(AuditEventType.STAFF)
 
-  @Scheduled(cron = "0 15 * * * *")
+  @Scheduled(cron = "0 0 0 1 * *")
   fun triggerPrisonerRepairPartitions() = triggerRepairPartitions(AuditEventType.PRISONER)
 }

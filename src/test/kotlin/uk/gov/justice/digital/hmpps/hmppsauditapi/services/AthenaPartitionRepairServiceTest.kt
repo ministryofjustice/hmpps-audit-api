@@ -1,21 +1,24 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import org.mockito.BDDMockito.given
 import org.mockito.Mock
-import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.whenever
 import software.amazon.awssdk.services.athena.AthenaClient
 import software.amazon.awssdk.services.athena.model.QueryExecutionContext
+import software.amazon.awssdk.services.athena.model.QueryExecutionState.QUEUED
 import software.amazon.awssdk.services.athena.model.ResultConfiguration
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AthenaQueryResponse
+import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
 class AthenaPartitionRepairServiceTest {
@@ -26,17 +29,11 @@ class AthenaPartitionRepairServiceTest {
   @Mock
   private lateinit var athenaPropertiesFactory: AthenaPropertiesFactory
 
-  @Mock
-  private lateinit var auditAthenaClient: AuditAthenaClient
-
   private val databaseName = "databaseName"
   private val tableName = "tableName"
   private val workGroupName = "workGroupName"
   private val outputLocation = "outputLocation"
-  private val prisonerDatabaseName = "prisonerDatabaseName"
-  private val prisonerTableName = "prisonerTableName"
-  private val prisonerWorkGroupName = "prisonerWorkGroupName"
-  private val prisonerOutputLocation = "prisonerOutputLocation"
+  private val s3BucketName = "s3BucketName"
 
   private lateinit var service: AthenaPartitionRepairService
 
@@ -47,67 +44,44 @@ class AthenaPartitionRepairServiceTest {
       .workGroup(workGroupName)
   private val updatePartitionsQueryExecutionId = "d9906078-2776-46cc-bcfe-3f91cfbc181b"
 
-  private val startPrisonerQueryExecutionRequestBuilder: StartQueryExecutionRequest.Builder =
-    StartQueryExecutionRequest.builder()
-      .queryExecutionContext(QueryExecutionContext.builder().database(prisonerDatabaseName).build())
-      .resultConfiguration(ResultConfiguration.builder().outputLocation(prisonerOutputLocation).build())
-      .workGroup(prisonerWorkGroupName)
-  private val updatePrisonerPartitionsQueryExecutionId = "d9906078-2776-46cc-bcfe-aaaabbbbcccc"
-
   @BeforeEach
   fun setup() {
     service = AthenaPartitionRepairService(
       athenaClient,
       athenaPropertiesFactory,
-      auditAthenaClient,
     )
   }
 
-  @Test
-  fun `should repair Athena partitions and send telemetry`() {
+  @ParameterizedTest
+  @EnumSource(AuditEventType::class)
+  fun `should repair Athena partitions`(auditEventType: AuditEventType) {
     // Given
     val updatePartitionsQuery = "MSCK REPAIR TABLE $databaseName.$tableName;"
     val startQueryExecutionRequest = startQueryExecutionRequestBuilder.queryString(updatePartitionsQuery).build()
     given(athenaClient.startQueryExecution(startQueryExecutionRequest)).willReturn(
       StartQueryExecutionResponse.builder().queryExecutionId(updatePartitionsQueryExecutionId).build(),
     )
-
-    // When
-    whenever(athenaPropertiesFactory.getProperties(AuditEventType.STAFF)).thenReturn(
+    given(athenaPropertiesFactory.getProperties(auditEventType)).willReturn(
       AthenaProperties(
-        databaseName = "databaseName",
-        tableName = "tableName",
-        workGroupName = "workGroupName",
-        outputLocation = "outputLocation",
+        auditEventType = auditEventType,
+        databaseName = databaseName,
+        tableName = tableName,
+        workGroupName = workGroupName,
+        outputLocation = outputLocation,
+        s3BucketName = s3BucketName,
       ),
-    )
-    service.triggerRepairPartitions(AuditEventType.STAFF)
-
-    // Then
-    verify(athenaClient).startQueryExecution(startQueryExecutionRequest)
-  }
-
-  @Test
-  fun `should repair Prisoner Athena partitions and send telemetry`() {
-    // Given
-    val updatePartitionsQuery = "MSCK REPAIR TABLE $prisonerDatabaseName.$prisonerTableName;"
-    val startQueryExecutionRequest = startPrisonerQueryExecutionRequestBuilder.queryString(updatePartitionsQuery).build()
-    given(athenaClient.startQueryExecution(startQueryExecutionRequest)).willReturn(
-      StartQueryExecutionResponse.builder().queryExecutionId(updatePrisonerPartitionsQueryExecutionId).build(),
     )
 
     // When
-    whenever(athenaPropertiesFactory.getProperties(AuditEventType.PRISONER)).thenReturn(
-      AthenaProperties(
-        databaseName = "prisonerDatabaseName",
-        tableName = "prisonerTableName",
-        workGroupName = "prisonerWorkGroupName",
-        outputLocation = "prisonerOutputLocation",
-      ),
-    )
-    service.triggerRepairPartitions(AuditEventType.PRISONER)
+    val athenaQueryResponse = service.triggerRepairPartitions(auditEventType)
 
     // Then
-    verify(athenaClient).startQueryExecution(startQueryExecutionRequest)
+    assertThat(athenaQueryResponse).isEqualTo(
+      AthenaQueryResponse(
+        queryExecutionId = UUID.fromString(updatePartitionsQueryExecutionId),
+        queryState = QUEUED,
+        authorisedServices = emptyList(),
+      ),
+    )
   }
 }

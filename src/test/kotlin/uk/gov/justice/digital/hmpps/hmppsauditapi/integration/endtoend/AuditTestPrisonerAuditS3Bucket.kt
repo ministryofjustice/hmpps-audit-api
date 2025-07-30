@@ -17,13 +17,11 @@ import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
-import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
 
 @TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=true"])
 @ActiveProfiles(resolver = CommandLineProfilesResolver::class, inheritProfiles = false)
 class AuditTestPrisonerAuditS3Bucket @Autowired constructor(
   override var webTestClient: WebTestClient,
-  auditQueueService: AuditQueueService,
 ) : QueueListenerIntegrationTest() {
 
   private val prisonerAuditEvent = AuditEvent(
@@ -40,14 +38,6 @@ class AuditTestPrisonerAuditS3Bucket @Autowired constructor(
 
   @Test
   fun `save basic audit entry to S3 bucket`() {
-//    webTestClient.post()
-//      .uri("/audit")
-//      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT_TEST"), scopes = listOf("write")))
-//      .contentType(MediaType.APPLICATION_JSON)
-//      .body(BodyInserters.fromValue(basicAuditEvent))
-//      .exchange()
-//      .expectStatus().isAccepted
-
     auditQueueService.sendPrisonerAuditEvent(prisonerAuditEvent)
 
     await untilCallTo { mockingDetails(auditS3Client).invocations.size } matches { it!! >= 1 }
@@ -60,7 +50,7 @@ class AuditTestPrisonerAuditS3Bucket @Autowired constructor(
           subjectType == "NOT_APPLICABLE" &&
           id != null
       },
-      bucketName = eq("hmpps-prisoner-audit-bucket"),
+      eq("hmpps-prisoner-audit-bucket"),
     )
     verifyNoInteractions(auditRepository)
   }

@@ -9,7 +9,9 @@ import software.amazon.awssdk.services.athena.model.GetQueryExecutionRequest
 import software.amazon.awssdk.services.athena.model.GetQueryResultsRequest
 import software.amazon.awssdk.services.athena.model.QueryExecutionState
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AthenaQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
@@ -17,6 +19,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import java.util.UUID
 
 private const val AUTHORISED_SERVICE_ROLE_PREFIX = "ROLE_QUERY_AUDIT__"
@@ -65,6 +68,31 @@ class AuditAthenaClient(
       executionTimeInMillis = queryExecution.statistics().totalExecutionTimeInMillis(),
     )
     return response
+  }
+
+  fun addPartitionForEvent(auditEvent: AuditEvent, athenaProperties: AthenaProperties) {
+    val whenDateTime = auditEvent.`when`.atZone(ZoneId.systemDefault()).toLocalDateTime()
+    val year = whenDateTime.year
+    val month = whenDateTime.monthValue
+    val day = whenDateTime.dayOfMonth
+    val user = auditEvent.who
+
+    val partitionS3Path = "s3://${athenaProperties.s3BucketName}/year=$year/month=$month/day=$day/user=$user/"
+
+    val alterQuery = """
+    ALTER TABLE ${athenaProperties.databaseName}.${athenaProperties.tableName}
+    ADD IF NOT EXISTS PARTITION (year=$year, month=$month, day=$day, user='$user')
+    LOCATION '$partitionS3Path'
+    """.trimIndent()
+
+    val request = StartQueryExecutionRequest.builder()
+      .queryString(alterQuery)
+      .queryExecutionContext { it.database(athenaProperties.databaseName) }
+      .workGroup(athenaProperties.workGroupName)
+      .resultConfiguration { it.outputLocation(athenaProperties.outputLocation) }
+      .build()
+
+    athenaClient.startQueryExecution(request)
   }
 
   private fun buildAthenaQuery(filter: DigitalServicesQueryRequest, services: List<String>, auditEventType: AuditEventType): String {

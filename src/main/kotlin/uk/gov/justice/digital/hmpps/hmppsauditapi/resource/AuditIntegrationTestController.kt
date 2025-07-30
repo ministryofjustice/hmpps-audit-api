@@ -18,8 +18,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
 
-private const val WHO = "audit-integration-test-user"
-
 @RestController
 @RequestMapping("/internal/integration-test")
 class AuditIntegrationTestController(
@@ -43,12 +41,12 @@ class AuditIntegrationTestController(
     return createdAuditEvent
   }
 
-  @PostMapping("/query")
+  @PostMapping("/query/{who}")
   @PreAuthorize("hasRole('ROLE_AUDIT_INTEGRATION_TEST')")
-  fun queryTestAuditEvent(): AthenaQueryResponse = auditService.triggerQuery(
+  fun queryTestAuditEvent(@PathVariable who: String): AthenaQueryResponse = auditService.triggerQuery(
     DigitalServicesQueryRequest(
       startDate = LocalDate.now(),
-      who = WHO,
+      who = who,
     ),
     AuditEventType.STAFF,
   )
@@ -99,7 +97,7 @@ class AuditIntegrationTestController(
     subjectId = "some subject ID",
     subjectType = "some subjectType ID",
     correlationId = UUID.randomUUID().toString(),
-    who = WHO,
+    who = "TEST_" + (1..5).map { ('A'..'Z').random() }.joinToString(""), // Random who to create a unique partition on every run
     service = "some service",
     details = "{\"key\": \"value\"}",
   )

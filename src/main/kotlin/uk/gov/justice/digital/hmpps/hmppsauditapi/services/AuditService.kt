@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.Direction.DESC
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
@@ -31,14 +32,15 @@ class AuditService(
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 
-  fun saveAuditEvent(auditEvent: AuditEvent, bucketName: String, eventType: AuditEventType) {
-    if (saveToS3Bucket || eventType == AuditEventType.PRISONER) {
+  fun saveAuditEvent(auditEvent: AuditEvent, athenaProperties: AthenaProperties) {
+    if (saveToS3Bucket || athenaProperties.auditEventType == AuditEventType.PRISONER) {
       auditEvent.id = UUID.randomUUID()
-      auditS3Client.save(auditEvent, bucketName)
+      auditS3Client.save(auditEvent, athenaProperties.s3BucketName)
+      auditAthenaClient.addPartitionForEvent(auditEvent, athenaProperties)
     } else {
       auditRepository.save(auditEvent)
     }
-    telemetryClient.trackEvent(eventType.description, auditEvent.asMap())
+    telemetryClient.trackEvent(athenaProperties.auditEventType.description, auditEvent.asMap())
   }
 
   fun findAll(): List<AuditDto> = auditRepository.findAll(Sort.by(DESC, "when")).map { AuditDto(it) }

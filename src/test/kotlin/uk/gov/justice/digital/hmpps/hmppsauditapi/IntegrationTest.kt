@@ -11,9 +11,11 @@ import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
 import uk.gov.justice.digital.hmpps.hmppsauditapi.helper.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.hmppsauditapi.integration.S3TestConfig
 import uk.gov.justice.digital.hmpps.hmppsauditapi.integration.endtoend.CommandLineProfilesResolver
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
 import uk.gov.justice.hmpps.sqs.HmppsQueueFactory
@@ -67,8 +69,25 @@ abstract class IntegrationTest {
   protected val awsSqsDlqUrl by lazy { auditQueueConfig.dlqUrl as String }
 
   protected val awsSqsPrisonerAuditDlqClient by lazy { prisonerAuditQueueConfig.sqsDlqClient as SqsAsyncClient }
-  protected val awsSqsPrisonerAuditUrl by lazy { prisonerAuditQueueConfig.queueUrl }
   protected val awsSqsPrisonerAuditDlqUrl by lazy { prisonerAuditQueueConfig.dlqUrl as String }
+
+  protected val staffAthenaProperties = AthenaProperties(
+    auditEventType = AuditEventType.STAFF,
+    s3BucketName = "hmpps-audit-bucket",
+    databaseName = "the-database",
+    tableName = "the-table",
+    workGroupName = "the-workgroup",
+    outputLocation = "the-location",
+  )
+
+  protected val prisonerAthenaProperties = AthenaProperties(
+    auditEventType = AuditEventType.PRISONER,
+    s3BucketName = "hmpps-prisoner-audit-bucket",
+    databaseName = "the-prisoner-database",
+    tableName = "the-prisoner-table",
+    workGroupName = "the-prisoner-workgroup",
+    outputLocation = "the-prisoner-location",
+  )
 
   @SpyBean
   @Qualifier("auditqueue-sqs-client")
