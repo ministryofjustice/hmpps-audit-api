@@ -21,3 +21,18 @@ hmpps:
     saveToS3Bucket: true
   audit:
     queriesStartDate: 2024-01-01
+  sqs:
+    provider: localstack
+    queues:
+      auditqueue:
+        queueName: mainQueue
+        asyncQueueClient: true
+        dlqName: mainDlq
+      auditusersqueue:
+        queueName: auditUsersQueue
+        asyncQueueClient: true
+        dlqName: auditUsersDlq
+      prisonerauditqueue:
+        queueName: prisonerQueue
+        asyncQueueClient: true
+        dlqName: prisonerDlq
