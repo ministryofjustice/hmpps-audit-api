@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.BDDMockito.given
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.then
 import org.mockito.kotlin.whenever
 import org.springframework.security.authentication.TestingAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -36,6 +37,7 @@ import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AthenaQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
@@ -43,7 +45,10 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.util.UUID
 import java.util.stream.Stream
 
@@ -66,6 +71,14 @@ class AuditAthenaClientTest {
     QueryExecution.builder().status(QueryExecutionStatus.builder().state(QueryExecutionState.SUCCEEDED).build())
       .statistics(QueryExecutionStatistics.builder().build()).build(),
   ).build()
+  private val athenaProperties = AthenaProperties(
+    auditEventType = AuditEventType.STAFF,
+    databaseName = "databaseName",
+    tableName = "tableName",
+    workGroupName = "workGroupName",
+    outputLocation = "outputLocation",
+    s3BucketName = "s3BucketName",
+  )
 
   @Mock
   private lateinit var athenaClient: AthenaClient
@@ -120,16 +133,7 @@ class AuditAthenaClientTest {
         .willReturn(StartQueryExecutionResponse.builder().queryExecutionId(queryExecutionId).build())
 
       // When
-      whenever(athenaPropertiesFactory.getProperties(AuditEventType.STAFF)).thenReturn(
-        AthenaProperties(
-          auditEventType = AuditEventType.STAFF,
-          databaseName = "databaseName",
-          tableName = "tableName",
-          workGroupName = "workGroupName",
-          outputLocation = "outputLocation",
-          s3BucketName = "s3BucketName",
-        ),
-      )
+      whenever(athenaPropertiesFactory.getProperties(AuditEventType.STAFF)).thenReturn(athenaProperties)
       val response: AthenaQueryResponse = auditAthenaClient.triggerQuery(
         digitalServicesQueryRequest,
         AuditEventType.STAFF,
@@ -327,6 +331,38 @@ class AuditAthenaClientTest {
           results = listOf(expectedAuditDto),
           authorisedServices = listOf(HMPPS_MANAGE_USERS),
         ),
+      )
+    }
+  }
+
+  @Nested
+  inner class AddPartitionForEvent {
+
+    @Test
+    fun `should issue correct ALTER TABLE ADD PARTITION query`() {
+      val expectedS3Location = "s3://${athenaProperties.s3BucketName}/year=2025/month=7/day=29/user=TESTUSER/"
+      val expectedQuery = """
+      ALTER TABLE $databaseName.$tableName
+      ADD IF NOT EXISTS PARTITION (year=2025, month=7, day=29, user='TESTUSER')
+      LOCATION '$expectedS3Location'
+      """.trimIndent()
+
+      auditAthenaClient.addPartitionForEvent(
+        HMPPSAuditListener.AuditEvent(
+          what = "what",
+          `when` = LocalDateTime.of(LocalDate.of(2025, 7, 29), LocalTime.MIN).toInstant(ZoneOffset.UTC),
+          who = "TESTUSER",
+        ),
+        athenaProperties,
+      )
+
+      then(athenaClient).should().startQueryExecution(
+        StartQueryExecutionRequest.builder()
+          .queryString(expectedQuery)
+          .queryExecutionContext { it.database(athenaProperties.databaseName) }
+          .workGroup(athenaProperties.workGroupName)
+          .resultConfiguration { it.outputLocation(athenaProperties.outputLocation) }
+          .build(),
       )
     }
   }
