@@ -76,7 +76,7 @@ jobs:
           QUERY_EXECUTION_ID=$(echo "$RESPONSE" | jq -r '.queryExecutionId')
           echo "queryExecutionId=$QUERY_EXECUTION_ID" >> $GITHUB_OUTPUT
 
-      - name: Step 5 - Wait for audit query results
+      - name: Step 3 - Wait for audit query results
         id: wait_audit_query
         run: |
           QUERY_ID=${{ steps.trigger_audit_query.outputs.queryExecutionId }}
@@ -110,7 +110,7 @@ jobs:
             exit 1
           fi
           
-      - name: Step 6 - Assert audit event exists
+      - name: Step 4 - Assert audit event exists
         run: |
           QUERY_ID=${{ steps.trigger_audit_query.outputs.queryExecutionId }}
           echo "Asserting audit event is present in the results for queryExecutionId: $QUERY_ID"
