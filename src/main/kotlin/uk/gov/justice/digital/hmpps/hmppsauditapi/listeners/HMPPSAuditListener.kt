@@ -36,7 +36,7 @@ class HMPPSAuditListener(
     val cleansedAuditEvent = auditEvent.copy(
       details = auditEvent.details?.jsonString(),
     )
-    auditService.saveAuditEvent(cleansedAuditEvent, athenaPropertiesFactory.getProperties(AuditEventType.STAFF), AuditEventType.STAFF)
+    auditService.saveAuditEvent(cleansedAuditEvent, athenaPropertiesFactory.getProperties(AuditEventType.STAFF))
   }
 
   @SqsListener("prisonerauditqueue", factory = "hmppsQueueContainerFactoryProxy")
@@ -48,7 +48,7 @@ class HMPPSAuditListener(
       details = auditEvent.details?.jsonString(),
     )
 
-    auditService.saveAuditEvent(cleansedAuditEvent, athenaPropertiesFactory.getProperties(AuditEventType.PRISONER), AuditEventType.PRISONER)
+    auditService.saveAuditEvent(cleansedAuditEvent, athenaPropertiesFactory.getProperties(AuditEventType.PRISONER))
   }
 
   private fun patchSubjectTypeIfMissing(message: String): String = try {
