@@ -58,7 +58,7 @@ class HMPPSAuditListener(
     }
 
     tree.toString()
-  } catch (e: Exception) {
+  } catch (_: Exception) {
     message
   }
 

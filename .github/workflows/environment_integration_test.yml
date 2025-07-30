@@ -51,7 +51,7 @@ jobs:
           echo "::add-mask::$TOKEN"
           echo "token=$TOKEN" >> $GITHUB_OUTPUT
 
-      - name: Step 1 - Create audit event and partition
+      - name: Step 1 - Create audit event and register partition
         id: create_event
         run: |
           RESPONSE=$(curl --fail --verbose --show-error \
