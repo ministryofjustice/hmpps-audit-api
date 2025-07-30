@@ -81,7 +81,7 @@ class AthenaPartitionRepairServiceTest {
         queryExecutionId = UUID.fromString(updatePartitionsQueryExecutionId),
         queryState = QUEUED,
         authorisedServices = emptyList(),
-      )
+      ),
     )
   }
 }
