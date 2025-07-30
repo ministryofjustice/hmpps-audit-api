@@ -6,7 +6,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.check
 import org.mockito.kotlin.doNothing
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
@@ -27,7 +26,7 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
   """
     listener.onAuditEvent(message)
 
-    doNothing().whenever(auditService).saveAuditEvent(any(), any(), any())
+    doNothing().whenever(auditService).saveAuditEvent(any(), any())
 
     verify(auditService).saveAuditEvent(
       check {
@@ -37,8 +36,10 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
         assertThat(it.who).isEqualTo("bobby.beans")
         assertThat(it.service).isEqualTo("offender-service")
       },
-      argThat { true == true }, // TODO fix
-      eq(AuditEventType.STAFF),
+      argThat {
+          s3BucketName == "hmpps-audit-bucket" &&
+          auditEventType == AuditEventType.STAFF
+      },
     )
   }
 
@@ -54,7 +55,7 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
     }
   """
 
-    doNothing().whenever(auditService).saveAuditEvent(any(), any(), any())
+    doNothing().whenever(auditService).saveAuditEvent(any(), any())
 
     listener.onAuditEvent(message)
 
@@ -67,7 +68,6 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
         assertThat(it.service).isEqualTo("auth-service")
       },
       argThat { true == true }, // TODO fix
-      eq(AuditEventType.STAFF),
     )
   }
 
@@ -84,7 +84,7 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
     }
   """
 
-    doNothing().whenever(auditService).saveAuditEvent(any(), any(), any())
+    doNothing().whenever(auditService).saveAuditEvent(any(), any())
 
     listener.onAuditEvent(message)
 
@@ -98,7 +98,6 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
         assertThat(it.subjectType).isEqualTo("NOT_APPLICABLE")
       },
       argThat { true == true }, // TODO fix
-      eq(AuditEventType.STAFF),
     )
   }
 }
