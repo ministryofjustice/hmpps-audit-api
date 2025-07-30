@@ -38,14 +38,6 @@ class AuditTestPrisonerAuditS3Bucket @Autowired constructor(
 
   @Test
   fun `save basic audit entry to S3 bucket`() {
-    //    webTestClient.post()
-    //      .uri("/audit")
-    //      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT_TEST"), scopes = listOf("write")))
-    //      .contentType(MediaType.APPLICATION_JSON)
-    //      .body(BodyInserters.fromValue(basicAuditEvent))
-    //      .exchange()
-    //      .expectStatus().isAccepted
-
     auditQueueService.sendPrisonerAuditEvent(prisonerAuditEvent)
 
     await untilCallTo { mockingDetails(auditS3Client).invocations.size } matches { it!! >= 1 }
@@ -59,8 +51,8 @@ class AuditTestPrisonerAuditS3Bucket @Autowired constructor(
           id != null
       },
       argThat {
-        true == true
-      }, // TODO fill in
+        s3BucketName == "hmpps-prisoner-audit-bucket"
+      },
     )
     verifyNoInteractions(auditRepository)
   }
