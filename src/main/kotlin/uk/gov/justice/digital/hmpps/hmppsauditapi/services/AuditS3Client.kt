@@ -21,7 +21,6 @@ import java.util.Base64
 @Service
 class AuditS3Client(
   private val s3Client: S3Client,
-  private val auditAthenaClient: AuditAthenaClient,
   private val schema: Schema,
 ) {
 
@@ -38,7 +37,6 @@ class AuditS3Client(
       .build()
 
     s3Client.putObject(putObjectRequest, RequestBody.fromBytes(parquetBytes))
-    auditAthenaClient.addPartitionForEvent(auditEvent, athenaProperties)
   }
 
   private fun generateFilename(auditEvent: AuditEvent): String {
