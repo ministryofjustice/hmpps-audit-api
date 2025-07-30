@@ -122,6 +122,7 @@ class AuditAthenaClientTest {
       // When
       whenever(athenaPropertiesFactory.getProperties(AuditEventType.STAFF)).thenReturn(
         AthenaProperties(
+          auditEventType = AuditEventType.STAFF,
           databaseName = "databaseName",
           tableName = "tableName",
           workGroupName = "workGroupName",

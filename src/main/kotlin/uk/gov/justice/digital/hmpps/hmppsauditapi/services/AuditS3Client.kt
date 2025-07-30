@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
-import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import java.nio.file.Files
 import java.security.MessageDigest
@@ -24,14 +23,14 @@ class AuditS3Client(
   private val schema: Schema,
 ) {
 
-  fun save(auditEvent: AuditEvent, athenaProperties: AthenaProperties) {
+  fun save(auditEvent: AuditEvent, bucketName: String) {
     val fileName = generateFilename(auditEvent)
     val parquetBytes = convertToParquetBytes(auditEvent)
     val md5Digest = MessageDigest.getInstance("MD5").digest(parquetBytes)
     val md5Base64 = Base64.getEncoder().encodeToString(md5Digest)
 
     val putObjectRequest = PutObjectRequest.builder()
-      .bucket(athenaProperties.s3BucketName)
+      .bucket(bucketName)
       .key(fileName)
       .contentMD5(md5Base64)
       .build()

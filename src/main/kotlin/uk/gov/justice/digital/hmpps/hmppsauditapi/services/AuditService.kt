@@ -32,14 +32,15 @@ class AuditService(
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 
-  fun saveAuditEvent(auditEvent: AuditEvent, athenaProperties: AthenaProperties, eventType: AuditEventType) {
-    if (saveToS3Bucket || eventType == AuditEventType.PRISONER) {
+  fun saveAuditEvent(auditEvent: AuditEvent, athenaProperties: AthenaProperties) {
+    if (saveToS3Bucket || athenaProperties.auditEventType == AuditEventType.PRISONER) {
       auditEvent.id = UUID.randomUUID()
-      auditS3Client.save(auditEvent, athenaProperties)
+      auditS3Client.save(auditEvent, athenaProperties.s3BucketName)
+      auditAthenaClient.addPartitionForEvent(auditEvent, athenaProperties) // TODO test
     } else {
       auditRepository.save(auditEvent)
     }
-    telemetryClient.trackEvent(eventType.description, auditEvent.asMap())
+    telemetryClient.trackEvent(athenaProperties.auditEventType.description, auditEvent.asMap())
   }
 
   fun findAll(): List<AuditDto> = auditRepository.findAll(Sort.by(DESC, "when")).map { AuditDto(it) }

@@ -75,6 +75,7 @@ class AthenaPartitionRepairServiceTest {
     // When
     whenever(athenaPropertiesFactory.getProperties(AuditEventType.STAFF)).thenReturn(
       AthenaProperties(
+        auditEventType = AuditEventType.STAFF,
         databaseName = "databaseName",
         tableName = "tableName",
         workGroupName = "workGroupName",
@@ -100,6 +101,7 @@ class AthenaPartitionRepairServiceTest {
     // When
     whenever(athenaPropertiesFactory.getProperties(AuditEventType.PRISONER)).thenReturn(
       AthenaProperties(
+        auditEventType = AuditEventType.PRISONER,
         databaseName = "prisonerDatabaseName",
         tableName = "prisonerTableName",
         workGroupName = "prisonerWorkGroupName",

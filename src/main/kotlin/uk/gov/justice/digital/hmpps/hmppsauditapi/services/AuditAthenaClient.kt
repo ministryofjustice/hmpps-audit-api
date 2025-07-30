@@ -70,7 +70,7 @@ class AuditAthenaClient(
     return response
   }
 
-  fun addPartitionForEvent(auditEvent: AuditEvent, athenaProperties: AthenaProperties) {
+  fun addPartitionForEvent(auditEvent: AuditEvent, athenaProperties: AthenaProperties) { // TODO test
     val whenDateTime = auditEvent.`when`.atZone(ZoneId.systemDefault()).toLocalDateTime()
     val year = whenDateTime.year
     val month = whenDateTime.monthValue

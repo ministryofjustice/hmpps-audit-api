@@ -50,9 +50,7 @@ class AuditTestPrisonerAuditS3Bucket @Autowired constructor(
           subjectType == "NOT_APPLICABLE" &&
           id != null
       },
-      argThat {
-        s3BucketName == "hmpps-prisoner-audit-bucket"
-      },
+      eq("hmpps-prisoner-audit-bucket"),
     )
     verifyNoInteractions(auditRepository)
   }

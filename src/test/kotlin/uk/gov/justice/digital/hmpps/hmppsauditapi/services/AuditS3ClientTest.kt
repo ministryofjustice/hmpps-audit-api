@@ -6,7 +6,6 @@ import org.apache.hadoop.fs.Path
 import org.apache.parquet.avro.AvroParquetReader
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -16,7 +15,6 @@ import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.any
 import org.mockito.kotlin.then
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
@@ -29,15 +27,11 @@ import java.time.ZoneOffset
 import java.util.Base64
 import java.util.UUID
 
-@Disabled
 @ExtendWith(MockitoExtension::class)
 class AuditS3ClientTest {
 
   @Mock
   private lateinit var s3Client: S3Client
-
-  @Mock
-  private lateinit var auditAthenaClient: AuditAthenaClient
 
   private lateinit var auditS3Client: AuditS3Client
 
@@ -57,12 +51,10 @@ class AuditS3ClientTest {
   fun setup() {
     auditS3Client = AuditS3Client(
       s3Client,
-      auditAthenaClient,
       schema,
     )
     prisonerAuditS3Client = AuditS3Client(
       s3Client,
-      auditAthenaClient,
       schema,
     )
   }
@@ -84,7 +76,7 @@ class AuditS3ClientTest {
         details = "some details",
       )
 
-      auditS3Client.save(auditEvent, any()) // TODO fix
+      auditS3Client.save(auditEvent, "auditBucketName")
 
       verify(s3Client).putObject(putObjectRequestCaptor.capture(), requestBodyCaptor.capture())
       val putObjectRequest = putObjectRequestCaptor.value
@@ -109,7 +101,7 @@ class AuditS3ClientTest {
         details = "some details",
       )
 
-      val exception = assertThrows<IllegalArgumentException> { auditS3Client.save(auditEvent, any()) } // TODO fix
+      val exception = assertThrows<IllegalArgumentException> { auditS3Client.save(auditEvent, "bucket") }
       assertThat(exception.message).isEqualTo("ID cannot be null")
       then(s3Client).shouldHaveNoInteractions()
     }
@@ -132,7 +124,7 @@ class AuditS3ClientTest {
         details = "some details",
       )
 
-      prisonerAuditS3Client.save(prisonerAuditEvent, any()) // todo fix
+      prisonerAuditS3Client.save(prisonerAuditEvent, "prisonerAuditBucketName")
 
       verify(s3Client).putObject(putObjectRequestCaptor.capture(), requestBodyCaptor.capture())
       val putObjectRequest = putObjectRequestCaptor.value
@@ -157,7 +149,7 @@ class AuditS3ClientTest {
         details = "some details",
       )
 
-      val exception = assertThrows<IllegalArgumentException> { prisonerAuditS3Client.save(prisonerAuditEvent, any()) }
+      val exception = assertThrows<IllegalArgumentException> { prisonerAuditS3Client.save(prisonerAuditEvent, "prisonerBucket") }
       assertThat(exception.message).isEqualTo("ID cannot be null")
       then(s3Client).shouldHaveNoInteractions()
     }
