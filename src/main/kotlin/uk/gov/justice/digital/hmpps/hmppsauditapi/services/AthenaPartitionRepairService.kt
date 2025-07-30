@@ -14,7 +14,6 @@ import java.util.UUID
 class AthenaPartitionRepairService(
   private val athenaClient: AthenaClient,
   private val athenaPropertiesFactory: AthenaPropertiesFactory,
-  private val auditAthenaClient: AuditAthenaClient,
 ) {
 
   // TODO test
@@ -36,9 +35,6 @@ class AthenaPartitionRepairService(
       authorisedServices = emptyList(),
     )
   }
-
-  // TODO test
-  fun getRepairPartitionsResult(queryExecutionId: UUID): AthenaQueryResponse = auditAthenaClient.getQueryResults(queryExecutionId.toString())
 
   @Scheduled(cron = "0 0 0 1 * *")
   fun triggerRepairPartitions() = triggerRepairPartitions(AuditEventType.STAFF)

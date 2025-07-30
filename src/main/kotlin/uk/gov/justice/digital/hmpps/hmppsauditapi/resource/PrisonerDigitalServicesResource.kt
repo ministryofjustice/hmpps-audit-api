@@ -15,7 +15,6 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AthenaQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.swagger.StandardApiResponses
-import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AthenaPartitionRepairService
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
 import java.util.UUID
@@ -25,7 +24,6 @@ import java.util.UUID
 class PrisonerDigitalServicesResource(
   private val auditService: AuditService,
   private val auditQueueService: AuditQueueService,
-  private val athenaPartitionRepairService: AthenaPartitionRepairService,
 ) {
 
   @PreAuthorize("hasRole('ROLE_PRISONER_AUDIT') and hasAuthority('SCOPE_read')")
@@ -63,15 +61,4 @@ class PrisonerDigitalServicesResource(
     )
     return auditService.getQueryResults(queryExecutionId.toString())
   }
-
-  @PreAuthorize("hasRole('ROLE_PRISONER_AUDIT')")
-  @PostMapping("/prisoner/repair-partitions") // TODO test
-  fun triggerRepairPrisonerPartitions(): AthenaQueryResponse = athenaPartitionRepairService.triggerRepairPartitions(AuditEventType.PRISONER)
-
-  // TODO test
-  @PreAuthorize("hasRole('ROLE_PRISONER_AUDIT')")
-  @GetMapping("/prisoner/repair-partitions/{queryExecutionId}") // TODO test
-  fun getRepairPrisonerPartitionsQueryResults(
-    @PathVariable queryExecutionId: UUID,
-  ): AthenaQueryResponse = athenaPartitionRepairService.getRepairPartitionsResult(queryExecutionId)
 }
