@@ -48,7 +48,9 @@ class AuditTestS3Bucket @Autowired constructor(
           subjectType == "NOT_APPLICABLE" &&
           id != null
       },
-      argThat { true == true }, // TODO fix
+      argThat {
+        s3BucketName == "hmpps-audit-bucket"
+      },
     )
 
     verifyNoInteractions(auditRepository)
