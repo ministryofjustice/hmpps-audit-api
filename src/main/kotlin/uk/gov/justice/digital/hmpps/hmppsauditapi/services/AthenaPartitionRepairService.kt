@@ -16,7 +16,6 @@ class AthenaPartitionRepairService(
   private val athenaPropertiesFactory: AthenaPropertiesFactory,
 ) {
 
-  // TODO test
   fun triggerRepairPartitions(auditEventType: AuditEventType): AthenaQueryResponse {
     val athenaProperties = athenaPropertiesFactory.getProperties(auditEventType)
     val databaseName = athenaProperties.databaseName
