@@ -103,7 +103,7 @@ class AuditResource(
 @Schema(description = "Audit Event Information")
 data class AuditDto(
   @Schema(description = "Audit Event Id", example = "0f21b9e0-d153-42c6-a9ab-d583fe590987")
-  val id: UUID,
+  val id: UUID? = null,
   @Schema(description = "Detailed description of the Event", example = "COURT_REGISTER_BUILDING_UPDATE")
   val what: String,
   @Schema(description = "When the Event occurred", example = "2021-04-01T15:15:30Z")
