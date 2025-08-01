@@ -84,7 +84,7 @@ class AuditService(
   fun getQueryResults(queryExecutionId: String): AthenaQueryResponse = auditAthenaClient.getAuditEventsQueryResults(queryExecutionId)
 }
 
-private fun AuditEvent.asMap(): Map<String, String> {
+fun AuditEvent.asMap(): Map<String, String> {
   val items = mutableMapOf("what" to what, "when" to `when`.toString())
   items.addIfNotNull("who", who)
   items.addIfNotNull("operationId", operationId)

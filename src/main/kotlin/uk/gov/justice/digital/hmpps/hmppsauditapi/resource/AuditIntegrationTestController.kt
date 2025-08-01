@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 
+import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.PathVariable
@@ -7,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AthenaQueryResponse
@@ -14,6 +16,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequ
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditAthenaClient
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
+import uk.gov.justice.digital.hmpps.hmppsauditapi.services.asMap
 import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
@@ -24,6 +27,7 @@ class AuditIntegrationTestController(
   private val auditQueueService: AuditQueueService,
   private val auditAthenaClient: AuditAthenaClient,
   private val auditService: AuditService,
+  private val telemetryClient: TelemetryClient,
 ) {
 
   data class IntegrationTestResult(
@@ -72,6 +76,9 @@ class AuditIntegrationTestController(
           it.what == expectedAuditEvent.what &&
           it.details == expectedAuditEvent.details
       }
+
+      telemetryClient.trackEvent("mohamad", expectedAuditEvent.asMap())
+      telemetryClient.trackEvent("mohamad", mapOf(Pair("results", results.toString())))
 
       if (matchFound) {
         ResponseEntity.ok(
