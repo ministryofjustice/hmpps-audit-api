@@ -100,6 +100,7 @@ class AuditIntegrationTestController(
   }
 
   private fun createTestAuditEvent(): AuditEvent = AuditEvent(
+    id = UUID.randomUUID(),
     what = "INTEGRATION_TEST",
     `when` = Instant.now(),
     operationId = UUID.randomUUID().toString(),
