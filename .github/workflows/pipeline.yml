@@ -43,6 +43,7 @@ jobs:
       postgres-db: audit_db
       postgres-username: admin
       postgres-password: admin_password
+      gradle-command: './gradlew test --tests "uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditS3ClientTest"'
   build:
     name: Build docker image from hmpps-github-actions
     if: github.ref == 'refs/heads/fix-integration-tests'

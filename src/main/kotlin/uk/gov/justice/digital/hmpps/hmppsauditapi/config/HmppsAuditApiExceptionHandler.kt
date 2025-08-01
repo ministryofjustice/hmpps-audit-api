@@ -54,7 +54,7 @@ class HmppsAuditApiExceptionHandler {
         ErrorResponse(
           status = BAD_REQUEST,
           userMessage = "Malformed JSON or incorrect field types",
-          developerMessage = e.mostSpecificCause?.message ?: e.message,
+          developerMessage = e.mostSpecificCause.message ?: e.message,
         ),
       )
   }
