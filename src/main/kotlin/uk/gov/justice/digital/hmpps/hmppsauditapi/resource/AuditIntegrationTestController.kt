@@ -122,5 +122,4 @@ class AuditIntegrationTestController(
     service = service,
     details = details,
   )
-
 }
