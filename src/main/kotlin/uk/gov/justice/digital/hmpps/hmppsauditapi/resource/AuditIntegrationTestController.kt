@@ -16,7 +16,6 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequ
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditAthenaClient
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
-import uk.gov.justice.digital.hmpps.hmppsauditapi.services.asMap
 import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
@@ -38,9 +37,9 @@ class AuditIntegrationTestController(
 
   @PostMapping("/audit-event")
   @PreAuthorize("hasRole('ROLE_AUDIT_INTEGRATION_TEST')")
-  fun createAuditEvent(): AuditEvent {
+  fun createAuditEvent(): AuditDto {
     val createdAuditEvent = createTestAuditEvent()
-    auditQueueService.sendAuditEvent(createdAuditEvent)
+    auditQueueService.sendAuditEvent(createdAuditEvent.toEntity())
     Thread.sleep(10000) // Time needed for event to be processed by SQS
     return createdAuditEvent
   }
@@ -58,10 +57,10 @@ class AuditIntegrationTestController(
   @PostMapping("/assertion/{queryExecutionId}")
   @PreAuthorize("hasRole('ROLE_AUDIT_INTEGRATION_TEST')")
   fun assertAuditEventSavedCorrectly(
-    @RequestBody expectedAuditEvent: AuditEvent,
+    @RequestBody expectedAuditEvent: AuditDto,
     @PathVariable queryExecutionId: String,
   ): ResponseEntity<IntegrationTestResult> {
-    telemetryClient.trackEvent("mohamad", expectedAuditEvent.asMap())
+    telemetryClient.trackEvent("mohamad", mapOf("event" to expectedAuditEvent.toString()))
 
     return try {
       val results = auditAthenaClient.getAuditEventsQueryResults(queryExecutionId).results
@@ -79,15 +78,14 @@ class AuditIntegrationTestController(
           it.details == expectedAuditEvent.details
       }
 
-      telemetryClient.trackEvent("mohamad", expectedAuditEvent.asMap())
-      telemetryClient.trackEvent("mohamad", mapOf(Pair("results", results.toString())))
+      telemetryClient.trackEvent("mohamad", mapOf("results" to results.toString()))
 
       if (matchFound) {
         ResponseEntity.ok(
           IntegrationTestResult(true, "Test successful. Audit event found in Athena", results),
         )
       } else {
-        return ResponseEntity.internalServerError().body(
+        ResponseEntity.internalServerError().body(
           IntegrationTestResult(false, "Test failed. Expected $expectedAuditEvent but got $results", results),
         )
       }
@@ -99,7 +97,7 @@ class AuditIntegrationTestController(
     }
   }
 
-  private fun createTestAuditEvent(): AuditEvent = AuditEvent(
+  private fun createTestAuditEvent(): AuditDto = AuditDto(
     id = UUID.randomUUID(),
     what = "INTEGRATION_TEST",
     `when` = Instant.now(),
@@ -111,4 +109,18 @@ class AuditIntegrationTestController(
     service = "some service",
     details = "{\"key\": \"value\"}",
   )
+
+  private fun AuditDto.toEntity() = AuditEvent(
+    id = id,
+    what = what,
+    `when` = `when`,
+    operationId = operationId,
+    subjectId = subjectId,
+    subjectType = subjectType ?: "UNKNOWN",
+    correlationId = correlationId,
+    who = who,
+    service = service,
+    details = details,
+  )
+
 }
