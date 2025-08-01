@@ -110,8 +110,8 @@ jobs:
             exit 1
           fi
 
-      - name: Show audit_event.json
-        run: cat audit_event.json
+      - name: Wait for Athena query to finish
+        run: sleep 5
 
       - name: Step 4 - Assert audit event exists
         run: |
