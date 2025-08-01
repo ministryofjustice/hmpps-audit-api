@@ -102,32 +102,6 @@ class AuditIntegrationTestController(
     }
   }
 
-  @ExceptionHandler(HttpMessageNotReadableException::class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  @ResponseBody
-  fun handleDeserializationError(ex: HttpMessageNotReadableException): ResponseEntity<Map<String, String>> {
-    ex.printStackTrace()
-    return ResponseEntity.badRequest().body(
-      mapOf(
-        "error" to "Malformed JSON or incorrect field types",
-        "message" to (ex.mostSpecificCause?.message ?: ex.message ?: "Unknown error"),
-      ),
-    )
-  }
-
-  @ExceptionHandler(Exception::class)
-  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-  @ResponseBody
-  fun handleOtherExceptions(ex: Exception): ResponseEntity<Map<String, String>> {
-    ex.printStackTrace()
-    return ResponseEntity.internalServerError().body(
-      mapOf(
-        "error" to "Unexpected server error",
-        "message" to (ex.message ?: "Unknown error"),
-      ),
-    )
-  }
-
   private fun createTestAuditEvent(): AuditDto = AuditDto(
     id = UUID.randomUUID(),
     what = "INTEGRATION_TEST",
