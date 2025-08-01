@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 
-import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.PathVariable
@@ -8,7 +7,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AthenaQueryResponse
@@ -26,7 +24,6 @@ class AuditIntegrationTestController(
   private val auditQueueService: AuditQueueService,
   private val auditAthenaClient: AuditAthenaClient,
   private val auditService: AuditService,
-  private val telemetryClient: TelemetryClient,
 ) {
 
   data class IntegrationTestResult(
@@ -37,9 +34,9 @@ class AuditIntegrationTestController(
 
   @PostMapping("/audit-event")
   @PreAuthorize("hasRole('ROLE_AUDIT_INTEGRATION_TEST')")
-  fun createAuditEvent(): AuditDto {
+  fun createAuditEvent(): AuditEvent {
     val createdAuditEvent = createTestAuditEvent()
-    auditQueueService.sendAuditEvent(createdAuditEvent.toEntity())
+    auditQueueService.sendAuditEvent(createdAuditEvent)
     Thread.sleep(10000) // Time needed for event to be processed by SQS
     return createdAuditEvent
   }
@@ -57,11 +54,9 @@ class AuditIntegrationTestController(
   @PostMapping("/assertion/{queryExecutionId}")
   @PreAuthorize("hasRole('ROLE_AUDIT_INTEGRATION_TEST')")
   fun assertAuditEventSavedCorrectly(
-    @RequestBody expectedAuditEvent: AuditDto,
+    @RequestBody expectedAuditEvent: AuditEvent,
     @PathVariable queryExecutionId: String,
   ): ResponseEntity<IntegrationTestResult> {
-    telemetryClient.trackEvent("mohamad", mapOf("event" to expectedAuditEvent.toString()))
-
     return try {
       val results = auditAthenaClient.getAuditEventsQueryResults(queryExecutionId).results
 
@@ -78,15 +73,13 @@ class AuditIntegrationTestController(
           it.details == expectedAuditEvent.details
       }
 
-      telemetryClient.trackEvent("mohamad", mapOf("results" to results.toString()))
-
       if (matchFound) {
         ResponseEntity.ok(
           IntegrationTestResult(true, "Test successful. Audit event found in Athena", results),
         )
       } else {
         ResponseEntity.internalServerError().body(
-          IntegrationTestResult(false, "Test failed. Expected $expectedAuditEvent but got $results", results),
+          IntegrationTestResult(false, "Test failed. Audit event not found in Athena", results),
         )
       }
     } catch (ex: Exception) {
@@ -97,8 +90,7 @@ class AuditIntegrationTestController(
     }
   }
 
-  private fun createTestAuditEvent(): AuditDto = AuditDto(
-    id = UUID.randomUUID(),
+  private fun createTestAuditEvent(): AuditEvent = AuditEvent(
     what = "INTEGRATION_TEST",
     `when` = Instant.now(),
     operationId = UUID.randomUUID().toString(),
@@ -108,18 +100,5 @@ class AuditIntegrationTestController(
     who = "TEST_" + (1..5).map { ('A'..'Z').random() }.joinToString(""), // Random who to create a unique partition on every run
     service = "some service",
     details = "{\"key\": \"value\"}",
-  )
-
-  private fun AuditDto.toEntity() = AuditEvent(
-    id = id,
-    what = what,
-    `when` = `when`,
-    operationId = operationId,
-    subjectId = subjectId,
-    subjectType = subjectType ?: "UNKNOWN",
-    correlationId = correlationId,
-    who = who,
-    service = service,
-    details = details,
   )
 }
