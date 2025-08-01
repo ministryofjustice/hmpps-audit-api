@@ -109,7 +109,10 @@ jobs:
             echo "Timed out waiting for audit query to succeed after 3 minutes."
             exit 1
           fi
-          
+
+      - name: Show audit_event.json
+        run: cat audit_event.json
+
       - name: Step 4 - Assert audit event exists
         run: |
           QUERY_ID=${{ steps.trigger_audit_query.outputs.queryExecutionId }}

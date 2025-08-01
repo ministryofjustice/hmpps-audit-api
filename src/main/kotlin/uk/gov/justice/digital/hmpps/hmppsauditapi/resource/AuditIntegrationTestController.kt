@@ -78,8 +78,8 @@ class AuditIntegrationTestController(
           IntegrationTestResult(true, "Test successful. Audit event found in Athena", results),
         )
       } else {
-        ResponseEntity.internalServerError().body(
-          IntegrationTestResult(false, "Test failed. Audit event not found in Athena", results),
+        return ResponseEntity.internalServerError().body(
+          IntegrationTestResult(false, "Test failed. Expected $expectedAuditEvent but got $results", results),
         )
       }
     } catch (ex: Exception) {
