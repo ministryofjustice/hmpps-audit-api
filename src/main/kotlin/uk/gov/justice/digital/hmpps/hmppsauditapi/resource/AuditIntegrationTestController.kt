@@ -61,6 +61,8 @@ class AuditIntegrationTestController(
     @RequestBody expectedAuditEvent: AuditEvent,
     @PathVariable queryExecutionId: String,
   ): ResponseEntity<IntegrationTestResult> {
+    telemetryClient.trackEvent("mohamad", expectedAuditEvent.asMap())
+
     return try {
       val results = auditAthenaClient.getAuditEventsQueryResults(queryExecutionId).results
 
