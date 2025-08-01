@@ -58,6 +58,7 @@ server:
   shutdown: graceful
   error:
     include-message: always
+    include-stacktrace: always
 
 management:
   endpoints:
