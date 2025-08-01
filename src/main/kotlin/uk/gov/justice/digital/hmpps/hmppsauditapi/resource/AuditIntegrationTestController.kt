@@ -1,12 +1,17 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 
 import com.microsoft.applicationinsights.TelemetryClient
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
@@ -95,6 +100,32 @@ class AuditIntegrationTestController(
         IntegrationTestResult(false, "Exception during test: ${ex.message}", null),
       )
     }
+  }
+
+  @ExceptionHandler(HttpMessageNotReadableException::class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  fun handleDeserializationError(ex: HttpMessageNotReadableException): ResponseEntity<Map<String, String>> {
+    ex.printStackTrace()
+    return ResponseEntity.badRequest().body(
+      mapOf(
+        "error" to "Malformed JSON or incorrect field types",
+        "message" to (ex.mostSpecificCause?.message ?: ex.message ?: "Unknown error"),
+      ),
+    )
+  }
+
+  @ExceptionHandler(Exception::class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  @ResponseBody
+  fun handleOtherExceptions(ex: Exception): ResponseEntity<Map<String, String>> {
+    ex.printStackTrace()
+    return ResponseEntity.internalServerError().body(
+      mapOf(
+        "error" to "Unexpected server error",
+        "message" to (ex.message ?: "Unknown error"),
+      ),
+    )
   }
 
   private fun createTestAuditEvent(): AuditDto = AuditDto(
