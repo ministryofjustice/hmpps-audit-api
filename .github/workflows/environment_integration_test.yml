@@ -12,9 +12,6 @@ on:
       environment:
         required: true
         type: string
-      audit_event_type:
-        required: true
-        type: string
     secrets:
       OAUTH_CLIENT_ID:
         required: true
@@ -28,15 +25,18 @@ permissions:
 
 jobs:
   run-integration-test:
-    name: ${{ inputs.job_name }}
+    name: ${{ inputs.job_name }} - ${{ matrix.audit_event_type }}
     environment: ${{ inputs.environment }}
     runs-on: [self-hosted, hmpps-github-actions-runner]
+    strategy:
+      matrix:
+        audit_event_type: ["STAFF", "PRISONER"]
     env:
       OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
       OAUTH_CLIENT_SECRET: ${{ secrets.OAUTH_CLIENT_SECRET }}
       OAUTH_TOKEN_URL: ${{ secrets.OAUTH_TOKEN_URL }}
       ENV_TEST_URL: ${{ inputs.env_test_url }}
-      AUDIT_EVENT_TYPE: ${{ inputs.audit_event_type }}
+      AUDIT_EVENT_TYPE: ${{ matrix.audit_event_type }}
     steps:
       - name: Get OAuth token
         id: get_token
