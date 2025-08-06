@@ -61,7 +61,7 @@ jobs:
           
           echo "Audit event response: $RESPONSE"
           echo "$RESPONSE" > audit_event.json
-          sleep 5
+          sleep 5  # Sleep essential for partition to register before being able to query
 
       - name: Step 2 - Trigger audit event query
         id: trigger_audit_query
