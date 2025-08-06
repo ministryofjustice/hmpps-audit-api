@@ -76,6 +76,10 @@ jobs:
       environment: "dev"
       env_test_url: "https://audit-api-dev.hmpps.service.justice.gov.uk"
       audit_event_type: 'STAFF'
+    secrets:
+      OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
+      OAUTH_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+      OAUTH_TOKEN_URL: ${{ secrets.OAUTH_TOKEN_URL }}
 
   prisoner_audit_integration_tests:
     needs:
