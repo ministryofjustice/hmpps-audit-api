@@ -39,7 +39,7 @@ jobs:
         shell: bash
         run: |
           BASIC_AUTH=$(echo -n "$OAUTH_CLIENT_ID:$OAUTH_CLIENT_SECRET" | base64 | tr -d '\n')
-          RESPONSE=$(curl --fail --verbose -s -X POST "$OAUTH_TOKEN_URL?grant_type=client_credentials" \
+          RESPONSE=$(curl --fail-with-body --verbose -s -X POST "$OAUTH_TOKEN_URL?grant_type=client_credentials" \
             -H "Content-Type: application/json" \
             -H "Authorization: Basic $BASIC_AUTH")
           TOKEN=$(echo "$RESPONSE" | jq -r '.access_token')
@@ -54,7 +54,7 @@ jobs:
       - name: Step 1 - Create audit event and register partition
         id: create_event
         run: |
-          RESPONSE=$(curl --fail --verbose --show-error \
+          RESPONSE=$(curl --fail-with-body --verbose --show-error \
             -X POST "$ENV_TEST_URL/internal/integration-test/audit-event" \
             -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
             -H "Content-Type: application/json")
@@ -69,7 +69,7 @@ jobs:
           WHO=$(jq -r '.who' audit_event.json)
           echo "Using 'who' value for query: $WHO"
 
-          RESPONSE=$(curl --fail --show-error --verbose \
+          RESPONSE=$(curl --fail-with-body --show-error --verbose \
             -X POST "$ENV_TEST_URL/internal/integration-test/query/$WHO" \
             -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}")
 
@@ -84,7 +84,7 @@ jobs:
           echo "Polling audit query status for ID: $QUERY_ID"
           
           for attempt in {1..36}; do
-            RESPONSE=$(curl --fail --show-error \
+            RESPONSE=$(curl --fail-with-body --show-error \
               -X GET "$ENV_TEST_URL/audit/query/$QUERY_ID" \
               -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
               -H "Content-Type: application/json")
@@ -118,7 +118,7 @@ jobs:
       
           cat audit_event.json
 
-          RESPONSE=$(curl --show-error --verbose \
+          RESPONSE=$(curl --fail-with-body --show-error --verbose \
             -X POST "$ENV_TEST_URL/internal/integration-test/assertion/$QUERY_ID" \
             -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
             -H "Content-Type: application/json" \
