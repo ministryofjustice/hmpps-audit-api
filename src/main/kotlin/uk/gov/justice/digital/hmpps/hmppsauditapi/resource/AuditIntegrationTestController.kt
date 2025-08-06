@@ -49,7 +49,8 @@ class AuditIntegrationTestController(
   @PreAuthorize("hasRole('ROLE_AUDIT_INTEGRATION_TEST')")
   fun queryTestAuditEvent(
     @PathVariable auditEventType: AuditEventType,
-    @PathVariable who: String): AthenaQueryResponse = auditService.triggerQuery(
+    @PathVariable who: String,
+  ): AthenaQueryResponse = auditService.triggerQuery(
     DigitalServicesQueryRequest(
       startDate = LocalDate.now(),
       who = who,
