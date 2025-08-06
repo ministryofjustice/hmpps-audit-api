@@ -20,8 +20,8 @@ permissions:
   packages: write
 concurrency:
   # only cancel in progress when on a branch - use SHA on main to ensure uniqueness
-  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/HAAR-4149-prisoner-tests' && github.sha || github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/HAAR-4149-prisoner-tests' }}
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.sha || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 jobs:
   helm_lint:
     strategy:
@@ -43,10 +43,9 @@ jobs:
       postgres-db: audit_db
       postgres-username: admin
       postgres-password: admin_password
-      gradle-command: ./gradlew test --tests "uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditS3ClientTest"
   build:
     name: Build docker image from hmpps-github-actions
-    if: github.ref == 'refs/heads/HAAR-4149-prisoner-tests'
+    if: github.ref == 'refs/heads/main'
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/docker_build.yml@v2 # WORKFLOW_VERSION
     needs:
       - gradle-verify
@@ -58,7 +57,7 @@ jobs:
       docker_multiplatform: false
   deploy_dev:
     name: Deploy to the dev environment
-    if: github.ref == 'refs/heads/HAAR-4149-prisoner-tests'
+    if: github.ref == 'refs/heads/main'
     needs:
       - build
       - helm_lint
