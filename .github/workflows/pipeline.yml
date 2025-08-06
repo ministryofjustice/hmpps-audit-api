@@ -68,7 +68,7 @@ jobs:
       environment: 'dev'
       app_version: '${{ needs.build.outputs.app_version }}'
 
-  audit_integration_tests:
+  integration_tests:
     needs: deploy_dev
     strategy:
       max-parallel: 1
