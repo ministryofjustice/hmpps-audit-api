@@ -77,7 +77,8 @@ class AuditIntegrationTestController(
         it.`when` == expectedAuditEvent.`when` &&
           it.who == expectedAuditEvent.who &&
           it.what == expectedAuditEvent.what &&
-          it.details == expectedAuditEvent.details
+          it.details == expectedAuditEvent.details &&
+          it.subjectId == expectedAuditEvent.subjectId
       }
 
       if (matchFound) {
