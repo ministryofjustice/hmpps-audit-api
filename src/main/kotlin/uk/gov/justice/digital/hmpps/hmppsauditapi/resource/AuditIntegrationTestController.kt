@@ -30,6 +30,7 @@ class AuditIntegrationTestController(
     val passed: Boolean,
     val message: String,
     val actualResult: List<AuditDto>?,
+    val expectedResult: AuditEvent,
   )
 
   @PostMapping("/audit-event/{auditEventType}")
@@ -69,7 +70,7 @@ class AuditIntegrationTestController(
 
       if (results == null) {
         return ResponseEntity.internalServerError().body(
-          IntegrationTestResult(false, "Test failed. Athena results were null", null),
+          IntegrationTestResult(false, "Test failed. Athena results were null", null, expectedAuditEvent),
         )
       }
 
@@ -87,17 +88,17 @@ class AuditIntegrationTestController(
 
       if (matchFound) {
         ResponseEntity.ok(
-          IntegrationTestResult(true, "Test successful. Audit event found in Athena", results),
+          IntegrationTestResult(true, "Test successful. Audit event found in Athena", results, expectedAuditEvent),
         )
       } else {
         ResponseEntity.internalServerError().body(
-          IntegrationTestResult(false, "Test failed. Audit event not found in Athena", results),
+          IntegrationTestResult(false, "Test failed. Audit event not found in Athena", results, expectedAuditEvent),
         )
       }
     } catch (ex: Exception) {
       ex.printStackTrace()
       ResponseEntity.internalServerError().body(
-        IntegrationTestResult(false, "Exception during test: ${ex.message}", null),
+        IntegrationTestResult(false, "Exception during test: ${ex.message}", null, expectedAuditEvent),
       )
     }
   }
@@ -107,7 +108,7 @@ class AuditIntegrationTestController(
     `when` = Instant.now(),
     operationId = UUID.randomUUID().toString(),
     subjectId = "some subject ID",
-    subjectType = "some subjectType ID",
+    subjectType = "some subject type",
     correlationId = UUID.randomUUID().toString(),
     who = "TEST_" + (1..5).map { ('A'..'Z').random() }.joinToString(""), // Random who to create a unique partition on every run
     service = "some service",
