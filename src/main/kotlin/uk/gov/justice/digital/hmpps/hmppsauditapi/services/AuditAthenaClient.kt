@@ -173,7 +173,7 @@ class AuditAthenaClient(
           what = resultMap["what"] ?: "",
           `when` = Instant.parse(resultMap["when"] ?: throw IllegalArgumentException("Missing timestamp")),
           operationId = resultMap["operationId"],
-          subjectId = resultMap["subjectId"],
+          subjectId = resultMap["subjectid"],
           subjectType = resultMap["subjectType"],
           correlationId = resultMap["correlationId"],
           who = resultMap["who"],
