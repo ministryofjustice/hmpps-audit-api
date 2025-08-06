@@ -15,13 +15,6 @@ on:
       audit_event_type:
         required: true
         type: string
-    secrets:
-      OAUTH_CLIENT_ID:
-        required: true
-      OAUTH_CLIENT_SECRET:
-        required: true
-      OAUTH_TOKEN_URL:
-        required: true
 
 permissions:
   contents: read
