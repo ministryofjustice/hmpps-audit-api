@@ -72,9 +72,10 @@ jobs:
     needs: deploy_dev
     uses: ./.github/workflows/environment_integration_test.yml
     with:
-      job_name: "Run integration tests after dev deploy"
+      job_name: "Run staff integration tests after dev deploy"
       environment: "dev"
       env_test_url: "https://audit-api-dev.hmpps.service.justice.gov.uk"
+      audit_event_type: 'STAFF'
     secrets:
       OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
       OAUTH_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
