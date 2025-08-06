@@ -26,6 +26,13 @@ class PartitionRepairController(
   ): AthenaQueryResponse = athenaPartitionRepairService.triggerRepairPartitions(auditEventType)
 
   @PreAuthorize("hasRole('ROLE_AUDIT')")
+  @PostMapping("/{auditEventType}/partition-repair/{who}/today")
+  fun triggerRepairPartitionsForToday( // TODO test
+    @PathVariable auditEventType: AuditEventType,
+    @PathVariable who: String,
+  ): AthenaQueryResponse = athenaPartitionRepairService.triggerRepairForUserToday(auditEventType, who)
+
+  @PreAuthorize("hasRole('ROLE_AUDIT')")
   @GetMapping("/query/partition-repair/{queryExecutionId}")
   fun getRepairPartitionsResults(
     @PathVariable queryExecutionId: UUID,
