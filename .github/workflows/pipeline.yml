@@ -69,6 +69,7 @@ jobs:
       app_version: '${{ needs.build.outputs.app_version }}'
 
   staff_audit_integration_tests:
+    needs: deploy_dev
     uses: ./.github/workflows/environment_integration_test.yml
     with:
       job_name: "Run integration tests after dev deploy"

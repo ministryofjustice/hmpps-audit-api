@@ -36,7 +36,7 @@ class AuditService(
     if (saveToS3Bucket || athenaProperties.auditEventType == AuditEventType.PRISONER) {
       auditEvent.id = UUID.randomUUID()
       auditS3Client.save(auditEvent, athenaProperties.s3BucketName)
-      auditAthenaClient.addPartitionForEvent(auditEvent, athenaProperties)
+      // auditAthenaClient.addPartitionForEvent(auditEvent, athenaProperties)
     } else {
       auditRepository.save(auditEvent)
     }
