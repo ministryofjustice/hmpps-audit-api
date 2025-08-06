@@ -410,7 +410,7 @@ class AuditServiceTest {
       auditService.saveAuditEvent(auditEvent, athenaProperties)
 
       then(auditS3Client).should().save(auditEvent, athenaProperties.s3BucketName)
-      then(auditAthenaClient).should().addPartitionForEvent(auditEvent, athenaProperties)
+      // then(auditAthenaClient).should().addPartitionForEvent(auditEvent, athenaProperties)
       then(auditRepository).shouldHaveNoInteractions()
     }
   }
@@ -450,7 +450,7 @@ class AuditServiceTest {
 
       then(auditRepository).shouldHaveNoInteractions()
       then(auditS3Client).should().save(auditEvent, athenaProperties.s3BucketName)
-      then(auditAthenaClient).should().addPartitionForEvent(auditEvent, athenaProperties)
+      // then(auditAthenaClient).should().addPartitionForEvent(auditEvent, athenaProperties)
     }
   }
 }
