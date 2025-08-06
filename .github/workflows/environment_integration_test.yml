@@ -55,7 +55,7 @@ jobs:
         id: create_event
         run: |
           RESPONSE=$(curl --fail-with-body --verbose --show-error \
-            -X POST "$ENV_TEST_URL/internal/integration-test/audit-event" \
+            -X POST "$ENV_TEST_URL/internal/integration-test/audit-event/STAFF" \
             -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
             -H "Content-Type: application/json")
           
@@ -70,7 +70,7 @@ jobs:
           echo "Using 'who' value for query: $WHO"
 
           RESPONSE=$(curl --fail-with-body --show-error --verbose \
-            -X POST "$ENV_TEST_URL/internal/integration-test/query/$WHO" \
+            -X POST "$ENV_TEST_URL/internal/integration-test/query/STAFF/$WHO" \
             -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}")
 
           echo "Trigger audit query response: $RESPONSE"
