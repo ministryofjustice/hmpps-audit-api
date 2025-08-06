@@ -67,31 +67,23 @@ jobs:
       environment: 'dev'
       app_version: '${{ needs.build.outputs.app_version }}'
 
-  staff_audit_integration_tests:
+  integration_tests:
     needs: deploy_dev
+    strategy:
+      max-parallel: 1
+      matrix:
+        audit_event_type: [STAFF, PRISONER]
     uses: ./.github/workflows/environment_integration_test.yml
     with:
-      job_name: "Run integration tests after dev deploy"
+      job_name: "Run ${{ matrix.audit_event_type }} integration tests"
       environment: "dev"
       env_test_url: "https://audit-api-dev.hmpps.service.justice.gov.uk"
+      audit_event_type: ${{ matrix.audit_event_type }}
     secrets:
       OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
       OAUTH_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
       OAUTH_TOKEN_URL: ${{ secrets.OAUTH_TOKEN_URL }}
 
-#  prisoner_audit_integration_tests:
-#    needs:
-#      - deploy_dev
-#    #      - staff_audit_integration_tests
-#    uses: ./.github/workflows/environment_integration_test.yml
-#    with:
-#      job_name: "Run prisoner_audit integration tests after dev deploy"
-#      environment: "dev"
-#      env_test_url: "https://audit-api-dev.hmpps.service.justice.gov.uk/internal/test/prisoner/audit-end-to-end-test"
-#    secrets:
-#      OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
-#      OAUTH_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
-#      OAUTH_TOKEN_URL: ${{ secrets.OAUTH_TOKEN_URL }}
 
   deploy_preprod:
     name: Deploy to the preprod environment
@@ -99,8 +91,7 @@ jobs:
       - build
       - helm_lint
       - deploy_dev
-      - staff_audit_integration_tests
-      #- prisoner_audit_integration_tests
+      - integration_tests
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2 # WORKFLOW_VERSION
     secrets: inherit
     with:

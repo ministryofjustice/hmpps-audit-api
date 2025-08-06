@@ -32,23 +32,30 @@ class AuditIntegrationTestController(
     val actualResult: List<AuditDto>?,
   )
 
-  @PostMapping("/audit-event")
+  @PostMapping("/audit-event/{auditEventType}")
   @PreAuthorize("hasRole('ROLE_AUDIT_INTEGRATION_TEST')")
-  fun createAuditEvent(): AuditEvent {
+  fun createAuditEvent(@PathVariable auditEventType: AuditEventType): AuditEvent {
     val createdAuditEvent = createTestAuditEvent()
-    auditQueueService.sendAuditEvent(createdAuditEvent)
+    if (auditEventType == AuditEventType.STAFF) {
+      auditQueueService.sendAuditEvent(createdAuditEvent)
+    } else if (auditEventType == AuditEventType.PRISONER) {
+      auditQueueService.sendPrisonerAuditEvent(createdAuditEvent)
+    }
     Thread.sleep(10000) // Time needed for event to be processed by SQS
     return createdAuditEvent
   }
 
-  @PostMapping("/query/{who}")
+  @PostMapping("/query/{auditEventType}/{who}")
   @PreAuthorize("hasRole('ROLE_AUDIT_INTEGRATION_TEST')")
-  fun queryTestAuditEvent(@PathVariable who: String): AthenaQueryResponse = auditService.triggerQuery(
+  fun queryTestAuditEvent(
+    @PathVariable auditEventType: AuditEventType,
+    @PathVariable who: String,
+  ): AthenaQueryResponse = auditService.triggerQuery(
     DigitalServicesQueryRequest(
       startDate = LocalDate.now(),
       who = who,
     ),
-    AuditEventType.STAFF,
+    auditEventType,
   )
 
   @PostMapping("/assertion/{queryExecutionId}")

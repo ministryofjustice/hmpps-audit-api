@@ -12,6 +12,9 @@ on:
       environment:
         required: true
         type: string
+      audit_event_type:
+        required: true
+        type: string
     secrets:
       OAUTH_CLIENT_ID:
         required: true
@@ -33,6 +36,7 @@ jobs:
       OAUTH_CLIENT_SECRET: ${{ secrets.OAUTH_CLIENT_SECRET }}
       OAUTH_TOKEN_URL: ${{ secrets.OAUTH_TOKEN_URL }}
       ENV_TEST_URL: ${{ inputs.env_test_url }}
+      AUDIT_EVENT_TYPE: ${{ inputs.audit_event_type }}
     steps:
       - name: Get OAuth token
         id: get_token
@@ -55,7 +59,7 @@ jobs:
         id: create_event
         run: |
           RESPONSE=$(curl --fail-with-body --verbose --show-error \
-            -X POST "$ENV_TEST_URL/internal/integration-test/audit-event" \
+            -X POST "$ENV_TEST_URL/internal/integration-test/audit-event/$AUDIT_EVENT_TYPE" \
             -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
             -H "Content-Type: application/json")
           
@@ -70,7 +74,7 @@ jobs:
           echo "Using 'who' value for query: $WHO"
 
           RESPONSE=$(curl --fail-with-body --show-error --verbose \
-            -X POST "$ENV_TEST_URL/internal/integration-test/query/$WHO" \
+            -X POST "$ENV_TEST_URL/internal/integration-test/query/$AUDIT_EVENT_TYPE/$WHO" \
             -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}")
 
           echo "Trigger audit query response: $RESPONSE"
