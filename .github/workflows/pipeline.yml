@@ -68,13 +68,18 @@ jobs:
       environment: 'dev'
       app_version: '${{ needs.build.outputs.app_version }}'
 
-  integration_tests:
+  audit_integration_tests:
     needs: deploy_dev
+    strategy:
+      max-parallel: 1
+      matrix:
+        audit_event_type: [STAFF, PRISONER]
     uses: ./.github/workflows/environment_integration_test.yml
     with:
-      job_name: "Run audit integration tests after dev deploy"
+      job_name: "Run ${{ matrix.audit_event_type }} integration tests"
       environment: "dev"
       env_test_url: "https://audit-api-dev.hmpps.service.justice.gov.uk"
+      audit_event_type: ${{ matrix.audit_event_type }}
     secrets:
       OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
       OAUTH_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
