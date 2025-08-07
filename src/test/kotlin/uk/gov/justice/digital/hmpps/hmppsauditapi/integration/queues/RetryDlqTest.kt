@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.integration.queues
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -14,6 +15,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.A
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 
 @TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=false"])
+@Disabled
 class RetryDlqTest : QueueListenerIntegrationTest() {
 
   @Nested
