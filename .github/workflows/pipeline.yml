@@ -99,7 +99,6 @@ jobs:
       app_version: '${{ needs.build.outputs.app_version }}'
 
   preprod_integration_tests:
-    needs: helm_lint
     strategy:
       max-parallel: 1
       matrix:
