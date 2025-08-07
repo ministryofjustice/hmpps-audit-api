@@ -33,12 +33,13 @@ class AuditService(
   }
 
   fun saveAuditEvent(auditEvent: AuditEvent, athenaProperties: AthenaProperties) {
-    if (saveToS3Bucket || athenaProperties.auditEventType == AuditEventType.PRISONER) {
+    if (saveToS3Bucket) {
       auditEvent.id = UUID.randomUUID()
       auditS3Client.save(auditEvent, athenaProperties.s3BucketName)
       auditAthenaClient.addPartitionForEvent(auditEvent, athenaProperties)
     } else {
-      auditRepository.save(auditEvent)
+      // No point saving messages to the DB, we'll be getting rid of this before the next prod release
+      // auditRepository.save(auditEvent)
     }
     telemetryClient.trackEvent(athenaProperties.auditEventType.description, auditEvent.asMap())
   }
