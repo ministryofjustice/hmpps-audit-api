@@ -65,11 +65,11 @@ jobs:
           
           echo "Audit event response: $RESPONSE"
           echo "$RESPONSE" > audit_event.json
-          sleep 10  # Sleep essential for partition to register before being able to query
 
       - name: Step 2 - Trigger audit event query
         id: trigger_audit_query
         run: |
+          sleep 5  # Sleep essential for partition to register before being able to query
           WHO=$(jq -r '.who' audit_event.json)
           echo "Using 'who' value for query: $WHO"
 
