@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
-import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AthenaQueryResponse
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditAthenaClient
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
@@ -52,7 +52,7 @@ class AuditIntegrationTestController(
   fun triggerTestQuery(
     @PathVariable auditEventType: AuditEventType,
     @PathVariable who: String,
-  ): AthenaQueryResponse = auditService.triggerQuery(
+  ): AuditQueryResponse = auditService.triggerQuery(
     DigitalServicesQueryRequest(
       auditEventType = auditEventType,
       startDate = LocalDate.now(),
@@ -65,7 +65,7 @@ class AuditIntegrationTestController(
   @PreAuthorize("hasRole('ROLE_AUDIT_INTEGRATION_TEST')")
   fun getQueryResults(
     @PathVariable queryExecutionId: UUID,
-  ): AthenaQueryResponse = auditService.getQueryResults(queryExecutionId.toString())
+  ): AuditQueryResponse = auditService.getQueryResults(queryExecutionId.toString())
 
   @PostMapping("/assertion/{queryExecutionId}")
   @PreAuthorize("hasRole('ROLE_AUDIT_INTEGRATION_TEST')")

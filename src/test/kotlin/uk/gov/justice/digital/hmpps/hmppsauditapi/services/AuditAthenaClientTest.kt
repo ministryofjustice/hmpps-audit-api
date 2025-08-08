@@ -39,7 +39,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType.STAFF
-import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AthenaQueryResponse
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import java.time.Clock
@@ -134,7 +134,7 @@ class AuditAthenaClientTest {
 
       // When
       whenever(athenaPropertiesFactory.getProperties(STAFF)).thenReturn(athenaProperties)
-      val response: AthenaQueryResponse = auditAthenaClient.triggerQuery(
+      val response: AuditQueryResponse = auditAthenaClient.triggerQuery(
         digitalServicesQueryRequest,
         STAFF,
       )
@@ -333,7 +333,7 @@ class AuditAthenaClientTest {
 
       // Then
       assertThat(digitalServicesAuditQueryResponse).isEqualTo(
-        AthenaQueryResponse(
+        AuditQueryResponse(
           queryExecutionId = UUID.fromString(queryExecutionId),
           queryState = QueryExecutionState.SUCCEEDED,
           results = listOf(expectedAuditDto),

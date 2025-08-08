@@ -5,7 +5,7 @@ import software.amazon.awssdk.services.athena.model.QueryExecutionState
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import java.util.UUID
 
-data class AthenaQueryResponse(
+data class AuditQueryResponse(
   val queryExecutionId: UUID,
   var queryState: QueryExecutionState,
   @JsonInclude(JsonInclude.Include.NON_NULL)

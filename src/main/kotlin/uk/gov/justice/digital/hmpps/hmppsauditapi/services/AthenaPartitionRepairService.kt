@@ -7,7 +7,7 @@ import software.amazon.awssdk.services.athena.model.QueryExecutionState.QUEUED
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
-import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AthenaQueryResponse
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryResponse
 import java.util.UUID
 
 @Component
@@ -16,7 +16,7 @@ class AthenaPartitionRepairService(
   private val athenaPropertiesFactory: AthenaPropertiesFactory,
 ) {
 
-  fun triggerRepairPartitions(auditEventType: AuditEventType): AthenaQueryResponse {
+  fun triggerRepairPartitions(auditEventType: AuditEventType): AuditQueryResponse {
     val athenaProperties = athenaPropertiesFactory.getProperties(auditEventType)
     val databaseName = athenaProperties.databaseName
     val tableName = athenaProperties.tableName
@@ -28,7 +28,7 @@ class AthenaPartitionRepairService(
       .resultConfiguration { it.outputLocation(athenaProperties.outputLocation) }
       .build()
     val startQueryExecutionResponse = athenaClient.startQueryExecution(request)
-    return AthenaQueryResponse(
+    return AuditQueryResponse(
       queryExecutionId = UUID.fromString(startQueryExecutionResponse.queryExecutionId()),
       queryState = QUEUED,
       authorisedServices = emptyList(),

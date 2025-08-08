@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
-import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AthenaQueryResponse
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AthenaPartitionRepairService
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditAthenaClient
 import java.util.UUID
@@ -23,11 +23,11 @@ class PartitionRepairController(
   @PostMapping("/{auditEventType}/partition-repair")
   fun triggerRepairPartitions(
     @PathVariable auditEventType: AuditEventType,
-  ): AthenaQueryResponse = athenaPartitionRepairService.triggerRepairPartitions(auditEventType)
+  ): AuditQueryResponse = athenaPartitionRepairService.triggerRepairPartitions(auditEventType)
 
   @PreAuthorize("hasRole('ROLE_AUDIT')")
   @GetMapping("/query/partition-repair/{queryExecutionId}")
   fun getRepairPartitionsResults(
     @PathVariable queryExecutionId: UUID,
-  ): AthenaQueryResponse = auditAthenaClient.getQueryResults(queryExecutionId.toString())
+  ): AuditQueryResponse = auditAthenaClient.getQueryResults(queryExecutionId.toString())
 }

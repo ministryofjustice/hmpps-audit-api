@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AthenaQueryResponse
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.swagger.StandardApiResponses
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
@@ -35,7 +35,7 @@ class DigitalServicesController(
   @PostMapping("/query")
   fun startQuery(
     @RequestBody @Valid auditFilterDto: DigitalServicesQueryRequest,
-  ): AthenaQueryResponse {
+  ): AuditQueryResponse {
     auditQueueService.sendAuditAuditEvent(
       AuditType.AUDIT_GET_BY_USER.name,
       auditFilterDto,
@@ -53,7 +53,7 @@ class DigitalServicesController(
   @GetMapping("/query/{queryExecutionId}")
   fun getQueryResults(
     @PathVariable queryExecutionId: UUID,
-  ): AthenaQueryResponse {
+  ): AuditQueryResponse {
     auditQueueService.sendAuditAuditEvent(
       AuditType.AUDIT_GET_BY_USER.name,
       queryExecutionId,
