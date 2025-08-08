@@ -89,7 +89,7 @@ jobs:
           
           for attempt in {1..36}; do
             RESPONSE=$(curl --fail-with-body --show-error \
-              -X GET "$ENV_TEST_URL/internal/integration-test/audit/query/$QUERY_ID" \
+              -X GET "$ENV_TEST_URL/internal/integration-test/query/$QUERY_ID" \
               -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
               -H "Content-Type: application/json")
           
