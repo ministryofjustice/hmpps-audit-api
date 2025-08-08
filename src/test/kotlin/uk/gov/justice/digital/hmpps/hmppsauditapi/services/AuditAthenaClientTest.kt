@@ -38,8 +38,8 @@ import software.amazon.awssdk.services.athena.model.StartQueryExecutionResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
-import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
-import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AthenaQueryResponse
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType.STAFF
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import java.time.Clock
@@ -72,7 +72,7 @@ class AuditAthenaClientTest {
       .statistics(QueryExecutionStatistics.builder().build()).build(),
   ).build()
   private val athenaProperties = AthenaProperties(
-    auditEventType = AuditEventType.STAFF,
+    auditEventType = STAFF,
     databaseName = "databaseName",
     tableName = "tableName",
     workGroupName = "workGroupName",
@@ -133,10 +133,10 @@ class AuditAthenaClientTest {
         .willReturn(StartQueryExecutionResponse.builder().queryExecutionId(queryExecutionId).build())
 
       // When
-      whenever(athenaPropertiesFactory.getProperties(AuditEventType.STAFF)).thenReturn(athenaProperties)
-      val response: AthenaQueryResponse = auditAthenaClient.triggerQuery(
+      whenever(athenaPropertiesFactory.getProperties(STAFF)).thenReturn(athenaProperties)
+      val response: AuditQueryResponse = auditAthenaClient.triggerQuery(
         digitalServicesQueryRequest,
-        AuditEventType.STAFF,
+        STAFF,
       )
 
       // Then
@@ -149,6 +149,7 @@ class AuditAthenaClientTest {
       // All fields
       Arguments.of(
         DigitalServicesQueryRequest(
+          auditEventType = STAFF,
           startDate = LocalDate.of(2025, 1, 1),
           endDate = LocalDate.of(2025, 1, 5),
           who = "someone",
@@ -163,6 +164,7 @@ class AuditAthenaClientTest {
       // Subject, no who
       Arguments.of(
         DigitalServicesQueryRequest(
+          auditEventType = STAFF,
           startDate = LocalDate.of(2025, 1, 1),
           endDate = LocalDate.of(2025, 1, 5),
           subjectId = "subjectId",
@@ -176,6 +178,7 @@ class AuditAthenaClientTest {
       // Subject + endDate, no who, no startDate
       Arguments.of(
         DigitalServicesQueryRequest(
+          auditEventType = STAFF,
           startDate = LocalDate.of(2025, 1, 25),
           subjectId = "subjectId",
           subjectType = "subjectType",
@@ -188,6 +191,7 @@ class AuditAthenaClientTest {
       // Subject + endDate, no who, no startDate
       Arguments.of(
         DigitalServicesQueryRequest(
+          auditEventType = STAFF,
           endDate = LocalDate.of(2025, 1, 10),
           subjectId = "subjectId",
           subjectType = "subjectType",
@@ -200,6 +204,7 @@ class AuditAthenaClientTest {
       // StartDate + endDate + who, no subject
       Arguments.of(
         DigitalServicesQueryRequest(
+          auditEventType = STAFF,
           startDate = LocalDate.of(2025, 1, 1),
           endDate = LocalDate.of(2025, 1, 15),
           who = "someone",
@@ -212,6 +217,7 @@ class AuditAthenaClientTest {
       // startDate + who, no subject, no endDate
       Arguments.of(
         DigitalServicesQueryRequest(
+          auditEventType = STAFF,
           startDate = LocalDate.of(2025, 1, 25),
           who = "someone",
         ),
@@ -223,6 +229,7 @@ class AuditAthenaClientTest {
       // Authorised to query all services
       Arguments.of(
         DigitalServicesQueryRequest(
+          auditEventType = STAFF,
           startDate = LocalDate.of(2025, 1, 1),
           endDate = LocalDate.of(2025, 1, 5),
           who = "someone",
@@ -235,6 +242,7 @@ class AuditAthenaClientTest {
       // No authorised services
       Arguments.of(
         DigitalServicesQueryRequest(
+          auditEventType = STAFF,
           startDate = LocalDate.of(2025, 1, 31),
           who = "someone",
         ),
@@ -325,7 +333,7 @@ class AuditAthenaClientTest {
 
       // Then
       assertThat(digitalServicesAuditQueryResponse).isEqualTo(
-        AthenaQueryResponse(
+        AuditQueryResponse(
           queryExecutionId = UUID.fromString(queryExecutionId),
           queryState = QueryExecutionState.SUCCEEDED,
           results = listOf(expectedAuditDto),

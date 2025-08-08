@@ -13,8 +13,8 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
-import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AthenaQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditFilterDto
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import java.util.UUID
@@ -80,9 +80,9 @@ class AuditService(
   fun triggerQuery(
     queryRequest: DigitalServicesQueryRequest,
     auditEventType: AuditEventType,
-  ): AthenaQueryResponse = auditAthenaClient.triggerQuery(queryRequest, auditEventType)
+  ): AuditQueryResponse = auditAthenaClient.triggerQuery(queryRequest, auditEventType)
 
-  fun getQueryResults(queryExecutionId: String): AthenaQueryResponse = auditAthenaClient.getAuditEventsQueryResults(queryExecutionId)
+  fun getQueryResults(queryExecutionId: String): AuditQueryResponse = auditAthenaClient.getAuditEventsQueryResults(queryExecutionId)
 }
 
 private fun AuditEvent.asMap(): Map<String, String> {

@@ -2,10 +2,18 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.model
 
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Size
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import java.time.LocalDate
 
 @ValidDigitalServicesQueryRequest
 open class DigitalServicesQueryRequest(
+  @Schema(
+    required = true,
+    description = "Audit event type",
+    example = "STAFF",
+  )
+  var auditEventType: AuditEventType,
+
   @Schema(
     required = false,
     description = "The start date to filter the audit events",

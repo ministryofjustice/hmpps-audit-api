@@ -13,7 +13,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
-import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AthenaQueryResponse
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import java.time.Clock
@@ -32,7 +32,7 @@ class AuditAthenaClient(
   @Value("\${hmpps.audit.queriesStartDate}") private val queriesStartDate: LocalDate,
 ) {
 
-  fun triggerQuery(filter: DigitalServicesQueryRequest, auditEventType: AuditEventType): AthenaQueryResponse {
+  fun triggerQuery(filter: DigitalServicesQueryRequest, auditEventType: AuditEventType): AuditQueryResponse {
     if (filter.startDate == null) {
       filter.startDate = queriesStartDate
     }
@@ -43,14 +43,14 @@ class AuditAthenaClient(
     val query = buildAthenaQuery(filter, authorisedServices, auditEventType)
     val queryExecutionId = startAthenaQuery(query, auditEventType)
 
-    return AthenaQueryResponse(
+    return AuditQueryResponse(
       queryExecutionId = UUID.fromString(queryExecutionId),
       queryState = QueryExecutionState.QUEUED,
       authorisedServices = authorisedServices,
     )
   }
 
-  fun getAuditEventsQueryResults(queryExecutionId: String): AthenaQueryResponse {
+  fun getAuditEventsQueryResults(queryExecutionId: String): AuditQueryResponse {
     val response = getQueryResults(queryExecutionId)
     if (response.queryState == QueryExecutionState.SUCCEEDED) {
       response.results = fetchQueryResults(queryExecutionId)
@@ -58,10 +58,10 @@ class AuditAthenaClient(
     return response
   }
 
-  fun getQueryResults(queryExecutionId: String): AthenaQueryResponse {
+  fun getQueryResults(queryExecutionId: String): AuditQueryResponse {
     val queryExecution = athenaClient.getQueryExecution(GetQueryExecutionRequest.builder().queryExecutionId(queryExecutionId).build()).queryExecution()
     val queryState = queryExecution.status().state()
-    val response = AthenaQueryResponse(
+    val response = AuditQueryResponse(
       queryExecutionId = UUID.fromString(queryExecutionId),
       queryState = queryState,
       authorisedServices = getAuthorisedServices(),

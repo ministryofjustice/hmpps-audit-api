@@ -17,7 +17,7 @@ import software.amazon.awssdk.services.athena.model.StartQueryExecutionResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
-import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AthenaQueryResponse
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryResponse
 import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
@@ -73,11 +73,11 @@ class AthenaPartitionRepairServiceTest {
     )
 
     // When
-    val athenaQueryResponse = service.triggerRepairPartitions(auditEventType)
+    val queryResponse = service.triggerRepairPartitions(auditEventType)
 
     // Then
-    assertThat(athenaQueryResponse).isEqualTo(
-      AthenaQueryResponse(
+    assertThat(queryResponse).isEqualTo(
+      AuditQueryResponse(
         queryExecutionId = UUID.fromString(updatePartitionsQueryExecutionId),
         queryState = QUEUED,
         authorisedServices = emptyList(),

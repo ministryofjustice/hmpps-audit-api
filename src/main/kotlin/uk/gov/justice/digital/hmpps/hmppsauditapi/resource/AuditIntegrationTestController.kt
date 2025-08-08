@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
-import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AthenaQueryResponse
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditAthenaClient
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
@@ -48,16 +49,23 @@ class AuditIntegrationTestController(
 
   @PostMapping("/query/{auditEventType}/{who}")
   @PreAuthorize("hasRole('ROLE_AUDIT_INTEGRATION_TEST')")
-  fun queryTestAuditEvent(
+  fun triggerTestQuery(
     @PathVariable auditEventType: AuditEventType,
     @PathVariable who: String,
-  ): AthenaQueryResponse = auditService.triggerQuery(
+  ): AuditQueryResponse = auditService.triggerQuery(
     DigitalServicesQueryRequest(
+      auditEventType = auditEventType,
       startDate = LocalDate.now(),
       who = who,
     ),
     auditEventType,
   )
+
+  @GetMapping("/query/{queryExecutionId}")
+  @PreAuthorize("hasRole('ROLE_AUDIT_INTEGRATION_TEST')")
+  fun getQueryResults(
+    @PathVariable queryExecutionId: UUID,
+  ): AuditQueryResponse = auditService.getQueryResults(queryExecutionId.toString())
 
   @PostMapping("/assertion/{queryExecutionId}")
   @PreAuthorize("hasRole('ROLE_AUDIT_INTEGRATION_TEST')")
