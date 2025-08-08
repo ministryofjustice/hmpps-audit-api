@@ -38,8 +38,7 @@ class AuditService(
       auditS3Client.save(auditEvent, athenaProperties.s3BucketName)
       auditAthenaClient.addPartitionForEvent(auditEvent, athenaProperties)
     } else {
-      // No point saving messages to the DB, we'll be getting rid of this before the next prod release
-      // auditRepository.save(auditEvent)
+      auditRepository.save(auditEvent)
     }
     telemetryClient.trackEvent(athenaProperties.auditEventType.description, auditEvent.asMap())
   }

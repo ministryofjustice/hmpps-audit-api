@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.service
 
 import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -394,7 +393,6 @@ class AuditServiceTest {
     )
 
     @Test
-    @Disabled
     fun `save audit event to database when saveToS3Bucket is false`() {
       auditService = AuditService(telemetryClient, auditRepository, auditS3Client, auditAthenaClient, false)
 
@@ -434,7 +432,6 @@ class AuditServiceTest {
     )
 
     @Test
-    @Disabled
     fun `save audit event to database when saveToS3Bucket is false`() {
       auditService = AuditService(telemetryClient, auditRepository, auditS3Client, auditAthenaClient, false)
 
