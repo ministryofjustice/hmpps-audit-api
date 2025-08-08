@@ -44,7 +44,7 @@ class DigitalServices( // TODO SM rename class
     return auditService.triggerQuery(auditFilterDto, AuditEventType.STAFF)
   }
 
-  @PreAuthorize("hasRole('ROLE_AUDIT') or hasRole('ROLE_AUDIT_INTEGRATION_TEST')")
+  @PreAuthorize("hasRole('ROLE_AUDIT')")
   @Operation(
     summary = "Get audit events for staff member",
     description = "Get audit events given who, or subject ID and subject type, role required is ROLE_AUDIT",
