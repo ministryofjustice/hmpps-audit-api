@@ -54,6 +54,7 @@ class AuditIntegrationTestController(
     @PathVariable who: String,
   ): AthenaQueryResponse = auditService.triggerQuery(
     DigitalServicesQueryRequest(
+      auditEventType = auditEventType,
       startDate = LocalDate.now(),
       who = who,
     ),

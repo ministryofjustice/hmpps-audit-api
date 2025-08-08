@@ -24,12 +24,13 @@ import software.amazon.awssdk.services.athena.model.Row
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.IntegrationTest
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType.STAFF
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
 import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
 
-class DigitalServicesTest : IntegrationTest() {
+class DigitalServicesControllerTest : IntegrationTest() {
 
   @Autowired
   private lateinit var athenaClient: AthenaClient
@@ -120,6 +121,7 @@ class DigitalServicesTest : IntegrationTest() {
       .body(
         BodyInserters.fromValue(
           DigitalServicesQueryRequest(
+            auditEventType = STAFF,
             startDate = LocalDate.of(2025, 1, 1),
             endDate = LocalDate.of(2025, 1, 5),
             subjectId = "test-subject",
@@ -138,7 +140,7 @@ class DigitalServicesTest : IntegrationTest() {
       .headers(setAuthorisation(roles = listOf("ROLE_AUDIT", "ROLE_QUERY_AUDIT__HMPPS_MANAGE_USERS"), scopes = listOf("read")))
       .body(
         BodyInserters.fromValue(
-          DigitalServicesQueryRequest(),
+          DigitalServicesQueryRequest(auditEventType = STAFF),
         ),
       )
       .exchange()
