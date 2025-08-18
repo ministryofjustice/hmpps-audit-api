@@ -1,9 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.3.5"
-  kotlin("plugin.spring") version "2.2.0"
-  kotlin("plugin.jpa") version "2.2.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.3.6"
+  kotlin("plugin.spring") version "2.2.10"
+  kotlin("plugin.jpa") version "2.2.10"
 }
 
 configurations {
@@ -32,8 +32,8 @@ dependencies {
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
 
   implementation("org.apache.commons:commons-lang3:3.18.0")
-  implementation("software.amazon.awssdk:s3:2.32.21")
-  implementation("software.amazon.awssdk:athena:2.32.21")
+  implementation("software.amazon.awssdk:s3:2.32.24")
+  implementation("software.amazon.awssdk:athena:2.32.24")
   implementation("org.apache.parquet:parquet-avro:1.15.2")
   implementation("org.apache.avro:avro:1.12.0")
   implementation("org.apache.hadoop:hadoop-client:3.4.1") {
@@ -57,8 +57,8 @@ dependencies {
   runtimeOnly("org.postgresql:postgresql:42.7.7")
 
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
-  testImplementation("io.jsonwebtoken:jjwt-impl:0.12.6")
-  testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
+  testImplementation("io.jsonwebtoken:jjwt-impl:0.12.7")
+  testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.7")
   testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   testImplementation("org.mockito:mockito-inline:5.2.0")
 
