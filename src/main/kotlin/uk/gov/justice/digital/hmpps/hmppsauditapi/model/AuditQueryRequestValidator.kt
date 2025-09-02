@@ -4,9 +4,9 @@ import jakarta.validation.ConstraintValidator
 import jakarta.validation.ConstraintValidatorContext
 import java.time.LocalDate
 
-class DigitalServicesQueryRequestValidator : ConstraintValidator<ValidDigitalServicesQueryRequest, DigitalServicesQueryRequest> {
+class AuditQueryRequestValidator : ConstraintValidator<ValidAuditQueryRequest, AuditQueryRequest> {
 
-  override fun isValid(dto: DigitalServicesQueryRequest?, context: ConstraintValidatorContext): Boolean {
+  override fun isValid(dto: AuditQueryRequest?, context: ConstraintValidatorContext): Boolean {
     if (dto == null) return false
     context.disableDefaultConstraintViolation()
     val now = LocalDate.now()

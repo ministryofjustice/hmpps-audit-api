@@ -13,8 +13,8 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryResponse
-import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import java.time.Clock
 import java.time.Instant
@@ -32,7 +32,7 @@ class AuditAthenaClient(
   @Value("\${hmpps.audit.queriesStartDate}") private val queriesStartDate: LocalDate,
 ) {
 
-  fun triggerQuery(filter: DigitalServicesQueryRequest, auditEventType: AuditEventType): AuditQueryResponse {
+  fun triggerQuery(filter: AuditQueryRequest, auditEventType: AuditEventType): AuditQueryResponse {
     if (filter.startDate == null) {
       filter.startDate = queriesStartDate
     }
@@ -95,7 +95,7 @@ class AuditAthenaClient(
     athenaClient.startQueryExecution(request)
   }
 
-  private fun buildAthenaQuery(filter: DigitalServicesQueryRequest, services: List<String>, auditEventType: AuditEventType): String {
+  private fun buildAthenaQuery(filter: AuditQueryRequest, services: List<String>, auditEventType: AuditEventType): String {
     val athenaProperties = athenaPropertiesFactory.getProperties(auditEventType)
     val conditions = mutableListOf<String>()
     val databaseName = athenaProperties.databaseName

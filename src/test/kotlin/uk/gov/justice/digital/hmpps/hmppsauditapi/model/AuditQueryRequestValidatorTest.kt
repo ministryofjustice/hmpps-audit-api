@@ -24,7 +24,7 @@ import java.util.stream.Stream
 @Import(IntegrationTest.SqsConfig::class, JwtAuthHelper::class, S3TestConfig::class)
 @ActiveProfiles(resolver = CommandLineProfilesResolver::class)
 @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
-class DigitalServicesQueryRequestValidatorTest {
+class AuditQueryRequestValidatorTest {
 
   private val validator: Validator = Validation.buildDefaultValidatorFactory().validator
 
@@ -34,50 +34,50 @@ class DigitalServicesQueryRequestValidatorTest {
 
     @ParameterizedTest
     @MethodSource("validBaseAuditFilterDto")
-    internal fun `should be valid`(digitalServicesQueryRequest: DigitalServicesQueryRequest) {
-      val violations = validator.validate(digitalServicesQueryRequest)
+    internal fun `should be valid`(auditQueryRequest: AuditQueryRequest) {
+      val violations = validator.validate(auditQueryRequest)
       assertThat(violations).isEmpty()
     }
 
     @ParameterizedTest
     @MethodSource("invalidBaseAuditFilterDto")
-    internal fun `should be invalid`(digitalServicesQueryRequest: DigitalServicesQueryRequest, expectedErrors: Map<String, String>) {
-      val actualErrors: Map<String, String> = validator.validate(digitalServicesQueryRequest).associate { it.propertyPath.toString() to it.message }
+    internal fun `should be invalid`(auditQueryRequest: AuditQueryRequest, expectedErrors: Map<String, String>) {
+      val actualErrors: Map<String, String> = validator.validate(auditQueryRequest).associate { it.propertyPath.toString() to it.message }
       assertThat(actualErrors).containsExactlyInAnyOrderEntriesOf(expectedErrors)
     }
 
     private fun validBaseAuditFilterDto() = listOf(
-      DigitalServicesQueryRequest(
+      AuditQueryRequest(
         auditEventType = STAFF,
         startDate = LocalDate.now().minusDays(1),
         endDate = LocalDate.now(),
         subjectId = "test-subject",
         subjectType = "USER_ID",
       ),
-      DigitalServicesQueryRequest(
+      AuditQueryRequest(
         auditEventType = STAFF,
         startDate = LocalDate.now(),
         subjectId = "test-subject",
         subjectType = "USER_ID",
       ),
-      DigitalServicesQueryRequest(
+      AuditQueryRequest(
         auditEventType = STAFF,
         endDate = LocalDate.now(),
         subjectId = "test-subject",
         subjectType = "USER_ID",
       ),
-      DigitalServicesQueryRequest(
+      AuditQueryRequest(
         auditEventType = STAFF,
         startDate = LocalDate.now().minusDays(1),
         endDate = LocalDate.now(),
         who = "who",
       ),
-      DigitalServicesQueryRequest(
+      AuditQueryRequest(
         auditEventType = STAFF,
         startDate = LocalDate.now().minusDays(1),
         who = "who",
       ),
-      DigitalServicesQueryRequest(
+      AuditQueryRequest(
         auditEventType = STAFF,
         endDate = LocalDate.now(),
         who = "who",
@@ -86,7 +86,7 @@ class DigitalServicesQueryRequestValidatorTest {
 
     private fun invalidBaseAuditFilterDto() = Stream.of(
       Arguments.of(
-        DigitalServicesQueryRequest(auditEventType = STAFF),
+        AuditQueryRequest(auditEventType = STAFF),
         mapOf(
           "startDate" to "startDate must be provided if endDate is null",
           "endDate" to "endDate must be provided if startDate is null",
@@ -95,7 +95,7 @@ class DigitalServicesQueryRequestValidatorTest {
       ),
 
       Arguments.of(
-        DigitalServicesQueryRequest(
+        AuditQueryRequest(
           auditEventType = STAFF,
           startDate = LocalDate.now(),
           endDate = LocalDate.now().plusDays(1),
@@ -105,7 +105,7 @@ class DigitalServicesQueryRequestValidatorTest {
       ),
 
       Arguments.of(
-        DigitalServicesQueryRequest(
+        AuditQueryRequest(
           auditEventType = STAFF,
           startDate = LocalDate.now().plusDays(1),
           who = "someone",
@@ -114,7 +114,7 @@ class DigitalServicesQueryRequestValidatorTest {
       ),
 
       Arguments.of(
-        DigitalServicesQueryRequest(
+        AuditQueryRequest(
           auditEventType = STAFF,
           startDate = LocalDate.now(),
           endDate = LocalDate.now().minusDays(1),
@@ -124,7 +124,7 @@ class DigitalServicesQueryRequestValidatorTest {
       ),
 
       Arguments.of(
-        DigitalServicesQueryRequest(
+        AuditQueryRequest(
           auditEventType = STAFF,
           startDate = LocalDate.now().minusDays(1),
           endDate = LocalDate.now(),
@@ -133,7 +133,7 @@ class DigitalServicesQueryRequestValidatorTest {
         mapOf("subjectType" to "Both subjectId and subjectType must be populated together or left null"),
       ),
       Arguments.of(
-        DigitalServicesQueryRequest(
+        AuditQueryRequest(
           auditEventType = STAFF,
           startDate = LocalDate.now().minusDays(1),
           endDate = LocalDate.now(),
@@ -142,7 +142,7 @@ class DigitalServicesQueryRequestValidatorTest {
         mapOf("subjectId" to "Both subjectId and subjectType must be populated together or left null"),
       ),
       Arguments.of(
-        DigitalServicesQueryRequest(
+        AuditQueryRequest(
           auditEventType = STAFF,
           startDate = LocalDate.now().minusDays(1),
           endDate = LocalDate.now(),

@@ -427,7 +427,7 @@ class AuditServiceTest {
       "PERSON",
       "3rdea6d876c62e2f5264c94c7b508548",
       "freddy.frog",
-      "hmpps-launchpad",
+      "hmpps-launchpad-ui",
       "{\"offenderId\": \"98\"}",
     )
 

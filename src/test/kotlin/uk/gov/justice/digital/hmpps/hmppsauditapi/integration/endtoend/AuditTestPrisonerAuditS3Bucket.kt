@@ -32,7 +32,7 @@ class AuditTestPrisonerAuditS3Bucket @Autowired constructor(
     subjectId = null,
     subjectType = "NOT_APPLICABLE",
     correlationId = null, who = null,
-    service = "hmpps-launchpad",
+    service = "hmpps-launchpad-ui",
     details = null,
   )
 
@@ -46,7 +46,7 @@ class AuditTestPrisonerAuditS3Bucket @Autowired constructor(
     verify(auditS3Client).save(
       argThat {
         what == "prisonerAuditEvent" &&
-          service == "hmpps-launchpad" &&
+          service == "hmpps-launchpad-ui" &&
           subjectType == "NOT_APPLICABLE" &&
           id != null
       },
