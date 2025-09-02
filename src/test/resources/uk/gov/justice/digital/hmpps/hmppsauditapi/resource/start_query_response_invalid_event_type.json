@@ -1,0 +1,7 @@
+{
+  "status": 400,
+  "errorCode": null,
+  "userMessage": "Validation failure: Incorrect event type used",
+  "developerMessage": "Incorrect event type used",
+  "moreInfo": null
+}

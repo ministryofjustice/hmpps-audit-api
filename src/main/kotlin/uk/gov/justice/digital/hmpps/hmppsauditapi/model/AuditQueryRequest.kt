@@ -5,8 +5,8 @@ import jakarta.validation.constraints.Size
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import java.time.LocalDate
 
-@ValidDigitalServicesQueryRequest
-open class DigitalServicesQueryRequest(
+@ValidAuditQueryRequest
+open class AuditQueryRequest(
   @Schema(
     required = true,
     description = "Audit event type",

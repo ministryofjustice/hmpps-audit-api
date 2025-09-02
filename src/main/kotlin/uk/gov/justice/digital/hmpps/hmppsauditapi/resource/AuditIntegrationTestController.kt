@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
+import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryResponse
-import uk.gov.justice.digital.hmpps.hmppsauditapi.model.DigitalServicesQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditAthenaClient
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
@@ -53,7 +53,7 @@ class AuditIntegrationTestController(
     @PathVariable auditEventType: AuditEventType,
     @PathVariable who: String,
   ): AuditQueryResponse = auditService.triggerQuery(
-    DigitalServicesQueryRequest(
+    AuditQueryRequest(
       auditEventType = auditEventType,
       startDate = LocalDate.now(),
       who = who,

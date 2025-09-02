@@ -6,8 +6,8 @@ import kotlin.reflect.KClass
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
-@Constraint(validatedBy = [DigitalServicesQueryRequestValidator::class])
-annotation class ValidDigitalServicesQueryRequest(
+@Constraint(validatedBy = [AuditQueryRequestValidator::class])
+annotation class ValidAuditQueryRequest(
   val message: String = "Invalid audit filter",
   val groups: Array<KClass<*>> = [],
   val payload: Array<KClass<out Payload>> = [],

@@ -1,7 +1,7 @@
 {
   "queryExecutionId": "b1231f6e-9653-4b3f-9507-793730932daf",
   "queryState": "SUCCEEDED",
-  "authorisedServices": ["hmpps-launchpad"],
+  "authorisedServices": ["hmpps-launchpad-ui"],
   "executionTimeInMillis": 100,
   "results": [
     {
@@ -12,8 +12,8 @@
       "subjectId": "sub-456",
       "subjectType": "User",
       "correlationId": "corr-789",
-      "who": "test-user",
-      "service": "auth-service",
+      "who": "prisoner-user",
+      "service": "hmpps-launchpad-ui",
       "details": "some details"
     }
   ]
