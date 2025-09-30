@@ -10,7 +10,10 @@ import org.springframework.data.domain.Sort.Direction.DESC
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
-import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
+import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.PrisonerAuditRepository
+import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.StaffAuditRepository
+import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.PrisonerAuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.StaffAuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditFilterDto
@@ -22,7 +25,8 @@ import java.util.UUID
 @Service
 class AuditService(
   private val telemetryClient: TelemetryClient,
-  private val auditRepository: AuditRepository,
+  private val staffAuditRepository: StaffAuditRepository,
+  private val prisonerAuditRepository: PrisonerAuditRepository,
   private val auditS3Client: AuditS3Client,
   private val auditAthenaClient: AuditAthenaClient,
   @Value("\${hmpps.repository.saveToS3Bucket}") private val saveToS3Bucket: Boolean,
@@ -32,18 +36,29 @@ class AuditService(
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 
-  fun saveAuditEvent(auditEvent: AuditEvent, athenaProperties: AthenaProperties) {
+  fun saveAuditEvent(auditEvent: AuditEvent, auditEventType: AuditEventType, athenaProperties: AthenaProperties) {
     if (saveToS3Bucket) {
       auditEvent.id = UUID.randomUUID()
       auditS3Client.save(auditEvent, athenaProperties.s3BucketName)
       auditAthenaClient.addPartitionForEvent(auditEvent, athenaProperties)
-    } else {
-      auditRepository.save(auditEvent)
     }
+
+    saveToPostgres(auditEvent, auditEventType)
+
     telemetryClient.trackEvent(athenaProperties.auditEventType.description, auditEvent.asMap())
   }
 
-  fun findAll(): List<AuditDto> = auditRepository.findAll(Sort.by(DESC, "when")).map { AuditDto(it) }
+  fun saveToPostgres(auditEvent: AuditEvent, auditEventType: AuditEventType) {
+    if (auditEventType == AuditEventType.STAFF) {
+      val staffAuditEvent: StaffAuditEvent = auditEvent.toStaffAuditEvent()
+      staffAuditRepository.save(staffAuditEvent)
+    } else {
+      val prisonerAuditEvent: PrisonerAuditEvent = auditEvent.toPrisonerAuditEvent()
+      prisonerAuditRepository.save(prisonerAuditEvent)
+    }
+  }
+
+  fun findAll(): List<AuditDto> = staffAuditRepository.findAll(Sort.by(DESC, "when")).map { AuditDto(it) }
 
   fun findPage(
     pageable: Pageable = Pageable.unpaged(),
@@ -61,7 +76,7 @@ class AuditService(
         what,
         who,
       )
-      return auditRepository.findPage(
+      return staffAuditRepository.findPage(
         pageable,
         startDateTime,
         endDateTime,
@@ -94,3 +109,29 @@ private fun AuditEvent.asMap(): Map<String, String> {
   items.addIfNotNull("service", service)
   return items.toMap()
 }
+
+fun AuditEvent.toPrisonerAuditEvent(): PrisonerAuditEvent = PrisonerAuditEvent(
+  id = id,
+  what = what,
+  `when` = `when`,
+  operationId = operationId,
+  subjectId = subjectId,
+  subjectType = subjectType,
+  correlationId = correlationId,
+  who = who,
+  service = service,
+  details = details,
+)
+
+fun AuditEvent.toStaffAuditEvent(): StaffAuditEvent = StaffAuditEvent(
+  id = id,
+  what = what,
+  `when` = `when`,
+  operationId = operationId,
+  subjectId = subjectId,
+  subjectType = subjectType,
+  correlationId = correlationId,
+  who = who,
+  service = service,
+  details = details,
+)

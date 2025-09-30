@@ -5,7 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import uk.gov.justice.digital.hmpps.hmppsauditapi.IntegrationTest
-import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
+import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.PrisonerAuditRepository
+import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.StaffAuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditS3Client
 import uk.gov.justice.hmpps.sqs.HmppsQueue
@@ -17,7 +18,10 @@ abstract class QueueListenerIntegrationTest : IntegrationTest() {
   lateinit var telemetryClient: TelemetryClient
 
   @MockBean
-  lateinit var auditRepository: AuditRepository
+  lateinit var staffAuditRepository: StaffAuditRepository
+
+  @MockBean
+  lateinit var prisonerAuditRepository: PrisonerAuditRepository
 
   @MockBean
   lateinit var auditS3Client: AuditS3Client

@@ -14,7 +14,7 @@ import org.hibernate.annotations.UpdateTimestamp
 import java.time.LocalDateTime
 
 @Entity(name = "AuthUserId")
-@Table(name = "auth_user_id")
+@Table(name = "auth_user_id", schema = "staff")
 @Schema(
   description = "Stores all user IDs for a given user. " +
     "AUDIT_USER_ID is the unique ID given by the audit service to each user. " +

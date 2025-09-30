@@ -19,7 +19,8 @@ import org.springframework.data.domain.Sort.Direction.DESC
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.hmppsauditapi.IntegrationTest
-import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
+import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.StaffAuditRepository
+import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.StaffAuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
 import java.time.Instant
 import java.util.UUID
@@ -28,7 +29,7 @@ import java.util.UUID
 class AuditResourceTest : IntegrationTest() {
 
   @MockBean
-  private lateinit var auditRepository: AuditRepository
+  private lateinit var staffAuditRepository: StaffAuditRepository
 
   @TestInstance(PER_CLASS)
   @Nested
@@ -80,7 +81,7 @@ class AuditResourceTest : IntegrationTest() {
     @MethodSource("secureEndpointsGet")
     internal fun `satisfies the correct role and scope`(uri: String) {
       whenever(
-        auditRepository.findPage(
+        staffAuditRepository.findPage(
           any(),
           anyOrNull(),
           anyOrNull(),
@@ -386,12 +387,12 @@ class AuditResourceTest : IntegrationTest() {
     @Test
     fun `find all audit entries`() {
       val listOfAudits = listOf(
-        AuditEvent(
+        StaffAuditEvent(
           UUID.fromString("64505f1e-c9ca-4e54-8c62-d946359b667f"),
           "MINIMUM_FIELDS_EVENT",
           Instant.parse("2021-04-04T17:17:30Z"),
         ),
-        AuditEvent(
+        StaffAuditEvent(
           UUID.fromString("5c5ba3d7-0707-42f1-b9ea-949e22dc17ba"),
           "COURT_REGISTER_BUILDING_UPDATE",
           Instant.parse("2021-04-03T10:15:30Z"),
@@ -403,7 +404,7 @@ class AuditResourceTest : IntegrationTest() {
           "court-register",
           "{\"courtId\":\"AAAMH1\",\"buildingId\":936,\"building\":{\"id\":936,\"courtId\":\"AAAMH1\",\"buildingName\":\"Main Court Name Changed\"}}",
         ),
-        AuditEvent(
+        StaffAuditEvent(
           UUID.fromString("e5b4800c-dc4e-45f8-826c-877b1f3ce8de"),
           "OFFENDER_DELETED",
           Instant.parse("2021-04-01T15:15:30Z"),
@@ -415,7 +416,7 @@ class AuditResourceTest : IntegrationTest() {
           "offender-service",
           "{\"offenderId\": \"97\"}",
         ),
-        AuditEvent(
+        StaffAuditEvent(
           UUID.fromString("03a1624a-54e7-453e-8c79-816dbe02fd3c"),
           "OFFENDER_DELETED",
           Instant.parse("2020-12-31T08:11:30Z"),
@@ -428,7 +429,7 @@ class AuditResourceTest : IntegrationTest() {
           "{\"offenderId\": \"98\"}",
         ),
       )
-      whenever(auditRepository.findAll(Sort.by(DESC, "when"))).thenReturn(
+      whenever(staffAuditRepository.findAll(Sort.by(DESC, "when"))).thenReturn(
         listOfAudits,
       )
 
@@ -438,7 +439,7 @@ class AuditResourceTest : IntegrationTest() {
         .expectStatus().isOk
         .expectBody().json("audit_events".loadJson())
 
-      verify(auditRepository).findAll(Sort.by(DESC, "when"))
+      verify(staffAuditRepository).findAll(Sort.by(DESC, "when"))
     }
   }
   private fun String.loadJson(): String = AuditResourceTest::class.java.getResource("$this.json")!!.readText()

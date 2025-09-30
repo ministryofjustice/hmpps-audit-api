@@ -52,6 +52,6 @@ class AuditTestPrisonerAuditS3Bucket @Autowired constructor(
       },
       eq("hmpps-prisoner-audit-bucket"),
     )
-    verifyNoInteractions(auditRepository)
+    verifyNoInteractions(staffAuditRepository)
   }
 }

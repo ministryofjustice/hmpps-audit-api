@@ -7,10 +7,8 @@ import io.awspring.cloud.sqs.annotation.SqsListener
 import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.persistence.Column
-import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.Id
-import jakarta.persistence.Table
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
@@ -36,7 +34,7 @@ class HMPPSAuditListener(
     val cleansedAuditEvent = auditEvent.copy(
       details = auditEvent.details?.jsonString(),
     )
-    auditService.saveAuditEvent(cleansedAuditEvent, athenaPropertiesFactory.getProperties(AuditEventType.STAFF))
+    auditService.saveAuditEvent(cleansedAuditEvent, AuditEventType.STAFF, athenaPropertiesFactory.getProperties(AuditEventType.STAFF))
   }
 
   @SqsListener("prisonerauditqueue", factory = "hmppsQueueContainerFactoryProxy")
@@ -48,7 +46,7 @@ class HMPPSAuditListener(
       details = auditEvent.details?.jsonString(),
     )
 
-    auditService.saveAuditEvent(cleansedAuditEvent, athenaPropertiesFactory.getProperties(AuditEventType.PRISONER))
+    auditService.saveAuditEvent(cleansedAuditEvent, AuditEventType.PRISONER, athenaPropertiesFactory.getProperties(AuditEventType.PRISONER))
   }
 
   private fun patchSubjectTypeIfMissing(message: String): String = try {
@@ -69,8 +67,6 @@ class HMPPSAuditListener(
     "{\"details\":\"$this\"}"
   }
 
-  @Entity(name = "AuditEvent")
-  @Table(name = "AuditEvent")
   @Schema(description = "Audit Event Insert Record")
   data class AuditEvent(
     @Id

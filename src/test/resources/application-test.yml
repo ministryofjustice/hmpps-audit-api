@@ -46,6 +46,8 @@ spring:
     show-sql: true
   flyway:
     locations: classpath:/db/migration/h2,classpath:/db/migration/dev/data,classpath:/db/migration/common
+    schemas: staff,prisoner
+    default-schema: staff
 
 hmpps:
   repository:

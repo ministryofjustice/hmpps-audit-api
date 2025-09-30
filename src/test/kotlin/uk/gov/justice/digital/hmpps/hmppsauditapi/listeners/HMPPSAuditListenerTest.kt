@@ -8,6 +8,7 @@ import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 
 internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
@@ -25,7 +26,7 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
   """
     listener.onAuditEvent(message)
 
-    doNothing().whenever(auditService).saveAuditEvent(any(), any())
+    doNothing().whenever(auditService).saveAuditEvent(any(), any(), any())
 
     verify(auditService).saveAuditEvent(
       check {
@@ -35,6 +36,7 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
         assertThat(it.who).isEqualTo("bobby.beans")
         assertThat(it.service).isEqualTo("offender-service")
       },
+      eq(AuditEventType.STAFF),
       eq(staffAthenaProperties),
     )
   }
@@ -51,7 +53,7 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
     }
   """
 
-    doNothing().whenever(auditService).saveAuditEvent(any(), any())
+    doNothing().whenever(auditService).saveAuditEvent(any(), any(), any())
 
     listener.onAuditEvent(message)
 
@@ -63,6 +65,7 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
         assertThat(it.who).isEqualTo("alice.jones")
         assertThat(it.service).isEqualTo("auth-service")
       },
+      eq(AuditEventType.STAFF),
       eq(staffAthenaProperties),
     )
   }
@@ -80,7 +83,7 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
     }
   """
 
-    doNothing().whenever(auditService).saveAuditEvent(any(), any())
+    doNothing().whenever(auditService).saveAuditEvent(any(), any(), any())
 
     listener.onAuditEvent(message)
 
@@ -93,6 +96,7 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
         assertThat(it.service).isEqualTo("auth-service")
         assertThat(it.subjectType).isEqualTo("NOT_APPLICABLE")
       },
+      eq(AuditEventType.STAFF),
       eq(staffAthenaProperties),
     )
   }

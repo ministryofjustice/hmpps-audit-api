@@ -8,19 +8,19 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.data.domain.Pageable
-import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.PrisonerAuditEvent
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 @DataJpaTest
-class AuditRepositoryTest {
+class PrisonerAuditRepositoryTest {
 
   @Autowired
-  lateinit var auditRepository: AuditRepository
+  lateinit var prisonerAuditRepository: PrisonerAuditRepository
 
   @AfterEach
   fun `remove test audit events`() {
-    auditRepository.deleteAll()
+    prisonerAuditRepository.deleteAll()
   }
 
   @Suppress("ClassName")
@@ -28,14 +28,14 @@ class AuditRepositoryTest {
   inner class saveAuditEvents {
     @Test
     internal fun `can write to repository with basic attributes`() {
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "An Event with basic attributes",
         ),
       )
 
-      assertThat(auditRepository.count()).isEqualTo(1)
-      val auditEvent = auditRepository.findAll().first()
+      assertThat(prisonerAuditRepository.count()).isEqualTo(1)
+      val auditEvent = prisonerAuditRepository.findAll().first()
 
       assertThat(auditEvent.id).isNotNull
       assertThat(auditEvent.what).isEqualTo("An Event with basic attributes")
@@ -56,8 +56,8 @@ class AuditRepositoryTest {
       }
       """
       val now = Instant.now()
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "An Event with all attributes",
           `when` = now,
           operationId = "123456789",
@@ -68,8 +68,8 @@ class AuditRepositoryTest {
           details = details,
         ),
       )
-      assertThat(auditRepository.count()).isEqualTo(1)
-      val auditEvent = auditRepository.findAll().first()
+      assertThat(prisonerAuditRepository.count()).isEqualTo(1)
+      val auditEvent = prisonerAuditRepository.findAll().first()
       assertThat(auditEvent.id).isNotNull
       assertThat(auditEvent.what).isEqualTo("An Event with all attributes")
       assertThat(auditEvent.`when`).isCloseTo(now, within(1, ChronoUnit.MICROS))
@@ -87,8 +87,8 @@ class AuditRepositoryTest {
   inner class filteredPageAuditEvents {
     @Test
     internal fun `filter audit events by date range, service, what and who`() {
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "An Event by John S",
           `when` = Instant.now(),
           operationId = "123456789",
@@ -98,8 +98,8 @@ class AuditRepositoryTest {
           service = "Service-A",
         ),
       )
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "Another Event By Fred S",
           `when` = Instant.now(),
           operationId = "345678",
@@ -109,8 +109,8 @@ class AuditRepositoryTest {
           service = "Service-B",
         ),
       )
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "Event By John J",
           `when` = Instant.now(),
           operationId = "234567",
@@ -121,8 +121,8 @@ class AuditRepositoryTest {
         ),
       )
 
-      assertThat(auditRepository.count()).isEqualTo(3)
-      val auditEvents = auditRepository.findPage(
+      assertThat(prisonerAuditRepository.count()).isEqualTo(3)
+      val auditEvents = prisonerAuditRepository.findPage(
         Pageable.unpaged(),
         Instant.now().minus(1, ChronoUnit.DAYS),
         Instant.now().plus(1, ChronoUnit.DAYS),
@@ -138,8 +138,8 @@ class AuditRepositoryTest {
 
     @Test
     internal fun `filter audit events by service`() {
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "An Event",
           `when` = Instant.now(),
           operationId = "123456789",
@@ -147,8 +147,8 @@ class AuditRepositoryTest {
           who = "John Smith",
         ),
       )
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "Another Event",
           `when` = Instant.now(),
           operationId = "345678",
@@ -156,8 +156,8 @@ class AuditRepositoryTest {
           who = "Fred Smith",
         ),
       )
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "Another Event By John",
           `when` = Instant.now(),
           operationId = "234567",
@@ -166,8 +166,8 @@ class AuditRepositoryTest {
         ),
       )
 
-      assertThat(auditRepository.count()).isEqualTo(3)
-      val auditEvents = auditRepository.findPage(
+      assertThat(prisonerAuditRepository.count()).isEqualTo(3)
+      val auditEvents = prisonerAuditRepository.findPage(
         Pageable.unpaged(),
         null,
         null,
@@ -183,8 +183,8 @@ class AuditRepositoryTest {
 
     @Test
     internal fun `filter audit events by all null parameters`() {
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "An Event",
           `when` = Instant.now(),
           operationId = "123456789",
@@ -192,8 +192,8 @@ class AuditRepositoryTest {
           who = "John Smith",
         ),
       )
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "Another Event",
           `when` = Instant.now(),
           operationId = "345678",
@@ -201,8 +201,8 @@ class AuditRepositoryTest {
           who = "Fred Smith",
         ),
       )
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "Another Event By John",
           `when` = Instant.now(),
           operationId = "234567",
@@ -211,8 +211,8 @@ class AuditRepositoryTest {
         ),
       )
 
-      assertThat(auditRepository.count()).isEqualTo(3)
-      val auditEvents = auditRepository.findPage(
+      assertThat(prisonerAuditRepository.count()).isEqualTo(3)
+      val auditEvents = prisonerAuditRepository.findPage(
         Pageable.unpaged(),
         null,
         null,
@@ -228,8 +228,8 @@ class AuditRepositoryTest {
 
     @Test
     internal fun `filter audit events by Who`() {
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "An Event",
           `when` = Instant.now(),
           operationId = "123456789",
@@ -237,8 +237,8 @@ class AuditRepositoryTest {
           who = "John Smith",
         ),
       )
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "Another Event",
           `when` = Instant.now(),
           operationId = "345678",
@@ -246,8 +246,8 @@ class AuditRepositoryTest {
           who = "Fred Smith",
         ),
       )
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "Another Event By John",
           `when` = Instant.now(),
           operationId = "234567",
@@ -256,8 +256,8 @@ class AuditRepositoryTest {
         ),
       )
 
-      assertThat(auditRepository.count()).isEqualTo(3)
-      val auditEvents = auditRepository.findPage(
+      assertThat(prisonerAuditRepository.count()).isEqualTo(3)
+      val auditEvents = prisonerAuditRepository.findPage(
         Pageable.unpaged(),
         null,
         null,
@@ -273,8 +273,8 @@ class AuditRepositoryTest {
 
     @Test
     internal fun `filter audit events by start date`() {
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "An Event",
           `when` = Instant.now(),
           operationId = "123456789",
@@ -282,8 +282,8 @@ class AuditRepositoryTest {
           who = "John Smith",
         ),
       )
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "Another Event",
           `when` = Instant.now().minus(1, ChronoUnit.DAYS),
           operationId = "345678",
@@ -291,8 +291,8 @@ class AuditRepositoryTest {
           who = "Fred Smith",
         ),
       )
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "Another Event By John",
           `when` = Instant.now().minus(2, ChronoUnit.DAYS),
           operationId = "234567",
@@ -301,9 +301,9 @@ class AuditRepositoryTest {
         ),
       )
 
-      assertThat(auditRepository.count()).isEqualTo(3)
+      assertThat(prisonerAuditRepository.count()).isEqualTo(3)
 
-      val auditEvents = auditRepository.findPage(
+      val auditEvents = prisonerAuditRepository.findPage(
         Pageable.unpaged(),
         Instant.now().minus(3, ChronoUnit.DAYS),
         null,
@@ -319,8 +319,8 @@ class AuditRepositoryTest {
 
     @Test
     internal fun `filter audit events by end date`() {
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "An Event",
           `when` = Instant.now(),
           operationId = "123456789",
@@ -328,8 +328,8 @@ class AuditRepositoryTest {
           who = "John Smith",
         ),
       )
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "Another Event",
           `when` = Instant.now().minus(1, ChronoUnit.DAYS),
           operationId = "345678",
@@ -337,8 +337,8 @@ class AuditRepositoryTest {
           who = "Fred Smith",
         ),
       )
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "Another Event By John",
           `when` = Instant.now().minus(2, ChronoUnit.DAYS),
           operationId = "234567",
@@ -347,8 +347,8 @@ class AuditRepositoryTest {
         ),
       )
 
-      assertThat(auditRepository.count()).isEqualTo(3)
-      val auditEvents = auditRepository.findPage(
+      assertThat(prisonerAuditRepository.count()).isEqualTo(3)
+      val auditEvents = prisonerAuditRepository.findPage(
         Pageable.unpaged(),
         null,
         Instant.now().minus(1, ChronoUnit.DAYS),
@@ -364,8 +364,8 @@ class AuditRepositoryTest {
 
     @Test
     internal fun `filter audit events by date range`() {
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "An Event",
           `when` = Instant.now(),
           operationId = "123456789",
@@ -373,8 +373,8 @@ class AuditRepositoryTest {
           who = "John Smith",
         ),
       )
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "Another Event",
           `when` = Instant.now().minus(1, ChronoUnit.DAYS),
           operationId = "345678",
@@ -382,8 +382,8 @@ class AuditRepositoryTest {
           who = "Fred Smith",
         ),
       )
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "Another Event By John",
           `when` = Instant.now().minus(2, ChronoUnit.DAYS),
           operationId = "234567",
@@ -392,9 +392,9 @@ class AuditRepositoryTest {
         ),
       )
 
-      assertThat(auditRepository.count()).isEqualTo(3)
+      assertThat(prisonerAuditRepository.count()).isEqualTo(3)
 
-      val auditEvents = auditRepository.findPage(
+      val auditEvents = prisonerAuditRepository.findPage(
         Pageable.unpaged(),
         Instant.now().minus(3, ChronoUnit.DAYS),
         Instant.now(),
@@ -410,8 +410,8 @@ class AuditRepositoryTest {
 
     @Test
     internal fun `filter audit events by date range, where start date is greater than end date, no results expected`() {
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "An Event",
           `when` = Instant.now(),
           operationId = "123456789",
@@ -419,8 +419,8 @@ class AuditRepositoryTest {
           who = "John Smith",
         ),
       )
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "Another Event",
           `when` = Instant.now().minus(1, ChronoUnit.DAYS),
           operationId = "345678",
@@ -428,8 +428,8 @@ class AuditRepositoryTest {
           who = "Fred Smith",
         ),
       )
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "Another Event By John",
           `when` = Instant.now().minus(2, ChronoUnit.DAYS),
           operationId = "234567",
@@ -438,9 +438,9 @@ class AuditRepositoryTest {
         ),
       )
 
-      assertThat(auditRepository.count()).isEqualTo(3)
+      assertThat(prisonerAuditRepository.count()).isEqualTo(3)
 
-      val auditEvents = auditRepository.findPage(
+      val auditEvents = prisonerAuditRepository.findPage(
         Pageable.unpaged(),
         Instant.now(),
         Instant.now().minus(3, ChronoUnit.DAYS),
@@ -456,8 +456,8 @@ class AuditRepositoryTest {
 
     @Test
     internal fun `filter audit events by subjectId`() {
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "An Event",
           `when` = Instant.now(),
           operationId = "123456789",
@@ -467,8 +467,8 @@ class AuditRepositoryTest {
           who = "John Smith",
         ),
       )
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "Another Event",
           `when` = Instant.now(),
           operationId = "345678",
@@ -478,8 +478,8 @@ class AuditRepositoryTest {
           who = "Fred Smith",
         ),
       )
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "Another Event By John",
           `when` = Instant.now(),
           operationId = "234567",
@@ -490,8 +490,8 @@ class AuditRepositoryTest {
         ),
       )
 
-      assertThat(auditRepository.count()).isEqualTo(3)
-      val auditEvents = auditRepository.findPage(
+      assertThat(prisonerAuditRepository.count()).isEqualTo(3)
+      val auditEvents = prisonerAuditRepository.findPage(
         Pageable.unpaged(),
         null,
         null,
@@ -508,8 +508,8 @@ class AuditRepositoryTest {
 
     @Test
     internal fun `filter audit events by subjectType`() {
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "An Event",
           `when` = Instant.now(),
           operationId = "123456789",
@@ -519,8 +519,8 @@ class AuditRepositoryTest {
           who = "John Smith",
         ),
       )
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "Another Event",
           `when` = Instant.now(),
           operationId = "345678",
@@ -530,8 +530,8 @@ class AuditRepositoryTest {
           who = "Fred Smith",
         ),
       )
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "Another Event By John",
           `when` = Instant.now(),
           operationId = "234567",
@@ -542,8 +542,8 @@ class AuditRepositoryTest {
         ),
       )
 
-      assertThat(auditRepository.count()).isEqualTo(3)
-      val auditEvents = auditRepository.findPage(
+      assertThat(prisonerAuditRepository.count()).isEqualTo(3)
+      val auditEvents = prisonerAuditRepository.findPage(
         Pageable.unpaged(),
         null,
         null,
@@ -560,8 +560,8 @@ class AuditRepositoryTest {
 
     @Test
     internal fun `filter audit events by correlationId`() {
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "An Event",
           `when` = Instant.now(),
           service = "Service-A",
@@ -569,8 +569,8 @@ class AuditRepositoryTest {
           correlationId = "correlationId1",
         ),
       )
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "Another Event",
           `when` = Instant.now(),
           service = "Service-B",
@@ -578,8 +578,8 @@ class AuditRepositoryTest {
           correlationId = "correlationId2",
         ),
       )
-      auditRepository.save(
-        AuditEvent(
+      prisonerAuditRepository.save(
+        PrisonerAuditEvent(
           what = "Another Event By John",
           `when` = Instant.now(),
           who = "John Smith",
@@ -587,8 +587,8 @@ class AuditRepositoryTest {
         ),
       )
 
-      assertThat(auditRepository.count()).isEqualTo(3)
-      val auditEvents = auditRepository.findPage(
+      assertThat(prisonerAuditRepository.count()).isEqualTo(3)
+      val auditEvents = prisonerAuditRepository.findPage(
         Pageable.unpaged(),
         null,
         null,

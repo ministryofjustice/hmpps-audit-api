@@ -10,7 +10,6 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mockingDetails
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyNoInteractions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
@@ -51,6 +50,6 @@ class AuditTestS3Bucket @Autowired constructor(
       eq(staffAthenaProperties.s3BucketName),
     )
 
-    verifyNoInteractions(auditRepository)
+    verify(staffAuditRepository).save(any())
   }
 }

@@ -8,6 +8,7 @@ import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 
 internal class HMPPSPrisonerAuditListenerTest : QueueListenerIntegrationTest() {
@@ -25,7 +26,7 @@ internal class HMPPSPrisonerAuditListenerTest : QueueListenerIntegrationTest() {
   """
     listener.onPrisonerAuditEvent(message)
 
-    doNothing().whenever(auditService).saveAuditEvent(any(), any())
+    doNothing().whenever(auditService).saveAuditEvent(any(), any(), any())
 
     verify(auditService).saveAuditEvent(
       check {
@@ -35,6 +36,7 @@ internal class HMPPSPrisonerAuditListenerTest : QueueListenerIntegrationTest() {
         assertThat(it.who).isEqualTo("bobby.beans")
         assertThat(it.service).isEqualTo("offender-service")
       },
+      eq(AuditEventType.PRISONER),
       eq(prisonerAthenaProperties),
     )
   }
@@ -51,7 +53,7 @@ internal class HMPPSPrisonerAuditListenerTest : QueueListenerIntegrationTest() {
     }
   """
 
-    doNothing().whenever(auditService).saveAuditEvent(any(), any())
+    doNothing().whenever(auditService).saveAuditEvent(any(), any(), any())
 
     listener.onPrisonerAuditEvent(message)
 
@@ -63,6 +65,7 @@ internal class HMPPSPrisonerAuditListenerTest : QueueListenerIntegrationTest() {
         assertThat(it.who).isEqualTo("alice.jones")
         assertThat(it.service).isEqualTo("auth-service")
       },
+      eq(AuditEventType.PRISONER),
       eq(prisonerAthenaProperties),
     )
   }
@@ -80,7 +83,7 @@ internal class HMPPSPrisonerAuditListenerTest : QueueListenerIntegrationTest() {
     }
   """
 
-    doNothing().whenever(auditService).saveAuditEvent(any(), any())
+    doNothing().whenever(auditService).saveAuditEvent(any(), any(), any())
 
     listener.onPrisonerAuditEvent(message)
 
@@ -93,6 +96,7 @@ internal class HMPPSPrisonerAuditListenerTest : QueueListenerIntegrationTest() {
         assertThat(it.service).isEqualTo("auth-service")
         assertThat(it.subjectType).isEqualTo("NOT_APPLICABLE")
       },
+      eq(AuditEventType.PRISONER),
       eq(prisonerAthenaProperties),
     )
   }
