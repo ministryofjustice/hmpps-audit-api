@@ -19,13 +19,12 @@ import org.mockito.kotlin.then
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
-import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import java.nio.file.Files
 import java.security.MessageDigest
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import java.util.Base64
-import java.util.UUID
+import java.util.*
 
 @ExtendWith(MockitoExtension::class)
 class AuditS3ClientTest {

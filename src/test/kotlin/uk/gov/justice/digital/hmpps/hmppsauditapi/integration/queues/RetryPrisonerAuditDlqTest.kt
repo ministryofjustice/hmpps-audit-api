@@ -10,7 +10,7 @@ import org.mockito.kotlin.verify
 import org.springframework.http.MediaType
 import org.springframework.test.context.TestPropertySource
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
-import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 
 @TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=true"])

@@ -69,6 +69,7 @@ abstract class IntegrationTest {
   protected val awsSqsDlqUrl by lazy { auditQueueConfig.dlqUrl as String }
 
   protected val awsSqsPrisonerAuditDlqClient by lazy { prisonerAuditQueueConfig.sqsDlqClient as SqsAsyncClient }
+  protected val awsSqsPrisonerAuditUrl by lazy { prisonerAuditQueueConfig.queueUrl }
   protected val awsSqsPrisonerAuditDlqUrl by lazy { prisonerAuditQueueConfig.dlqUrl as String }
 
   protected val staffAthenaProperties = AthenaProperties(

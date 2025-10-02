@@ -1,4 +1,4 @@
-CREATE TABLE audit_user
+CREATE TABLE staff.audit_user
 (
     id                 UUID PRIMARY KEY,
     creation_time      TIMESTAMP,
@@ -6,7 +6,7 @@ CREATE TABLE audit_user
 );
 
 
-CREATE TABLE auth_user_id
+CREATE TABLE staff.auth_user_id
 (
     id                 SERIAL PRIMARY KEY,
     audit_user_id      UUID         NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE auth_user_id
     FOREIGN KEY (audit_user_id) REFERENCES audit_user (id)
 );
 
-CREATE TABLE auth_user_uuid
+CREATE TABLE staff.auth_user_uuid
 (
     id                 SERIAL PRIMARY KEY,
     audit_user_id      UUID      NOT NULL,
@@ -28,7 +28,7 @@ CREATE TABLE auth_user_uuid
     FOREIGN KEY (audit_user_id) REFERENCES audit_user (id)
 );
 
-CREATE TABLE auth_email_address
+CREATE TABLE staff.auth_email_address
 (
     id                 SERIAL PRIMARY KEY,
     audit_user_id      UUID         NOT NULL,
@@ -39,7 +39,7 @@ CREATE TABLE auth_email_address
     FOREIGN KEY (audit_user_id) REFERENCES audit_user (id)
 );
 
-CREATE TABLE auth_username
+CREATE TABLE staff.auth_username
 (
     id                 SERIAL PRIMARY KEY,
     audit_user_id      UUID         NOT NULL,
