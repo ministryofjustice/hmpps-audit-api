@@ -11,11 +11,11 @@ import org.springframework.stereotype.Service
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
-import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import java.nio.file.Files
 import java.security.MessageDigest
 import java.time.ZoneId
-import java.util.Base64
+import java.util.*
 
 @Service
 class AuditS3Client(

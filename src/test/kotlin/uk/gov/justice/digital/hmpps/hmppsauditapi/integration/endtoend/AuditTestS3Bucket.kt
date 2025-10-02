@@ -10,13 +10,14 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mockingDetails
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.reactive.function.BodyInserters
-import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 
 @TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=true"])
@@ -25,7 +26,7 @@ class AuditTestS3Bucket @Autowired constructor(
   override var webTestClient: WebTestClient,
 ) : QueueListenerIntegrationTest() {
 
-  private val basicAuditEvent = HMPPSAuditListener.AuditEvent(what = "basicAuditEvent", service = "hmpps-audit-poc-ui")
+  private val basicAuditEvent = AuditEvent(what = "basicAuditEvent", service = "hmpps-audit-poc-ui")
 
   @Test
   fun `save basic audit entry to S3 bucket`() {
@@ -50,6 +51,14 @@ class AuditTestS3Bucket @Autowired constructor(
       eq(staffAthenaProperties.s3BucketName),
     )
 
-    verify(staffAuditRepository).save(any())
+    verify(staffAuditRepository).save(
+      argThat {
+        what == "basicAuditEvent" &&
+          service == "hmpps-audit-poc-ui" &&
+          subjectType == "NOT_APPLICABLE" &&
+          id != null
+      },
+    )
+    verifyNoInteractions(prisonerAuditRepository)
   }
 }

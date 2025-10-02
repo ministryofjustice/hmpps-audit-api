@@ -19,11 +19,11 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.reactive.function.BodyInserters
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.StaffAuditEvent
-import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.toStaffAuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
-import uk.gov.justice.digital.hmpps.hmppsauditapi.services.toStaffAuditEvent
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 @TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=false"])
 class AuditTestDatabase @Autowired constructor(

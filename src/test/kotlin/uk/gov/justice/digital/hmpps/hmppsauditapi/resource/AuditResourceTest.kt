@@ -21,9 +21,9 @@ import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.hmppsauditapi.IntegrationTest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.StaffAuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.StaffAuditEvent
-import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 @Suppress("ClassName")
 class AuditResourceTest : IntegrationTest() {

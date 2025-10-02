@@ -9,13 +9,15 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.Direction.DESC
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.PrisonerAuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.StaffAuditRepository
-import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.PrisonerAuditEvent
-import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.StaffAuditEvent
-import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.asMap
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.toPrisonerAuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.toStaffAuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditFilterDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryResponse
@@ -29,6 +31,7 @@ class AuditService(
   private val prisonerAuditRepository: PrisonerAuditRepository,
   private val auditS3Client: AuditS3Client,
   private val auditAthenaClient: AuditAthenaClient,
+  private val athenaPropertiesFactory: AthenaPropertiesFactory,
   @Value("\${hmpps.repository.saveToS3Bucket}") private val saveToS3Bucket: Boolean,
 
 ) {
@@ -36,8 +39,9 @@ class AuditService(
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 
-  fun saveAuditEvent(auditEvent: AuditEvent, auditEventType: AuditEventType, athenaProperties: AthenaProperties) {
+  fun saveAuditEvent(auditEvent: AuditEvent, auditEventType: AuditEventType) {
     if (saveToS3Bucket) {
+      val athenaProperties: AthenaProperties = athenaPropertiesFactory.getProperties(auditEventType)
       auditEvent.id = UUID.randomUUID()
       auditS3Client.save(auditEvent, athenaProperties.s3BucketName)
       auditAthenaClient.addPartitionForEvent(auditEvent, athenaProperties)
@@ -45,16 +49,13 @@ class AuditService(
 
     saveToPostgres(auditEvent, auditEventType)
 
-    telemetryClient.trackEvent(athenaProperties.auditEventType.description, auditEvent.asMap())
+    telemetryClient.trackEvent(auditEventType.description, auditEvent.asMap())
   }
 
   fun saveToPostgres(auditEvent: AuditEvent, auditEventType: AuditEventType) {
-    if (auditEventType == AuditEventType.STAFF) {
-      val staffAuditEvent: StaffAuditEvent = auditEvent.toStaffAuditEvent()
-      staffAuditRepository.save(staffAuditEvent)
-    } else {
-      val prisonerAuditEvent: PrisonerAuditEvent = auditEvent.toPrisonerAuditEvent()
-      prisonerAuditRepository.save(prisonerAuditEvent)
+    when (auditEventType) {
+      AuditEventType.STAFF -> staffAuditRepository.save(auditEvent.toStaffAuditEvent())
+      AuditEventType.PRISONER -> prisonerAuditRepository.save(auditEvent.toPrisonerAuditEvent())
     }
   }
 
@@ -98,40 +99,3 @@ class AuditService(
 
   fun getQueryResults(queryExecutionId: String): AuditQueryResponse = auditAthenaClient.getAuditEventsQueryResults(queryExecutionId)
 }
-
-private fun AuditEvent.asMap(): Map<String, String> {
-  val items = mutableMapOf("what" to what, "when" to `when`.toString())
-  items.addIfNotNull("who", who)
-  items.addIfNotNull("operationId", operationId)
-  items.addIfNotNull("subjectId", subjectId)
-  items.addIfNotNull("subjectType", subjectType)
-  items.addIfNotNull("correlationId", correlationId)
-  items.addIfNotNull("service", service)
-  return items.toMap()
-}
-
-fun AuditEvent.toPrisonerAuditEvent(): PrisonerAuditEvent = PrisonerAuditEvent(
-  id = id,
-  what = what,
-  `when` = `when`,
-  operationId = operationId,
-  subjectId = subjectId,
-  subjectType = subjectType,
-  correlationId = correlationId,
-  who = who,
-  service = service,
-  details = details,
-)
-
-fun AuditEvent.toStaffAuditEvent(): StaffAuditEvent = StaffAuditEvent(
-  id = id,
-  what = what,
-  `when` = `when`,
-  operationId = operationId,
-  subjectId = subjectId,
-  subjectType = subjectType,
-  correlationId = correlationId,
-  who = who,
-  service = service,
-  details = details,
-)

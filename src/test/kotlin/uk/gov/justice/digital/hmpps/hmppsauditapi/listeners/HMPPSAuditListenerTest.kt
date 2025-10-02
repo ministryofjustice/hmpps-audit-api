@@ -26,7 +26,7 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
   """
     listener.onAuditEvent(message)
 
-    doNothing().whenever(auditService).saveAuditEvent(any(), any(), any())
+    doNothing().whenever(auditService).saveAuditEvent(any(), any())
 
     verify(auditService).saveAuditEvent(
       check {
@@ -37,7 +37,6 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
         assertThat(it.service).isEqualTo("offender-service")
       },
       eq(AuditEventType.STAFF),
-      eq(staffAthenaProperties),
     )
   }
 
@@ -53,7 +52,7 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
     }
   """
 
-    doNothing().whenever(auditService).saveAuditEvent(any(), any(), any())
+    doNothing().whenever(auditService).saveAuditEvent(any(), any())
 
     listener.onAuditEvent(message)
 
@@ -66,7 +65,6 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
         assertThat(it.service).isEqualTo("auth-service")
       },
       eq(AuditEventType.STAFF),
-      eq(staffAthenaProperties),
     )
   }
 
@@ -83,7 +81,7 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
     }
   """
 
-    doNothing().whenever(auditService).saveAuditEvent(any(), any(), any())
+    doNothing().whenever(auditService).saveAuditEvent(any(), any())
 
     listener.onAuditEvent(message)
 
@@ -97,7 +95,6 @@ internal class HMPPSAuditListenerTest : QueueListenerIntegrationTest() {
         assertThat(it.subjectType).isEqualTo("NOT_APPLICABLE")
       },
       eq(AuditEventType.STAFF),
-      eq(staffAthenaProperties),
     )
   }
 }

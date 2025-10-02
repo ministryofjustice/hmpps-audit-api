@@ -14,35 +14,29 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.PrisonerAuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.StaffAuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.StaffAuditEvent
-import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.toPrisonerAuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.toStaffAuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditFilterDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditAthenaClient
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditS3Client
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
-import uk.gov.justice.digital.hmpps.hmppsauditapi.services.toStaffAuditEvent
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 class AuditServiceTest {
-  private val athenaProperties = AthenaProperties(
-    auditEventType = AuditEventType.STAFF,
-    s3BucketName = "hmpps-audit-bucket",
-    databaseName = "the-database",
-    tableName = "the-table",
-    workGroupName = "the-workgroup",
-    outputLocation = "the-location",
-  )
-
   private val telemetryClient: TelemetryClient = mock()
   private val staffAuditRepository: StaffAuditRepository = mock()
   private val prisonerAuditRepository: PrisonerAuditRepository = mock()
   private val auditS3Client: AuditS3Client = mock()
   private val auditAthenaClient: AuditAthenaClient = mock()
+  private val athenaPropertiesFactory: AthenaPropertiesFactory = mock()
   private val saveToS3Bucket = false
   private var auditService =
     AuditService(
@@ -51,6 +45,7 @@ class AuditServiceTest {
       prisonerAuditRepository,
       auditS3Client,
       auditAthenaClient,
+      athenaPropertiesFactory,
       saveToS3Bucket,
     )
 
@@ -399,9 +394,9 @@ class AuditServiceTest {
 
     @Test
     fun `save audit event to database when saveToS3Bucket is false`() {
-      auditService = AuditService(telemetryClient, staffAuditRepository, prisonerAuditRepository, auditS3Client, auditAthenaClient, false)
+      auditService = AuditService(telemetryClient, staffAuditRepository, prisonerAuditRepository, auditS3Client, auditAthenaClient, athenaPropertiesFactory, false)
 
-      auditService.saveAuditEvent(auditEvent, AuditEventType.STAFF, athenaProperties)
+      auditService.saveAuditEvent(auditEvent, AuditEventType.STAFF)
 
       then(staffAuditRepository).should().save(auditEvent.toStaffAuditEvent())
       then(auditS3Client).shouldHaveNoInteractions()
@@ -410,9 +405,10 @@ class AuditServiceTest {
 
     @Test
     fun `save audit event to S3 bucket when saveToS3Bucket is true`() {
-      auditService = AuditService(telemetryClient, staffAuditRepository, prisonerAuditRepository, auditS3Client, auditAthenaClient, true)
+      whenever(athenaPropertiesFactory.getProperties(AuditEventType.STAFF)).thenReturn(athenaProperties)
+      auditService = AuditService(telemetryClient, staffAuditRepository, prisonerAuditRepository, auditS3Client, auditAthenaClient, athenaPropertiesFactory, true)
 
-      auditService.saveAuditEvent(auditEvent, AuditEventType.STAFF, athenaProperties)
+      auditService.saveAuditEvent(auditEvent, AuditEventType.STAFF)
 
       then(auditS3Client).should().save(auditEvent, athenaProperties.s3BucketName)
       then(auditAthenaClient).should().addPartitionForEvent(auditEvent, athenaProperties)
@@ -421,7 +417,7 @@ class AuditServiceTest {
   }
 
   @Nested
-  inner class SaveAuditEventPrisoner {
+  inner class SavePrisonerAuditEvent {
 
     val auditEvent = AuditEvent(
       UUID.fromString("03a1624a-54e7-453e-8c79-816dbe02fd3c"),
@@ -438,24 +434,34 @@ class AuditServiceTest {
 
     @Test
     fun `save audit event to database when saveToS3Bucket is false`() {
-      auditService = AuditService(telemetryClient, staffAuditRepository, prisonerAuditRepository, auditS3Client, auditAthenaClient, false)
+      auditService = AuditService(telemetryClient, staffAuditRepository, prisonerAuditRepository, auditS3Client, auditAthenaClient, athenaPropertiesFactory, false)
 
-      auditService.saveAuditEvent(auditEvent, AuditEventType.STAFF, athenaProperties)
+      auditService.saveAuditEvent(auditEvent, AuditEventType.PRISONER)
 
       then(auditS3Client).shouldHaveNoInteractions()
       then(auditAthenaClient).shouldHaveNoInteractions()
-      then(staffAuditRepository).should().save(auditEvent.toStaffAuditEvent())
+      then(prisonerAuditRepository).should().save(auditEvent.toPrisonerAuditEvent())
     }
 
     @Test
     fun `save audit event to S3 bucket when saveToS3Bucket is true`() {
-      auditService = AuditService(telemetryClient, staffAuditRepository, prisonerAuditRepository, auditS3Client, auditAthenaClient, true)
+      whenever(athenaPropertiesFactory.getProperties(AuditEventType.PRISONER)).thenReturn(athenaProperties)
+      auditService = AuditService(telemetryClient, staffAuditRepository, prisonerAuditRepository, auditS3Client, auditAthenaClient, athenaPropertiesFactory, true)
 
-      auditService.saveAuditEvent(auditEvent, AuditEventType.STAFF, athenaProperties)
+      auditService.saveAuditEvent(auditEvent, AuditEventType.PRISONER)
 
       then(auditS3Client).should().save(auditEvent, athenaProperties.s3BucketName)
       then(auditAthenaClient).should().addPartitionForEvent(auditEvent, athenaProperties)
-      then(staffAuditRepository).should().save(auditEvent.toStaffAuditEvent())
+      then(prisonerAuditRepository).should().save(auditEvent.toPrisonerAuditEvent())
     }
   }
+
+  private val athenaProperties = AthenaProperties(
+    auditEventType = AuditEventType.STAFF,
+    s3BucketName = "hmpps-audit-bucket",
+    databaseName = "the-database",
+    tableName = "the-table",
+    workGroupName = "the-workgroup",
+    outputLocation = "the-location",
+  )
 }
