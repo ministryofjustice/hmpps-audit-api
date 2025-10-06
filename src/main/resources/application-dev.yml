@@ -14,7 +14,7 @@ spring:
   jpa:
     show-sql: true
   flyway:
-    locations: classpath:/db/audit,/db/audit_{vendor}
+    locations: classpath:/db/audit,/db/audit_h2
     schemas: staff,prisoner
     default-schema: staff
 

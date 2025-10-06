@@ -17,7 +17,7 @@ spring:
 
   flyway:
     enabled: true
-    locations: classpath:db/audit,db/audit_{vendor}
+    locations: classpath:db/audit,db/audit_postgres
     schemas: staff,prisoner
     default-schema: staff
 
