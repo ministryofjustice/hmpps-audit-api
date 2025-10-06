@@ -24,7 +24,8 @@ import java.nio.file.Files
 import java.security.MessageDigest
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import java.util.*
+import java.util.Base64
+import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
 class AuditS3ClientTest {

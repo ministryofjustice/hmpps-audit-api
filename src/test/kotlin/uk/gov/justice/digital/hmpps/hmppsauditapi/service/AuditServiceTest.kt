@@ -28,7 +28,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditAthenaClient
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditS3Client
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
 import java.time.Instant
-import java.util.*
+import java.util.UUID
 
 class AuditServiceTest {
   private val telemetryClient: TelemetryClient = mock()

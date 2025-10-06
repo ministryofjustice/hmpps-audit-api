@@ -15,7 +15,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import java.nio.file.Files
 import java.security.MessageDigest
 import java.time.ZoneId
-import java.util.*
+import java.util.Base64
 
 @Service
 class AuditS3Client(

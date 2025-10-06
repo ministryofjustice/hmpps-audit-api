@@ -23,7 +23,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.StaffAuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.StaffAuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import java.time.Instant
-import java.util.*
+import java.util.UUID
 
 @Suppress("ClassName")
 class AuditResourceTest : IntegrationTest() {
