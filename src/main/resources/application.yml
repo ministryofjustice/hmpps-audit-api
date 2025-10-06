@@ -17,7 +17,9 @@ spring:
 
   flyway:
     enabled: true
-    locations: classpath:/db/migration/postgres,classpath:/db/migration/common
+    locations: classpath:db/audit,db/audit_{vendor}
+    schemas: staff,prisoner
+    default-schema: staff
 
   security:
     oauth2:

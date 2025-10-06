@@ -37,7 +37,7 @@ import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
-import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType.STAFF
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryResponse
@@ -356,7 +356,7 @@ class AuditAthenaClientTest {
       """.trimIndent()
 
       auditAthenaClient.addPartitionForEvent(
-        HMPPSAuditListener.AuditEvent(
+        AuditEvent(
           what = "what",
           `when` = LocalDateTime.of(LocalDate.of(2025, 7, 29), LocalTime.MIN).toInstant(ZoneOffset.UTC),
           who = "TESTUSER",

@@ -8,6 +8,7 @@ import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 
 internal class HMPPSPrisonerAuditListenerTest : QueueListenerIntegrationTest() {
@@ -35,7 +36,7 @@ internal class HMPPSPrisonerAuditListenerTest : QueueListenerIntegrationTest() {
         assertThat(it.who).isEqualTo("bobby.beans")
         assertThat(it.service).isEqualTo("offender-service")
       },
-      eq(prisonerAthenaProperties),
+      eq(AuditEventType.PRISONER),
     )
   }
 
@@ -63,7 +64,7 @@ internal class HMPPSPrisonerAuditListenerTest : QueueListenerIntegrationTest() {
         assertThat(it.who).isEqualTo("alice.jones")
         assertThat(it.service).isEqualTo("auth-service")
       },
-      eq(prisonerAthenaProperties),
+      eq(AuditEventType.PRISONER),
     )
   }
 
@@ -93,7 +94,7 @@ internal class HMPPSPrisonerAuditListenerTest : QueueListenerIntegrationTest() {
         assertThat(it.service).isEqualTo("auth-service")
         assertThat(it.subjectType).isEqualTo("NOT_APPLICABLE")
       },
-      eq(prisonerAthenaProperties),
+      eq(AuditEventType.PRISONER),
     )
   }
 }

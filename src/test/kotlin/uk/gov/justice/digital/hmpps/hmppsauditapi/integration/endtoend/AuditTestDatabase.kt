@@ -18,7 +18,9 @@ import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.reactive.function.BodyInserters
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
-import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.StaffAuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.toStaffAuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 import java.time.Instant
 import java.util.UUID
@@ -65,7 +67,7 @@ class AuditTestDatabase @Autowired constructor(
       },
       isNull(),
     )
-    verify(auditRepository).save(any<AuditEvent>())
+    verify(staffAuditRepository).save(any<StaffAuditEvent>())
   }
 
   @Test
@@ -78,10 +80,10 @@ class AuditTestDatabase @Autowired constructor(
       .exchange()
       .expectStatus().isAccepted
 
-    await untilCallTo { mockingDetails(auditRepository).invocations.size } matches { it == 1 }
+    await untilCallTo { mockingDetails(staffAuditRepository).invocations.size } matches { it == 1 }
 
     verify(telemetryClient).trackEvent(eq("hmpps-audit"), any(), isNull())
-    verify(auditRepository).save(any<AuditEvent>())
+    verify(staffAuditRepository).save(any<StaffAuditEvent>())
     verifyNoInteractions(auditS3Client)
   }
 
@@ -105,10 +107,10 @@ class AuditTestDatabase @Autowired constructor(
       .exchange()
       .expectStatus().isAccepted
 
-    await untilCallTo { mockingDetails(auditRepository).invocations.size } matches { it == 1 }
+    await untilCallTo { mockingDetails(staffAuditRepository).invocations.size } matches { it == 1 }
 
     verify(telemetryClient).trackEvent(eq("hmpps-audit"), any(), isNull())
-    verify(auditRepository).save(auditEvent)
+    verify(staffAuditRepository).save(auditEvent.toStaffAuditEvent())
     verifyNoInteractions(auditS3Client)
   }
 }
