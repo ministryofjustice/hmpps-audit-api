@@ -15,5 +15,15 @@ generic-service:
 # CloudPlatform AlertManager receiver to route promethues alerts to slack
 generic-prometheus-alerts:
   alertSeverity: hmpps_tech
+  sqsAlertsQueueNames:
+    staff:
+      - "Digital-Prison-Services-prod-hmpps_audit_queue"
+      - "Digital-Prison-Services-prod-hmpps_audit_dlq"
+    Prisoner:
+      - "Digital-Prison-Services-prod-hmpps_prisoner_audit_queue"
+      - "Digital-Prison-Services-prod-hmpps_prisoner_audit_dlq"
+    user:
+      - "Digital-Prison-Services-prod-hmpps_audit_users_queue"
+      - "Digital-Prison-Services-prod-hmpps_audit_users_dlq"
   rdsAlertsDatabases:
     cloud-platform-a041fe0b2e6de452: "hmpps audit api"
