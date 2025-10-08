@@ -17,7 +17,8 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.integration.S3TestConfig
 import uk.gov.justice.digital.hmpps.hmppsauditapi.integration.endtoend.CommandLineProfilesResolver
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
-import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
+import uk.gov.justice.digital.hmpps.hmppsauditapi.services.PrisonerAuditService
+import uk.gov.justice.digital.hmpps.hmppsauditapi.services.StaffAuditService
 import uk.gov.justice.hmpps.sqs.HmppsQueueFactory
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.HmppsSqsProperties
@@ -32,7 +33,10 @@ abstract class IntegrationTest {
   lateinit var webTestClient: WebTestClient
 
   @SpyBean
-  protected lateinit var auditService: AuditService
+  protected lateinit var staffAuditService: StaffAuditService
+
+  @SpyBean
+  protected lateinit var prisonerAuditService: PrisonerAuditService
 
   @SpyBean
   protected lateinit var auditQueueService: AuditQueueService

@@ -14,15 +14,16 @@ import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryResponse
+import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.model.AuditType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.swagger.StandardApiResponses
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
-import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
+import uk.gov.justice.digital.hmpps.hmppsauditapi.services.PrisonerAuditService
 import java.util.UUID
 
 @RestController
 @RequestMapping("/audit", produces = [MediaType.APPLICATION_JSON_VALUE])
 class PrisonerAuditResource(
-  private val auditService: AuditService,
+  private val prisonerAuditService: PrisonerAuditService,
   private val auditQueueService: AuditQueueService,
 ) {
 
@@ -44,13 +45,13 @@ class PrisonerAuditResource(
       AuditType.AUDIT_GET_BY_USER.name,
       auditFilterDto,
     )
-    return auditService.triggerQuery(auditFilterDto, AuditEventType.PRISONER)
+    return prisonerAuditService.triggerQuery(auditFilterDto, AuditEventType.PRISONER)
   }
 
   @PreAuthorize("hasRole('ROLE_PRISONER_AUDIT')")
   @Operation(
     summary = "Get audit events for prisoner",
-    description = "Get audit events given who, or subject ID and subject type, role required is ROLE_PRISONER_AUDIT",
+    description = "Get prisoner audit events given who, or subject ID and subject type, role required is ROLE_PRISONER_AUDIT",
     security = [SecurityRequirement(name = "ROLE_PRISONER_AUDIT")],
   )
   @StandardApiResponses
@@ -62,6 +63,6 @@ class PrisonerAuditResource(
       AuditType.AUDIT_GET_BY_USER.name,
       queryExecutionId,
     )
-    return auditService.getQueryResults(queryExecutionId.toString())
+    return prisonerAuditService.getQueryResults(queryExecutionId.toString())
   }
 }
