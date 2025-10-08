@@ -29,7 +29,7 @@ import java.io.IOException
 
 @RestController
 @RequestMapping("/audit", produces = [MediaType.APPLICATION_JSON_VALUE])
-class PrisonerAuditQueryResource(
+class PrisonerAuditRDSResource(
   private val auditServiceFactory: AuditServiceFactory,
   private val auditQueueService: AuditQueueService,
 ) {
