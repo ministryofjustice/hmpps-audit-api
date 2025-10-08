@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.model
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import software.amazon.awssdk.services.athena.model.QueryExecutionState
-import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
+import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.model.AuditDto
 import java.util.UUID
 
 data class AuditQueryResponse(

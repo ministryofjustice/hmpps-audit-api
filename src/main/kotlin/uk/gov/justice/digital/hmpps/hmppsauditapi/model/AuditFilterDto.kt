@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.model
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Size
 import java.time.Instant
+
 data class AuditFilterDto(
   @Schema(
     required = false,

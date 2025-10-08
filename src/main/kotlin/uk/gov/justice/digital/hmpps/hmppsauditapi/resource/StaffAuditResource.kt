@@ -15,15 +15,16 @@ import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryResponse
+import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.model.AuditType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.swagger.StandardApiResponses
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
-import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
-import java.util.UUID
+import uk.gov.justice.digital.hmpps.hmppsauditapi.services.StaffAuditService
+import java.util.*
 
 @RestController
 @RequestMapping("/audit", produces = [MediaType.APPLICATION_JSON_VALUE])
-class StaffAuditController(
-  private val auditService: AuditService,
+class StaffAuditResource(
+  private val staffAuditService: StaffAuditService,
   private val auditQueueService: AuditQueueService,
 ) {
 
@@ -45,7 +46,7 @@ class StaffAuditController(
       AuditType.AUDIT_GET_BY_USER.name,
       auditFilterDto,
     )
-    return auditService.triggerQuery(auditFilterDto, AuditEventType.STAFF)
+    return staffAuditService.triggerQuery(auditFilterDto, AuditEventType.STAFF)
   }
 
   @PreAuthorize("hasRole('ROLE_AUDIT')")
@@ -63,7 +64,7 @@ class StaffAuditController(
       AuditType.AUDIT_GET_BY_USER.name,
       queryExecutionId,
     )
-    return auditService.getQueryResults(queryExecutionId.toString())
+    return staffAuditService.getQueryResults(queryExecutionId.toString())
   }
 }
 

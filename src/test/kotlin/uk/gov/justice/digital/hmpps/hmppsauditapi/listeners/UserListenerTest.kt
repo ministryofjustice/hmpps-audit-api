@@ -12,7 +12,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.UserService
 
-internal class HMPPSUserListenerTest : QueueListenerIntegrationTest() {
+internal class UserListenerTest : QueueListenerIntegrationTest() {
 
   @Autowired
   private lateinit var userListener: HMPPSUserListener

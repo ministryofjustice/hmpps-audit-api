@@ -41,7 +41,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType.STAFF
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryResponse
-import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
+import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.model.AuditDto
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
