@@ -21,7 +21,7 @@ generic-service:
 generic-prometheus-alerts:
   alertSeverity: hmpps_tech_non_prod
   businessHoursOnly: true
-  sqsAlertsQueueNames:
+  sqsNumberAlertQueueMappings:
     staff:
       - "Digital-Prison-Services-dev-hmpps_audit_queue"
       - "Digital-Prison-Services-dev-hmpps_audit_dlq"
