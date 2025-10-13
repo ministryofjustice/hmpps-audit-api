@@ -21,7 +21,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.model.AuditDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService.Companion.log
-import java.util.*
+import java.util.UUID
 
 @Service
 class PrisonerAuditService(

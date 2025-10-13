@@ -11,7 +11,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.IntegrationTest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.PrisonerAuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.PrisonerAuditEvent
 import java.time.Instant
-import java.util.*
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PrisonerAuditResourceFilteredPagingTest : IntegrationTest() {
