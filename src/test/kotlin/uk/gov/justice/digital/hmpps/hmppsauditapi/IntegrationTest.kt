@@ -4,11 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.reactive.server.WebTestClient
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
@@ -32,13 +32,13 @@ abstract class IntegrationTest {
   @Autowired
   lateinit var webTestClient: WebTestClient
 
-  @SpyBean
+  @MockitoSpyBean
   protected lateinit var staffAuditService: StaffAuditService
 
-  @SpyBean
+  @MockitoSpyBean
   protected lateinit var prisonerAuditService: PrisonerAuditService
 
-  @SpyBean
+  @MockitoSpyBean
   protected lateinit var auditQueueService: AuditQueueService
 
   @Autowired
@@ -94,7 +94,7 @@ abstract class IntegrationTest {
     outputLocation = "the-prisoner-location",
   )
 
-  @SpyBean
+  @MockitoSpyBean
   @Qualifier("auditqueue-sqs-client")
   protected lateinit var awsSqsClient: SqsAsyncClient
 

@@ -24,7 +24,7 @@ import software.amazon.awssdk.services.athena.model.Row
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.IntegrationTest
-import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType.PRISONER
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType.STAFF
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.model.AuditDto
@@ -32,12 +32,12 @@ import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
 
-class StaffAuditResourceTest : IntegrationTest() {
+class PrisonerAuditAthenaResourceTest : IntegrationTest() {
 
   @Autowired
   private lateinit var athenaClient: AthenaClient
 
-  private final val expectedStaffAuditDto = AuditDto(
+  private final val expectedPrisonerAuditDto = AuditDto(
     id = UUID.fromString("cebcfc92-bdd6-4c3c-be50-a33fb08a9853"),
     what = "READ_USER",
     `when` = Instant.parse("2024-02-14T12:34:56Z"),
@@ -45,8 +45,8 @@ class StaffAuditResourceTest : IntegrationTest() {
     subjectId = "sub-456",
     subjectType = "User",
     correlationId = "corr-789",
-    who = "test-user",
-    service = "auth-service",
+    who = "prisoner-user",
+    service = "hmpps-launchpad-ui",
     details = "some details",
   )
 
@@ -82,24 +82,25 @@ class StaffAuditResourceTest : IntegrationTest() {
           Datum.builder().varCharValue("details").build(),
         ).build(),
         Row.builder().data(
-          Datum.builder().varCharValue(expectedStaffAuditDto.id.toString()).build(),
-          Datum.builder().varCharValue(expectedStaffAuditDto.what).build(),
-          Datum.builder().varCharValue(expectedStaffAuditDto.`when`.toString()).build(),
-          Datum.builder().varCharValue(expectedStaffAuditDto.operationId).build(),
-          Datum.builder().varCharValue(expectedStaffAuditDto.subjectId).build(),
-          Datum.builder().varCharValue(expectedStaffAuditDto.subjectType).build(),
-          Datum.builder().varCharValue(expectedStaffAuditDto.correlationId).build(),
-          Datum.builder().varCharValue(expectedStaffAuditDto.who).build(),
-          Datum.builder().varCharValue(expectedStaffAuditDto.service).build(),
-          Datum.builder().varCharValue(expectedStaffAuditDto.details).build(),
+          Datum.builder().varCharValue(expectedPrisonerAuditDto.id.toString()).build(),
+          Datum.builder().varCharValue(expectedPrisonerAuditDto.what).build(),
+          Datum.builder().varCharValue(expectedPrisonerAuditDto.`when`.toString()).build(),
+          Datum.builder().varCharValue(expectedPrisonerAuditDto.operationId).build(),
+          Datum.builder().varCharValue(expectedPrisonerAuditDto.subjectId).build(),
+          Datum.builder().varCharValue(expectedPrisonerAuditDto.subjectType).build(),
+          Datum.builder().varCharValue(expectedPrisonerAuditDto.correlationId).build(),
+          Datum.builder().varCharValue(expectedPrisonerAuditDto.who).build(),
+          Datum.builder().varCharValue(expectedPrisonerAuditDto.service).build(),
+          Datum.builder().varCharValue(expectedPrisonerAuditDto.details).build(),
         ).build(),
       ),
     ).build()
+
   private val startQueryExecutionRequest: StartQueryExecutionRequest = StartQueryExecutionRequest.builder()
-    .queryString("SELECT * FROM the-database.the-table WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND subjectId = 'test-subject' AND subjectType = 'USER_ID' AND service IN ('hmpps-manage-users');")
-    .queryExecutionContext(QueryExecutionContext.builder().database("the-database").build())
-    .workGroup("the-workgroup")
-    .resultConfiguration(ResultConfiguration.builder().outputLocation("the-location").build())
+    .queryString("SELECT * FROM the-prisoner-database.the-prisoner-table WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND subjectId = 'test-subject' AND subjectType = 'USER_ID' AND service IN ('hmpps-launchpad-ui');")
+    .queryExecutionContext(QueryExecutionContext.builder().database("the-prisoner-database").build())
+    .workGroup("the-prisoner-workgroup")
+    .resultConfiguration(ResultConfiguration.builder().outputLocation("the-prisoner-location").build())
     .build()
   private final val queryExecutionId = "b1231f6e-9653-4b3f-9507-793730932daf"
   private val startQueryExecutionResponse: StartQueryExecutionResponse = StartQueryExecutionResponse.builder().queryExecutionId(queryExecutionId).build()
@@ -118,8 +119,42 @@ class StaffAuditResourceTest : IntegrationTest() {
   fun startQuery() {
     given(athenaClient.startQueryExecution(startQueryExecutionRequest)).willReturn(startQueryExecutionResponse)
 
-    webTestClient.post().uri("/audit/query")
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT", "ROLE_QUERY_AUDIT__HMPPS_MANAGE_USERS"), scopes = listOf("read")))
+    webTestClient.post().uri("/audit/prisoner/query")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_AUDIT", "ROLE_QUERY_AUDIT__HMPPS_LAUNCHPAD_UI"), scopes = listOf("read")))
+      .body(
+        BodyInserters.fromValue(
+          AuditQueryRequest(
+            auditEventType = PRISONER,
+            startDate = LocalDate.of(2025, 1, 1),
+            endDate = LocalDate.of(2025, 1, 5),
+            subjectId = "test-subject",
+            subjectType = "USER_ID",
+          ),
+        ),
+      )
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().json("prisoner_start_query_response".loadJson(), STRICT)
+  }
+
+  @Test
+  fun invalidQuery() {
+    webTestClient.post().uri("/audit/prisoner/query")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_AUDIT", "ROLE_QUERY_AUDIT__HMPPS_LAUNCHPAD_UI"), scopes = listOf("read")))
+      .body(
+        BodyInserters.fromValue(
+          AuditQueryRequest(auditEventType = PRISONER),
+        ),
+      )
+      .exchange()
+      .expectStatus().isBadRequest
+      .expectBody().json("prisoner_start_query_response_invalid".loadJson(), STRICT)
+  }
+
+  @Test
+  fun invalidEventType() {
+    webTestClient.post().uri("/audit/prisoner/query")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_AUDIT", "ROLE_QUERY_AUDIT__HMPPS_LAUNCHPAD_UI"), scopes = listOf("read")))
       .body(
         BodyInserters.fromValue(
           AuditQueryRequest(
@@ -132,42 +167,8 @@ class StaffAuditResourceTest : IntegrationTest() {
         ),
       )
       .exchange()
-      .expectStatus().isOk
-      .expectBody().json("start_query_response".loadJson(), STRICT)
-  }
-
-  @Test
-  fun invalidQuery() {
-    webTestClient.post().uri("/audit/query")
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT", "ROLE_QUERY_AUDIT__HMPPS_MANAGE_USERS"), scopes = listOf("read")))
-      .body(
-        BodyInserters.fromValue(
-          AuditQueryRequest(auditEventType = STAFF),
-        ),
-      )
-      .exchange()
       .expectStatus().isBadRequest
-      .expectBody().json("start_query_response_invalid".loadJson(), STRICT)
-  }
-
-  @Test
-  fun invalidEventType() {
-    webTestClient.post().uri("/audit/query")
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT", "ROLE_QUERY_AUDIT__HMPPS_MANAGE_USERS"), scopes = listOf("read")))
-      .body(
-        BodyInserters.fromValue(
-          AuditQueryRequest(
-            auditEventType = AuditEventType.PRISONER,
-            startDate = LocalDate.of(2025, 1, 1),
-            endDate = LocalDate.of(2025, 1, 5),
-            subjectId = "test-subject",
-            subjectType = "USER_ID",
-          ),
-        ),
-      )
-      .exchange()
-      .expectStatus().isBadRequest
-      .expectBody().json("start_query_response_invalid_event_type".loadJson(), STRICT)
+      .expectBody().json("prisoner_start_query_response_invalid_event_type".loadJson(), STRICT)
   }
 
   @Test
@@ -175,12 +176,12 @@ class StaffAuditResourceTest : IntegrationTest() {
     given(athenaClient.getQueryExecution(getQueryExecutionRequest)).willReturn(successfulGetQueryExecutionResponse)
     given(athenaClient.getQueryResults(getQueryResultsRequest)).willReturn(getQueryResultsResponse)
 
-    webTestClient.get().uri("/audit/query/{queryExecutionId}", queryExecutionId)
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT", "ROLE_QUERY_AUDIT__HMPPS_MANAGE_USERS"), scopes = listOf("read")))
+    webTestClient.get().uri("/audit/prisoner/query/{queryExecutionId}", queryExecutionId)
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_AUDIT", "ROLE_QUERY_AUDIT__HMPPS_LAUNCHPAD_UI"), scopes = listOf("read")))
       .exchange()
       .expectStatus().isOk
-      .expectBody().json("get_query_results_response".loadJson(), STRICT)
+      .expectBody().json("prisoner_get_query_results_response".loadJson(), STRICT)
   }
   private fun columnInfo(name: String): ColumnInfo = ColumnInfo.builder().name(name).type("string").build()
-  private fun String.loadJson(): String = AuditResourceTest::class.java.getResource("$this.json")!!.readText()
+  private fun String.loadJson(): String = StaffAuditRDSResourceTest::class.java.getResource("$this.json")!!.readText()
 }

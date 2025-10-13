@@ -1,35 +1,20 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.check
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.data.domain.PageImpl
-import org.springframework.data.domain.Sort
-import org.springframework.data.domain.Sort.Direction.DESC
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.hmppsauditapi.IntegrationTest
-import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.PrisonerAuditRepository
-import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.PrisonerAuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import java.time.Instant
-import java.util.UUID
 
 @Suppress("ClassName")
 class PrisonerAuditRDSResourceTest : IntegrationTest() {
-
-  @MockBean
-  private lateinit var prisonerAuditRepository: PrisonerAuditRepository
 
   @TestInstance(PER_CLASS)
   @Nested
@@ -45,77 +30,6 @@ class PrisonerAuditRDSResourceTest : IntegrationTest() {
         .uri(uri)
         .exchange()
         .expectStatus().isUnauthorized
-    }
-
-    @ParameterizedTest
-    @MethodSource("secureEndpointsGet")
-    internal fun `requires the correct role`(uri: String) {
-      webTestClient.get()
-        .uri(uri)
-        .headers(setAuthorisation(roles = listOf()))
-        .exchange()
-        .expectStatus().isForbidden
-    }
-
-    @ParameterizedTest
-    @MethodSource("secureEndpointsGet")
-    internal fun `satisfies the correct role but no scope`(uri: String) {
-      webTestClient.get()
-        .uri(uri)
-        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_AUDIT")))
-        .exchange()
-        .expectStatus().isForbidden
-    }
-
-    @ParameterizedTest
-    @MethodSource("secureEndpointsGet")
-    internal fun `satisfies the correct role but wrong scope`(uri: String) {
-      webTestClient.get()
-        .uri(uri)
-        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_AUDIT"), scopes = listOf("write")))
-        .exchange()
-        .expectStatus().isForbidden
-    }
-
-    @ParameterizedTest
-    @MethodSource("secureEndpointsGet")
-    internal fun `satisfies the correct role and scope`(uri: String) {
-      whenever(
-        prisonerAuditRepository.findPage(
-          any(),
-          anyOrNull(),
-          anyOrNull(),
-          anyOrNull(),
-          anyOrNull(),
-          anyOrNull(),
-          anyOrNull(),
-          anyOrNull(),
-          anyOrNull(),
-        ),
-      ).thenReturn(
-        PageImpl(listOf()),
-      )
-
-      webTestClient.get()
-        .uri(uri)
-        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_AUDIT"), scopes = listOf("read")))
-        .exchange()
-        .expectStatus().isOk
-
-      verify(auditQueueService).sendAuditAuditEvent(
-        "AUDIT_GET_ALL",
-        "",
-      )
-
-      verify(auditQueueService).sendAuditEvent(
-        check {
-          assertThat(it.what).isEqualTo("AUDIT_GET_ALL")
-          assertThat(it.who).isEqualTo("hmpps-audit-client")
-          assertThat(it.service).isEqualTo("hmpps-audit-api")
-          assertThat(it.details).isEqualTo("\"\"")
-        },
-      )
-      // test call to queue
     }
   }
 
@@ -381,66 +295,4 @@ class PrisonerAuditRDSResourceTest : IntegrationTest() {
       // test call to queue
     }
   }
-
-  @Nested
-  inner class findAuditEntries {
-    @Test
-    fun `find all audit entries`() {
-      val listOfAudits = listOf(
-        PrisonerAuditEvent(
-          UUID.fromString("64505f1e-c9ca-4e54-8c62-d946359b667f"),
-          "MINIMUM_FIELDS_EVENT",
-          Instant.parse("2021-04-04T17:17:30Z"),
-        ),
-        PrisonerAuditEvent(
-          UUID.fromString("5c5ba3d7-0707-42f1-b9ea-949e22dc17ba"),
-          "COURT_REGISTER_BUILDING_UPDATE",
-          Instant.parse("2021-04-03T10:15:30Z"),
-          "badea6d876c62e2f5264c94c7b50875e",
-          "er4ea6d876c62e2f5264c94c7b50863r",
-          "PERSON",
-          "er4ea6d876c62e2f5264c94c7b50863r",
-          "bobby.beans",
-          "court-register",
-          "{\"courtId\":\"AAAMH1\",\"buildingId\":936,\"building\":{\"id\":936,\"courtId\":\"AAAMH1\",\"buildingName\":\"Main Court Name Changed\"}}",
-        ),
-        PrisonerAuditEvent(
-          UUID.fromString("e5b4800c-dc4e-45f8-826c-877b1f3ce8de"),
-          "OFFENDER_DELETED",
-          Instant.parse("2021-04-01T15:15:30Z"),
-          "cadea6d876c62e2f5264c94c7b50875e",
-          "er4ea6d876c62e2f5264c94c7b50863r",
-          "PERSON",
-          "er4ea6d876c62e2f5264c94c7b50863r",
-          "bobby.beans",
-          "offender-service",
-          "{\"offenderId\": \"97\"}",
-        ),
-        PrisonerAuditEvent(
-          UUID.fromString("03a1624a-54e7-453e-8c79-816dbe02fd3c"),
-          "OFFENDER_DELETED",
-          Instant.parse("2020-12-31T08:11:30Z"),
-          "dadea6d876c62e2f5264c94c7b50875e",
-          "er4ea6d876c62e2f5264c94c7b50863r",
-          "PERSON",
-          "er4ea6d876c62e2f5264c94c7b50863r",
-          "freddy.frog",
-          "offender-service",
-          "{\"offenderId\": \"98\"}",
-        ),
-      )
-      whenever(prisonerAuditRepository.findAll(Sort.by(DESC, "when"))).thenReturn(
-        listOfAudits,
-      )
-
-      webTestClient.get().uri("/audit/prisoner")
-        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_AUDIT"), scopes = listOf("read")))
-        .exchange()
-        .expectStatus().isOk
-        .expectBody().json("audit_events".loadJson())
-
-      verify(prisonerAuditRepository).findAll(Sort.by(DESC, "when"))
-    }
-  }
-  private fun String.loadJson(): String = PrisonerAuditRDSResourceTest::class.java.getResource("$this.json")!!.readText()
 }

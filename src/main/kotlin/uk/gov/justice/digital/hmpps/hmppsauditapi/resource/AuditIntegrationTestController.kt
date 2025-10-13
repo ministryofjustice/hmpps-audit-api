@@ -25,7 +25,6 @@ import java.util.UUID
 class AuditIntegrationTestController(
   private val auditQueueService: AuditQueueService,
   private val auditAthenaClient: AuditAthenaClient,
-  private val auditService: AuditServiceFactory,
   private val auditServiceFactory: AuditServiceFactory,
 ) {
 

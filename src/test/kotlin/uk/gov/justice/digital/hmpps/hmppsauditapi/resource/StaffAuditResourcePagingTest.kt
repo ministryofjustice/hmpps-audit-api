@@ -16,7 +16,7 @@ import java.time.Instant
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class AuditResourcePagingTest : IntegrationTest() {
+class StaffAuditResourcePagingTest : IntegrationTest() {
 
   @Autowired
   private lateinit var staffAuditRepository: StaffAuditRepository

@@ -28,12 +28,12 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.11")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.5.0")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
 
   implementation("org.apache.commons:commons-lang3:3.19.0")
-  implementation("software.amazon.awssdk:s3:2.34.6")
-  implementation("software.amazon.awssdk:athena:2.34.6")
+  implementation("software.amazon.awssdk:s3:2.35.5")
+  implementation("software.amazon.awssdk:athena:2.35.5")
   implementation("org.apache.parquet:parquet-avro:1.16.0")
   implementation("org.apache.avro:avro:1.12.0")
   implementation("org.apache.hadoop:hadoop-client:3.4.2") {
