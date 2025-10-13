@@ -7,14 +7,14 @@ import io.awspring.cloud.sqs.annotation.SqsListener
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
-import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
+import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditServiceFactory
 import java.io.IOException
 
 private const val DEFAULT_SUBJECT_TYPE = "NOT_APPLICABLE"
 
 @Service
 class HMPPSAuditListener(
-  private val auditService: AuditService,
+  private val auditServiceFactory: AuditServiceFactory,
   private val objectMapper: ObjectMapper,
 ) {
 
@@ -26,7 +26,7 @@ class HMPPSAuditListener(
     val cleansedAuditEvent = auditEvent.copy(
       details = auditEvent.details?.jsonString(),
     )
-    auditService.saveAuditEvent(cleansedAuditEvent, AuditEventType.STAFF)
+    auditServiceFactory.getAuditService(AuditEventType.STAFF).saveAuditEvent(cleansedAuditEvent)
   }
 
   @SqsListener("prisonerauditqueue", factory = "hmppsQueueContainerFactoryProxy")
@@ -38,7 +38,7 @@ class HMPPSAuditListener(
       details = auditEvent.details?.jsonString(),
     )
 
-    auditService.saveAuditEvent(cleansedAuditEvent, AuditEventType.PRISONER)
+    auditServiceFactory.getAuditService(AuditEventType.PRISONER).saveAuditEvent(cleansedAuditEvent)
   }
 
   private fun patchSubjectTypeIfMissing(message: String): String = try {

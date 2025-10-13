@@ -15,7 +15,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryResponse
-import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.AuditDto
+import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.model.AuditDto
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
@@ -168,7 +168,7 @@ class AuditAthenaClient(
         val values = row.data().map { it.varCharValue() ?: "" }
         val resultMap = columnNames.zip(values).toMap()
 
-        val auditDto = AuditDto(
+        val staffAuditDto = AuditDto(
           id = UUID.fromString(resultMap["id"]),
           what = resultMap["what"] ?: "",
           `when` = Instant.parse(resultMap["when"] ?: throw IllegalArgumentException("Missing timestamp")),
@@ -181,7 +181,7 @@ class AuditAthenaClient(
           details = resultMap["details"],
         )
 
-        results.add(auditDto)
+        results.add(staffAuditDto)
       }
 
       nextToken = response.nextToken()

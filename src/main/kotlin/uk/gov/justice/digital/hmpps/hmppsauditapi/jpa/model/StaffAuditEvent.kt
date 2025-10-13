@@ -7,6 +7,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import java.time.Instant
 import java.util.UUID
 
@@ -28,4 +29,17 @@ data class StaffAuditEvent(
   val who: String? = null,
   val service: String? = null,
   val details: String? = null,
+)
+
+fun StaffAuditEvent.toAuditEvent(): AuditEvent = AuditEvent(
+  id = id,
+  what = what,
+  `when` = `when`,
+  operationId = operationId,
+  subjectId = subjectId,
+  subjectType = subjectType,
+  correlationId = correlationId,
+  who = who,
+  service = service,
+  details = details,
 )
