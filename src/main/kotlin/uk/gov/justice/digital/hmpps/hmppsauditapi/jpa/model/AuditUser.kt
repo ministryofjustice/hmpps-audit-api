@@ -14,7 +14,7 @@ import java.util.UUID
 import kotlin.collections.List
 
 @Entity(name = "AuditUser")
-@Table(name = "audit_user")
+@Table(name = "audit_user", schema = "staff")
 @Schema(description = "Stores a unique ID for each user from auth")
 data class AuditUser(
   @Id

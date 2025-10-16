@@ -6,19 +6,19 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.stereotype.Repository
-import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.StaffAuditEvent
 import java.time.Instant
 import java.util.UUID
 
 @Repository
-interface AuditRepository :
-  PagingAndSortingRepository<AuditEvent, UUID>,
-  CrudRepository<AuditEvent, UUID> {
+interface StaffAuditRepository :
+  PagingAndSortingRepository<StaffAuditEvent, UUID>,
+  CrudRepository<StaffAuditEvent, UUID> {
 
   @Query(
     """
-    select 
-        ae from AuditEvent ae 
+    select
+        ae from StaffAuditEvent ae
     where
         ((cast(:startDate as string) is null or ae.when >=:startDate )
            and (cast(:endDate as string) is null or ae.when <=:endDate))
@@ -40,5 +40,5 @@ interface AuditRepository :
     correlationId: String?,
     what: String?,
     who: String?,
-  ): Page<AuditEvent>
+  ): Page<StaffAuditEvent>
 }

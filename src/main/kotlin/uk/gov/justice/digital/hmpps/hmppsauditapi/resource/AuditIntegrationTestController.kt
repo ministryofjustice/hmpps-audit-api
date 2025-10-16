@@ -8,13 +8,14 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryResponse
+import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.model.AuditDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditAthenaClient
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
-import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditService
+import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditServiceFactory
 import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
@@ -24,7 +25,7 @@ import java.util.UUID
 class AuditIntegrationTestController(
   private val auditQueueService: AuditQueueService,
   private val auditAthenaClient: AuditAthenaClient,
-  private val auditService: AuditService,
+  private val auditServiceFactory: AuditServiceFactory,
 ) {
 
   data class IntegrationTestResult(
@@ -52,7 +53,7 @@ class AuditIntegrationTestController(
   fun triggerTestQuery(
     @PathVariable auditEventType: AuditEventType,
     @PathVariable who: String,
-  ): AuditQueryResponse = auditService.triggerQuery(
+  ): AuditQueryResponse = auditServiceFactory.getAuditService(auditEventType).triggerQuery(
     AuditQueryRequest(
       auditEventType = auditEventType,
       startDate = LocalDate.now(),
@@ -61,11 +62,12 @@ class AuditIntegrationTestController(
     auditEventType,
   )
 
-  @GetMapping("/query/{queryExecutionId}")
+  @GetMapping("/query/{auditEventType}/{queryExecutionId}")
   @PreAuthorize("hasRole('ROLE_AUDIT_INTEGRATION_TEST')")
   fun getQueryResults(
+    @PathVariable auditEventType: AuditEventType,
     @PathVariable queryExecutionId: UUID,
-  ): AuditQueryResponse = auditService.getQueryResults(queryExecutionId.toString())
+  ): AuditQueryResponse = auditServiceFactory.getAuditService(auditEventType).getQueryResults(queryExecutionId.toString())
 
   @PostMapping("/assertion/{queryExecutionId}")
   @PreAuthorize("hasRole('ROLE_AUDIT_INTEGRATION_TEST')")

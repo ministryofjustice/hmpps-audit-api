@@ -27,16 +27,17 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.IntegrationTest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType.STAFF
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryRequest
+import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.model.AuditDto
 import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
 
-class StaffAuditResourceTest : IntegrationTest() {
+class StaffAuditAthenaResourceTest : IntegrationTest() {
 
   @Autowired
   private lateinit var athenaClient: AthenaClient
 
-  private final val expectedAuditDto = AuditDto(
+  private final val expectedStaffAuditDto = AuditDto(
     id = UUID.fromString("cebcfc92-bdd6-4c3c-be50-a33fb08a9853"),
     what = "READ_USER",
     `when` = Instant.parse("2024-02-14T12:34:56Z"),
@@ -81,16 +82,16 @@ class StaffAuditResourceTest : IntegrationTest() {
           Datum.builder().varCharValue("details").build(),
         ).build(),
         Row.builder().data(
-          Datum.builder().varCharValue(expectedAuditDto.id.toString()).build(),
-          Datum.builder().varCharValue(expectedAuditDto.what).build(),
-          Datum.builder().varCharValue(expectedAuditDto.`when`.toString()).build(),
-          Datum.builder().varCharValue(expectedAuditDto.operationId).build(),
-          Datum.builder().varCharValue(expectedAuditDto.subjectId).build(),
-          Datum.builder().varCharValue(expectedAuditDto.subjectType).build(),
-          Datum.builder().varCharValue(expectedAuditDto.correlationId).build(),
-          Datum.builder().varCharValue(expectedAuditDto.who).build(),
-          Datum.builder().varCharValue(expectedAuditDto.service).build(),
-          Datum.builder().varCharValue(expectedAuditDto.details).build(),
+          Datum.builder().varCharValue(expectedStaffAuditDto.id.toString()).build(),
+          Datum.builder().varCharValue(expectedStaffAuditDto.what).build(),
+          Datum.builder().varCharValue(expectedStaffAuditDto.`when`.toString()).build(),
+          Datum.builder().varCharValue(expectedStaffAuditDto.operationId).build(),
+          Datum.builder().varCharValue(expectedStaffAuditDto.subjectId).build(),
+          Datum.builder().varCharValue(expectedStaffAuditDto.subjectType).build(),
+          Datum.builder().varCharValue(expectedStaffAuditDto.correlationId).build(),
+          Datum.builder().varCharValue(expectedStaffAuditDto.who).build(),
+          Datum.builder().varCharValue(expectedStaffAuditDto.service).build(),
+          Datum.builder().varCharValue(expectedStaffAuditDto.details).build(),
         ).build(),
       ),
     ).build()
@@ -181,5 +182,5 @@ class StaffAuditResourceTest : IntegrationTest() {
       .expectBody().json("get_query_results_response".loadJson(), STRICT)
   }
   private fun columnInfo(name: String): ColumnInfo = ColumnInfo.builder().name(name).type("string").build()
-  private fun String.loadJson(): String = AuditResourceTest::class.java.getResource("$this.json")!!.readText()
+  private fun String.loadJson(): String = StaffAuditRDSResourceTest::class.java.getResource("$this.json")!!.readText()
 }

@@ -8,16 +8,16 @@ import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.UserService
 
-internal class HMPPSUserListenerTest : QueueListenerIntegrationTest() {
+internal class UserListenerTest : QueueListenerIntegrationTest() {
 
   @Autowired
   private lateinit var userListener: HMPPSUserListener
 
-  @SpyBean
+  @MockitoSpyBean
   private lateinit var userService: UserService
 
   @Test

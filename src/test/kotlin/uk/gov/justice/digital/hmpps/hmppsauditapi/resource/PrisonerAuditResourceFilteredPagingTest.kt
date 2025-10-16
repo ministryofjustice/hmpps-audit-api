@@ -8,16 +8,16 @@ import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.IntegrationTest
-import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.AuditRepository
-import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.HMPPSAuditListener.AuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.PrisonerAuditRepository
+import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.PrisonerAuditEvent
 import java.time.Instant
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class AuditResourceFilteredPagingTest : IntegrationTest() {
+class PrisonerAuditResourceFilteredPagingTest : IntegrationTest() {
 
   @Autowired
-  private lateinit var auditRepository: AuditRepository
+  private lateinit var prisonerAuditRepository: PrisonerAuditRepository
 
   val whatRequestBody = JSONObject().put("what", "OFFENDER_DELETED")
   val whoRequestBody = JSONObject().put("who", "bobby.beans")
@@ -30,12 +30,12 @@ class AuditResourceFilteredPagingTest : IntegrationTest() {
     .put("endDateTime", Instant.parse("2021-04-12T17:17:30Z"))
 
   val listOfAudits = listOf(
-    AuditEvent(
+    PrisonerAuditEvent(
       UUID.fromString("64505f1e-c9ca-4e54-8c62-d946359b667f"),
       "MINIMUM_FIELDS_EVENT",
       Instant.parse("2021-04-04T17:17:30Z"),
     ),
-    AuditEvent(
+    PrisonerAuditEvent(
       UUID.fromString("5c5ba3d7-0707-42f1-b9ea-949e22dc17ba"),
       "COURT_REGISTER_BUILDING_UPDATE",
       Instant.parse("2021-04-03T10:15:30Z"),
@@ -47,7 +47,7 @@ class AuditResourceFilteredPagingTest : IntegrationTest() {
       "court-register",
       "{\"courtId\":\"AAAMH1\",\"buildingId\":936,\"building\":{\"id\":936,\"courtId\":\"AAAMH1\",\"buildingName\":\"Main Court Name Changed\"}}",
     ),
-    AuditEvent(
+    PrisonerAuditEvent(
       UUID.fromString("e5b4800c-dc4e-45f8-826c-877b1f3ce8de"),
       "OFFENDER_DELETED",
       Instant.parse("2021-04-01T15:15:30Z"),
@@ -56,10 +56,10 @@ class AuditResourceFilteredPagingTest : IntegrationTest() {
       "PERSON",
       "correlationId2",
       "bobby.beans",
-      "offender-service",
+      "launchpad",
       "{\"offenderId\": \"97\"}",
     ),
-    AuditEvent(
+    PrisonerAuditEvent(
       UUID.fromString("03a1624a-54e7-453e-8c79-816dbe02fd3c"),
       "OFFENDER_DELETED",
       Instant.parse("2020-12-31T08:11:30Z"),
@@ -68,27 +68,28 @@ class AuditResourceFilteredPagingTest : IntegrationTest() {
       "PERSON",
       "correlationId3",
       "freddy.frog",
-      "offender-service",
+      "launchpad",
       "{\"offenderId\": \"98\"}",
     ),
   )
 
   @BeforeAll
   fun `insert test audit events`() {
+    prisonerAuditRepository.deleteAll()
     listOfAudits.forEach {
-      auditRepository.save(it)
+      prisonerAuditRepository.save(it)
     }
   }
 
   @AfterAll
   fun `remove test audit events`() {
-    auditRepository.deleteAll()
+    prisonerAuditRepository.deleteAll()
   }
 
   @Test
   fun `filter audit events by what`() {
-    webTestClient.post().uri("/audit/paged?page=0&size=3")
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
+    webTestClient.post().uri("/audit/prisoner/paged?page=0&size=3")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_AUDIT"), scopes = listOf("read")))
       .contentType(MediaType.APPLICATION_JSON)
       .bodyValue(whatRequestBody.toString())
       .exchange()
@@ -107,8 +108,8 @@ class AuditResourceFilteredPagingTest : IntegrationTest() {
 
   @Test
   fun `filter audit events by who`() {
-    webTestClient.post().uri("/audit/paged?page=0&size=3")
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
+    webTestClient.post().uri("/audit/prisoner/paged?page=0&size=3")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_AUDIT"), scopes = listOf("read")))
       .contentType(MediaType.APPLICATION_JSON)
       .bodyValue(whoRequestBody.toString())
       .exchange()
@@ -127,8 +128,8 @@ class AuditResourceFilteredPagingTest : IntegrationTest() {
 
   @Test
   fun `filter audit events by what and who`() {
-    webTestClient.post().uri("/audit/paged?page=0&size=3")
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
+    webTestClient.post().uri("/audit/prisoner/paged?page=0&size=3")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_AUDIT"), scopes = listOf("read")))
       .contentType(MediaType.APPLICATION_JSON)
       .bodyValue(whoAndWhatRequestBody.toString())
       .exchange()
@@ -146,8 +147,8 @@ class AuditResourceFilteredPagingTest : IntegrationTest() {
 
   @Test
   fun `filter audit events by startDateTme`() {
-    webTestClient.post().uri("/audit/paged?page=0&size=2")
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("read")))
+    webTestClient.post().uri("/audit/prisoner/paged?page=0&size=2")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_AUDIT"), scopes = listOf("read")))
       .contentType(MediaType.APPLICATION_JSON)
       .bodyValue(startDateRequestBody.toString())
       .exchange()
@@ -163,8 +164,8 @@ class AuditResourceFilteredPagingTest : IntegrationTest() {
 
   @Test
   fun `filter audit events by endDateTime`() {
-    webTestClient.post().uri("/audit/paged?page=0&size=3")
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+    webTestClient.post().uri("/audit/prisoner/paged?page=0&size=3")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_AUDIT"), scopes = listOf("write")))
       .contentType(MediaType.APPLICATION_JSON)
       .bodyValue(endDateRequestBody.toString())
       .exchange()
@@ -180,8 +181,8 @@ class AuditResourceFilteredPagingTest : IntegrationTest() {
 
   @Test
   fun `filter audit events by date range`() {
-    webTestClient.post().uri("/audit/paged?page=0&size=3")
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+    webTestClient.post().uri("/audit/prisoner/paged?page=0&size=3")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_AUDIT"), scopes = listOf("write")))
       .contentType(MediaType.APPLICATION_JSON)
       .bodyValue(dateRangeRequestBody.toString())
       .exchange()
@@ -197,8 +198,8 @@ class AuditResourceFilteredPagingTest : IntegrationTest() {
 
   @Test
   fun `filter audit events by subjectId`() {
-    webTestClient.post().uri("/audit/paged?page=0&size=3")
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+    webTestClient.post().uri("/audit/prisoner/paged?page=0&size=3")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_AUDIT"), scopes = listOf("write")))
       .contentType(MediaType.APPLICATION_JSON)
       .bodyValue(subjectIdRequestBody.toString())
       .exchange()
@@ -213,8 +214,8 @@ class AuditResourceFilteredPagingTest : IntegrationTest() {
 
   @Test
   fun `filter audit events by subjectType`() {
-    webTestClient.post().uri("/audit/paged?page=0&size=3")
-      .headers(setAuthorisation(roles = listOf("ROLE_AUDIT"), scopes = listOf("write")))
+    webTestClient.post().uri("/audit/prisoner/paged?page=0&size=3")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_AUDIT"), scopes = listOf("write")))
       .contentType(MediaType.APPLICATION_JSON)
       .bodyValue(subjectTypeRequestBody.toString())
       .exchange()
