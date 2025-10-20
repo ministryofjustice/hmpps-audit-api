@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.1.2"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.1.3"
   kotlin("plugin.spring") version "2.2.20"
   kotlin("plugin.jpa") version "2.2.20"
 }
@@ -32,10 +32,10 @@ dependencies {
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
 
   implementation("org.apache.commons:commons-lang3:3.19.0")
-  implementation("software.amazon.awssdk:s3:2.35.5")
-  implementation("software.amazon.awssdk:athena:2.35.5")
+  implementation("software.amazon.awssdk:s3:2.35.10")
+  implementation("software.amazon.awssdk:athena:2.35.10")
   implementation("org.apache.parquet:parquet-avro:1.16.0")
-  implementation("org.apache.avro:avro:1.12.0")
+  implementation("org.apache.avro:avro:1.12.1")
   implementation("org.apache.hadoop:hadoop-client:3.4.2") {
     exclude(group = "com.google.protobuf", module = "protobuf-java")
     exclude(group = "org.apache.hadoop.thirdparty", module = "hadoop-shaded-protobuf_3_25")
