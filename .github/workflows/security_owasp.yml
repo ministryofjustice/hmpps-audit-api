@@ -2,7 +2,7 @@ name: Security OWASP dependency check
 on:
   workflow_dispatch:
   schedule:
-    - cron: "10 9 * * MON-FRI" # Every weekday at 09:10 UTC
+    - cron: "10 4 * * MON-FRI" # Every weekday at 04:10 UTC
 jobs:
   security-kotlin-owasp-check:
     permissions:
