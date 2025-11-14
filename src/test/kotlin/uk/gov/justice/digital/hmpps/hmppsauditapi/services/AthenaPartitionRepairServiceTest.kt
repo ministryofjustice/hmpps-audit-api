@@ -49,6 +49,7 @@ class AthenaPartitionRepairServiceTest {
     service = AthenaPartitionRepairService(
       athenaClient,
       athenaPropertiesFactory,
+      true,
     )
   }
 
