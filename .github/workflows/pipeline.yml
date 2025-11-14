@@ -127,3 +127,21 @@ jobs:
     with:
       environment: 'prod'
       app_version: '${{ needs.build.outputs.app_version }}'
+
+
+  prod_integration_tests:
+    needs: deploy_prod
+    strategy:
+      max-parallel: 1
+      matrix:
+        audit_event_type: [ STAFF, PRISONER ]
+    uses: ./.github/workflows/environment_integration_test.yml
+    with:
+      job_name: "Run ${{ matrix.audit_event_type }} prod integration tests"
+      environment: "prod"
+      env_test_url: "https://audit-api.hmpps.service.justice.gov.uk"
+      audit_event_type: ${{ matrix.audit_event_type }}
+    secrets:
+      OAUTH_CLIENT_ID: ${{ secrets.PROD_INTEGRATION_TESTS_CLIENT_ID }}
+      OAUTH_CLIENT_SECRET: ${{ secrets.PROD_INTEGRATION_TESTS_CLIENT_SECRET }}
+      OAUTH_TOKEN_URL: "https://sign-in.hmpps.service.justice.gov.uk/auth/oauth/token"
