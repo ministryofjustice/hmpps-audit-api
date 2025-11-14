@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import software.amazon.awssdk.services.athena.AthenaClient
@@ -14,6 +15,7 @@ import java.util.UUID
 class AthenaPartitionRepairService(
   private val athenaClient: AthenaClient,
   private val athenaPropertiesFactory: AthenaPropertiesFactory,
+  @param:Value("\${hmpps.repository.saveToS3Bucket}") private val saveToS3Bucket: Boolean,
 ) {
 
   fun triggerRepairPartitions(auditEventType: AuditEventType): AuditQueryResponse {
@@ -36,8 +38,16 @@ class AthenaPartitionRepairService(
   }
 
   @Scheduled(cron = "0 0 0 1 * *")
-  fun triggerRepairPartitions() = triggerRepairPartitions(AuditEventType.STAFF)
+  fun triggerRepairPartitions() {
+    if (saveToS3Bucket) {
+      triggerRepairPartitions(AuditEventType.STAFF)
+    }
+  }
 
   @Scheduled(cron = "0 0 0 1 * *")
-  fun triggerPrisonerRepairPartitions() = triggerRepairPartitions(AuditEventType.PRISONER)
+  fun triggerPrisonerRepairPartitions() {
+    if (saveToS3Bucket) {
+      triggerRepairPartitions(AuditEventType.PRISONER)
+    }
+  }
 }
