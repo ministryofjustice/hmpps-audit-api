@@ -26,12 +26,12 @@ generic-service:
     modsecurity_audit_enabled: true
     modsecurity_snippet: |
       SecRuleEngine DetectionOnly
-#  Default is only GET HEAD POST OPTIONS so need to include PUT etc.
+    #  Default is only GET HEAD POST OPTIONS so need to include PUT etc.
       SecAction "id:900200,phase:1,nolog,pass,t:none,setvar:tx.allowed_methods=GET HEAD PATCH POST OPTIONS PUT DELETE"
-# team here grants access to the OpenSearch logs to delve into the cause of the blockage
+    # team here grants access to the OpenSearch logs to delve into the cause of the blockage
       SecDefaultAction "phase:2,pass,log,tag:github_team=haha"
       SecDefaultAction "phase:4,pass,log,tag:github_team=haha"
-# Change default denial to be a 406 so that we can tell easily that it is modsecurity doing the blocking
+    # Change default denial to be a 406 so that we can tell easily that it is modsecurity doing the blocking
       SecRuleUpdateActionById 949110 "t:none,deny,status:406,logdata:%{SERVER_NAME}"
       SecRuleUpdateActionById 959100 "t:none,deny,status:406,logdata:%{SERVER_NAME}"
 
