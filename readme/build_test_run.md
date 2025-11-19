@@ -20,7 +20,7 @@ docker build -t quay.io/hmpps/hmpps-audit-api:latest .
 Tests need [LocalStack](https://localstack.cloud/) to be up and running, this can be done manually.
 
 ```bash
-TMPDIR=/private$TMPDIR docker-compose up localstack
+TMPDIR=/private$TMPDIR docker compose up localstack
 ```
 
 ### Test Database
@@ -39,7 +39,7 @@ For local development of this service, to run all the dependencies (including [L
 
 
 ```bash
-TMPDIR=/private$TMPDIR  docker-compose up --scale hmpps-audit-api=0
+TMPDIR=/private$TMPDIR  docker compose up --scale hmpps-audit-api=0
 ```
 
 And then using gradle:

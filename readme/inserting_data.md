@@ -30,7 +30,7 @@ details = details (String)
 #### To send and audit event to localstack for local testing
 
 Install the AWS CLI (`brew install awscli` on a Mac)
-Ensure localstack is running (`TMPDIR=/private$TMPDIR docker-compose up localstack`)
+Ensure localstack is running (`TMPDIR=/private$TMPDIR docker compose up localstack`)
 
 To send the above payload:
 
