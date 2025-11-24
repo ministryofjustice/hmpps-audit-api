@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.1.4"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.2.0"
   kotlin("plugin.spring") version "2.2.21"
   kotlin("plugin.jpa") version "2.2.21"
 }
@@ -28,12 +28,12 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.6.0")
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.6.2")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14")
 
-  implementation("org.apache.commons:commons-lang3:3.19.0")
-  implementation("software.amazon.awssdk:s3:2.36.2")
-  implementation("software.amazon.awssdk:athena:2.36.2")
+  implementation("org.apache.commons:commons-lang3:3.20.0")
+  implementation("software.amazon.awssdk:s3:2.39.2")
+  implementation("software.amazon.awssdk:athena:2.39.2")
   implementation("org.apache.parquet:parquet-avro:1.16.0")
   implementation("org.apache.avro:avro:1.12.1")
   implementation("org.apache.hadoop:hadoop-client:3.4.2") {
