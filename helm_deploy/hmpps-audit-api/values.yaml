@@ -25,8 +25,7 @@ generic-service:
     modsecurity_enabled: true  # enable OWASP core rules then handle false positives by removing or tweaking rules to not block specific args or cookies
     modsecurity_audit_enabled: true
     modsecurity_snippet: |
-      #  Set engine to DetectionOnly so that we can see what we are blocking before we switch on fully
-      SecRuleEngine DetectionOnly
+      SecRuleEngine On
       #  Default is only GET HEAD POST OPTIONS so need to include PUT etc.
       SecAction "id:900200,phase:1,nolog,pass,t:none,setvar:tx.allowed_methods=GET HEAD PATCH POST OPTIONS PUT DELETE,setvar:tx.paranoia_level=3"
       # team here grants access to the OpenSearch logs to delve into the cause of the blockage
