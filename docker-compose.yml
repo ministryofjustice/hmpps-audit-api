@@ -16,7 +16,7 @@ services:
       - SPRING_PROFILES_ACTIVE=dev
 
   audit-db:
-    image: postgres
+    image: postgres:18
     networks:
       - hmpps
     container_name: audit-db
