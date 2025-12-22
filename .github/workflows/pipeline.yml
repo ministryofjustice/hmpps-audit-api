@@ -1,4 +1,5 @@
 name: Pipeline [test -> build -> deploy]
+
 on:
   push:
     branches:
@@ -15,13 +16,16 @@ on:
         required: true
         default: false
         type: boolean
+
 permissions:
   contents: read
   packages: write
+
 concurrency:
   # only cancel in progress when on a branch - use SHA on main to ensure uniqueness
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.sha || github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   helm_lint:
     strategy:
@@ -32,17 +36,30 @@ jobs:
     secrets: inherit
     with:
       environment: ${{ matrix.environments }}
+  app_version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.app_version.outputs.version }}
+    steps:
+      - id: app_version
+        name: Application version creators
+        uses: ministryofjustice/hmpps-github-actions/.github/actions/build-test-and-deploy/create_app_version@v2 # WORKFLOW_VERSION
   gradle-verify:
     name: Run the tests
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/gradle_localstack_postgres_verify.yml@v2 # WORKFLOW_VERSION
     secrets: inherit
     with:
+      gradle-command: 'BUILD_NUMBER=${{ needs.app_version.outputs.version}} ./gradlew assemble check'
+      upload-build-artifacts: ${{ github.ref == 'refs/heads/main' }}
+      java-version: "25"
       localstack-services: s3,sqs
       localstack-tag: "4"
       postgres-tag: "18"
       postgres-db: audit_db
       postgres-username: admin
       postgres-password: admin_password
+    needs:
+      - app_version
   build:
     name: Build docker image from hmpps-github-actions
     if: github.ref == 'refs/heads/main'
@@ -53,8 +70,9 @@ jobs:
       docker_registry: 'ghcr.io'
       registry_org: 'ministryofjustice'
       additional_docker_tag: ${{ inputs.additional_docker_tag }}
-      push: ${{ inputs.push || true }}
+      push: ${{ inputs.push || inputs.push == null }}
       docker_multiplatform: false
+      download_build_artifacts: true
   deploy_dev:
     name: Deploy to the dev environment
     if: github.ref == 'refs/heads/main'
