@@ -29,7 +29,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webflux")
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.6.2")
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.0")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14")
 
   implementation("org.apache.commons:commons-lang3:3.20.0")
   implementation("software.amazon.awssdk:s3:2.40.13")
