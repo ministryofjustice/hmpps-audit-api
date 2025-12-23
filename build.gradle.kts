@@ -1,9 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.2.0"
-  kotlin("plugin.spring") version "2.2.21"
-  kotlin("plugin.jpa") version "2.2.21"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.3.0"
+  kotlin("plugin.spring") version "2.3.0"
+  kotlin("plugin.jpa") version "2.3.0"
 }
 
 configurations {
@@ -32,8 +32,8 @@ dependencies {
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14")
 
   implementation("org.apache.commons:commons-lang3:3.20.0")
-  implementation("software.amazon.awssdk:s3:2.39.2")
-  implementation("software.amazon.awssdk:athena:2.39.2")
+  implementation("software.amazon.awssdk:s3:2.40.13")
+  implementation("software.amazon.awssdk:athena:2.40.13")
   implementation("org.apache.parquet:parquet-avro:1.16.0")
   implementation("org.apache.avro:avro:1.12.1")
   implementation("org.apache.hadoop:hadoop-client:3.4.2") {
