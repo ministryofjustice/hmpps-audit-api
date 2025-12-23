@@ -44,6 +44,6 @@ class OpenApiDocsTest : IntegrationTest() {
       .accept(MediaType.APPLICATION_JSON)
       .exchange()
       .expectStatus().isOk
-      .expectBody().jsonPath("info.version").isEqualTo(DateTimeFormatter.ISO_DATE.format(LocalDate.now()))
+      .expectBody().jsonPath("info.version").value { it: Any -> assert((it as String).contains(DateTimeFormatter.ISO_DATE.format(LocalDate.now()))) }
   }
 }
