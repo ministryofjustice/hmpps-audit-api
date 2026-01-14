@@ -1,8 +1,6 @@
-version: "3.1"
 services:
   hmpps-audit-api:
-    build:
-      context: .
+    image: ghcr.io/ministryofjustice/hmpps-audit-api:latest
     network_mode: "host"
     container_name: hmpps-audit-api
     depends_on:
