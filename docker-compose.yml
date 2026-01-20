@@ -19,7 +19,7 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health/ping"]
     environment:
-      - JAVA_TOOL_OPTIONS=-XX:+AlwaysActAsServerClassMachine -XX:MaxRAMPercentage=50.0 -XX:+ExitOnOutOfMemoryError
+      - JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=50.0 -XX:+ExitOnOutOfMemoryError
       - SERVER_PORT=8080
       - SPRING_PROFILES_ACTIVE=dev,localstack
 

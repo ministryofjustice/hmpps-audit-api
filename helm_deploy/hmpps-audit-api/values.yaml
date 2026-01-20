@@ -39,7 +39,7 @@ generic-service:
 
   # Environment variables to load into the deployment
   env:
-    JAVA_TOOL_OPTIONS: "-XX:+AlwaysActAsServerClassMachine -XX:MaxRAMPercentage=50.0 -XX:+ExitOnOutOfMemoryError"
+    JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=50.0 -XX:+ExitOnOutOfMemoryError"
     SERVER_PORT: "8080"
     SPRING_PROFILES_ACTIVE: "logstash"
     HMPPS_SQS_USE_WEB_TOKEN: true
