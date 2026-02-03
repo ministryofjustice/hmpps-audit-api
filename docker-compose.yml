@@ -1,6 +1,15 @@
 services:
   hmpps-audit-api:
     image: ghcr.io/ministryofjustice/hmpps-audit-api:latest
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"          # 2000m
+          memory: "1024m"     # 1 GiB
+        reservations:
+          cpus: "1.0"         # 1000m
+          memory: "512m"      # 512 MiB
+
     network_mode: "host"
     container_name: hmpps-audit-api
     depends_on:
@@ -10,8 +19,9 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health/ping"]
     environment:
+      - JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=50.0 -XX:+ExitOnOutOfMemoryError
       - SERVER_PORT=8080
-      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_PROFILES_ACTIVE=dev,localstack
 
   audit-db:
     image: postgres:18
