@@ -11,7 +11,6 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.IntegrationTest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.PrisonerAuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.PrisonerAuditEvent
 import java.time.Instant
-import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PrisonerAuditResourceFilteredPagingTest : IntegrationTest() {
@@ -31,45 +30,41 @@ class PrisonerAuditResourceFilteredPagingTest : IntegrationTest() {
 
   val listOfAudits = listOf(
     PrisonerAuditEvent(
-      UUID.fromString("64505f1e-c9ca-4e54-8c62-d946359b667f"),
-      "MINIMUM_FIELDS_EVENT",
-      Instant.parse("2021-04-04T17:17:30Z"),
+      what = "MINIMUM_FIELDS_EVENT",
+      `when` = Instant.parse("2021-04-04T17:17:30Z"),
     ),
     PrisonerAuditEvent(
-      UUID.fromString("5c5ba3d7-0707-42f1-b9ea-949e22dc17ba"),
-      "COURT_REGISTER_BUILDING_UPDATE",
-      Instant.parse("2021-04-03T10:15:30Z"),
-      "badea6d876c62e2f5264c94c7b50875b",
-      "da8ea6d876c62e2f5264c94c7b50867r",
-      "PERSON",
-      "correlationId1",
-      "bobby.beans",
-      "court-register",
-      "{\"courtId\":\"AAAMH1\",\"buildingId\":936,\"building\":{\"id\":936,\"courtId\":\"AAAMH1\",\"buildingName\":\"Main Court Name Changed\"}}",
+      what = "COURT_REGISTER_BUILDING_UPDATE",
+      `when` = Instant.parse("2021-04-03T10:15:30Z"),
+      operationId = "badea6d876c62e2f5264c94c7b50875b",
+      subjectId = "da8ea6d876c62e2f5264c94c7b50867r",
+      subjectType = "PERSON",
+      correlationId = "correlationId1",
+      who = "bobby.beans",
+      service = "court-register",
+      details = "{\"courtId\":\"AAAMH1\",\"buildingId\":936,\"building\":{\"id\":936,\"courtId\":\"AAAMH1\",\"buildingName\":\"Main Court Name Changed\"}}",
     ),
     PrisonerAuditEvent(
-      UUID.fromString("e5b4800c-dc4e-45f8-826c-877b1f3ce8de"),
-      "OFFENDER_DELETED",
-      Instant.parse("2021-04-01T15:15:30Z"),
-      "cadea6d876c62e2f5264c94c7b50875c",
-      "da4ea6d876c62e2f5264c94c7b508c57",
-      "PERSON",
-      "correlationId2",
-      "bobby.beans",
-      "launchpad",
-      "{\"offenderId\": \"97\"}",
+      what = "OFFENDER_DELETED",
+      `when` = Instant.parse("2021-04-01T15:15:30Z"),
+      operationId = "cadea6d876c62e2f5264c94c7b50875c",
+      subjectId = "da4ea6d876c62e2f5264c94c7b508c57",
+      subjectType = "PERSON",
+      correlationId = "correlationId2",
+      who = "bobby.beans",
+      service = "launchpad",
+      details = "{\"offenderId\": \"97\"}",
     ),
     PrisonerAuditEvent(
-      UUID.fromString("03a1624a-54e7-453e-8c79-816dbe02fd3c"),
-      "OFFENDER_DELETED",
-      Instant.parse("2020-12-31T08:11:30Z"),
-      "dadea6d876c62e2f5264c94c7b50875d",
-      "mu2ea6d876c62e2f5264c94c7b508d57",
-      "PERSON",
-      "correlationId3",
-      "freddy.frog",
-      "launchpad",
-      "{\"offenderId\": \"98\"}",
+      what = "OFFENDER_DELETED",
+      `when` = Instant.parse("2020-12-31T08:11:30Z"),
+      operationId = "dadea6d876c62e2f5264c94c7b50875d",
+      subjectId = "mu2ea6d876c62e2f5264c94c7b508d57",
+      subjectType = "PERSON",
+      correlationId = "correlationId3",
+      who = "freddy.frog",
+      service = "launchpad",
+      details = "{\"offenderId\": \"98\"}",
     ),
   )
 

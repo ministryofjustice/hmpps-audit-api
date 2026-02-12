@@ -1,13 +1,16 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.integration.health
 
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.kotlin.await
+import org.awaitility.kotlin.matches
+import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
-import uk.gov.justice.digital.hmpps.hmppsauditapi.IntegrationTest
+import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.function.Consumer
 
-class HealthCheckTest : IntegrationTest() {
+class HealthCheckTest : QueueListenerIntegrationTest() {
 
   @Test
   fun `Health page reports ok`() {
@@ -22,6 +25,7 @@ class HealthCheckTest : IntegrationTest() {
 
   @Test
   fun `Queue health reports audit queue details`() {
+    await untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 0 }
     webTestClient.get().uri("/health")
       .exchange()
       .expectStatus().isOk
@@ -36,6 +40,7 @@ class HealthCheckTest : IntegrationTest() {
 
   @Test
   fun `Queue health reports prisoner audit queue details`() {
+    await untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditDlq() } matches { it == 0 }
     webTestClient.get().uri("/health")
       .exchange()
       .expectStatus().isOk

@@ -19,7 +19,7 @@ import kotlin.collections.List
 data class AuditUser(
   @Id
   @GeneratedValue
-  val id: UUID = UUID.randomUUID(),
+  val id: UUID? = null,
 
   @OneToMany(mappedBy = "auditUser", cascade = [CascadeType.ALL], orphanRemoval = true)
   val userIds: List<AuthUserId>? = ArrayList(),
