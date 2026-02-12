@@ -23,7 +23,6 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.toStaffAuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 import java.time.Instant
-import java.util.UUID
 
 @TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=false"])
 class AuditTestDatabase @Autowired constructor(
@@ -90,13 +89,12 @@ class AuditTestDatabase @Autowired constructor(
   @Test
   fun `save full audit entry to database`() {
     val auditEvent = AuditEvent(
-      UUID.fromString("e5b4800c-dc4e-45f8-826c-877b1f3ce8de"),
-      "OFFENDER_DELETED",
-      Instant.parse("2021-04-01T15:15:30Z"),
-      "cadea6d876c62e2f5264c94c7b50875e",
-      "bobby.beans",
-      "offender-service",
-      "{\"offenderId\": \"97\"}",
+      what = "OFFENDER_DELETED",
+      `when` = Instant.parse("2021-04-01T15:15:30Z"),
+      operationId = "cadea6d876c62e2f5264c94c7b50875e",
+      subjectId = "bobby.beans",
+      subjectType = "offender-service",
+      correlationId = "{\"offenderId\": \"97\"}",
     )
 
     webTestClient.post()

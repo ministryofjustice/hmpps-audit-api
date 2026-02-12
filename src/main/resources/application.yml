@@ -5,8 +5,9 @@ info.app:
 spring:
   application:
     name: hmpps-audit-api
-  codec:
-    max-in-memory-size: 10MB
+  http:
+    codecs:
+      max-in-memory-size: 10MB
 
   jpa:
     open-in-view: false
@@ -26,6 +27,9 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: ${oauth.endpoint.url}/.well-known/jwks.json
+  web:
+    error:
+      include-message: always
 
   datasource:
     url: jdbc:postgresql://${DATABASE_ENDPOINT}/${DATABASE_NAME}?sslmode=verify-full
@@ -38,6 +42,8 @@ spring:
         stringtype: unspecified
 
   jackson:
+    date-format: "yyyy-MM-dd HH:mm:ss"
+  jackson2:
     date-format: "yyyy-MM-dd HH:mm:ss"
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false

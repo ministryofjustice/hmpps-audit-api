@@ -194,8 +194,8 @@ class AuditAthenaClient(
     val authentication = SecurityContextHolder.getContext().authentication
     return authentication?.authorities
       ?.map(GrantedAuthority::getAuthority)
-      ?.filter { it.startsWith(AUTHORISED_SERVICE_ROLE_PREFIX) }
-      ?.map { it.removePrefix(AUTHORISED_SERVICE_ROLE_PREFIX).lowercase().replace('_', '-') }
+      ?.filter { it!!.startsWith(AUTHORISED_SERVICE_ROLE_PREFIX) }
+      ?.map { it!!.removePrefix(AUTHORISED_SERVICE_ROLE_PREFIX).lowercase().replace('_', '-') }
       ?: emptyList()
   }
 
