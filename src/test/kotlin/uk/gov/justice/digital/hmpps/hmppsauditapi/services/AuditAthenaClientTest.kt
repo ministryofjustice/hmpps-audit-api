@@ -250,6 +250,21 @@ class AuditAthenaClientTest {
         "SELECT * FROM databaseName.$tableName WHERE 1 = 0;",
         emptyList<String>(),
       ),
+
+      // Single quote escaping in user input
+      Arguments.of(
+        AuditQueryRequest(
+          auditEventType = STAFF,
+          startDate = LocalDate.of(2025, 1, 1),
+          endDate = LocalDate.of(2025, 1, 2),
+          who = "O'Reilly",
+          subjectId = "sub'ject",
+          subjectType = "type'with'quote",
+        ),
+        listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS),
+        "SELECT * FROM databaseName.$tableName WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-02' AND user = 'O''Reilly' AND subjectId = 'sub''ject' AND subjectType = 'type''with''quote' AND service IN ('hmpps-manage-users');",
+        listOf(HMPPS_MANAGE_USERS),
+      ),
     )
   }
 
