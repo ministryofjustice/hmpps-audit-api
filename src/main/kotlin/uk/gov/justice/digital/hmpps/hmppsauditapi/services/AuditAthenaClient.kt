@@ -95,6 +95,8 @@ class AuditAthenaClient(
     athenaClient.startQueryExecution(request)
   }
 
+  private fun escapeSql(value: String): String = value.replace("'", "''")
+
   private fun buildAthenaQuery(filter: AuditQueryRequest, services: List<String>, auditEventType: AuditEventType): String {
     val athenaProperties = athenaPropertiesFactory.getProperties(auditEventType)
     val conditions = mutableListOf<String>()
@@ -111,12 +113,12 @@ class AuditAthenaClient(
 
     // Timestamp-based filtering for precision
     conditions.add("DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '${filter.startDate}' AND DATE '${filter.endDate}'")
-    filter.who?.let { conditions.add("user = '$it'") }
-    filter.subjectId?.let { conditions.add("subjectId = '$it'") }
-    filter.subjectType?.let { conditions.add("subjectType = '$it'") }
+    filter.who?.let { conditions.add("user = '" + escapeSql(it) + "'") }
+    filter.subjectId?.let { conditions.add("subjectId = '" + escapeSql(it) + "'") }
+    filter.subjectType?.let { conditions.add("subjectType = '" + escapeSql(it) + "'") }
 
     if (userDoesNotHaveAccessToAllServices(services)) {
-      val serviceList = services.joinToString(", ") { "'$it'" }
+      val serviceList = services.joinToString(", ") { "'" + escapeSql(it) + "'" }
       conditions.add("service IN ($serviceList)")
     }
 
