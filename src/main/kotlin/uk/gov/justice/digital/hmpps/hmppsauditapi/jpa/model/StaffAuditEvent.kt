@@ -12,7 +12,7 @@ import java.time.Instant
 import java.util.UUID
 
 @Entity(name = "StaffAuditEvent")
-@Table(name = "AuditEvent", schema = "staff")
+@Table(name = "audit_event", schema = "staff")
 @Schema(description = "Audit Event Insert Record")
 data class StaffAuditEvent(
   @Id
