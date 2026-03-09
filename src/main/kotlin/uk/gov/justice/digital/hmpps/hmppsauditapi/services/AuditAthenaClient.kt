@@ -95,6 +95,16 @@ class AuditAthenaClient(
     athenaClient.startQueryExecution(request)
   }
 
+  // Helper to substitute parameters in a query template
+  private fun substituteParameters(queryTemplate: String, parameters: Map<String, String>): String {
+    var query = queryTemplate
+    parameters.forEach { (placeholder, value) ->
+      // For string values, wrap in single quotes
+      query = query.replace(placeholder, "'${escapeSql(value)}'")
+    }
+    return query
+  }
+
   private fun escapeSql(value: String): String = value.replace("'", "''")
 
   private fun buildAthenaQuery(filter: AuditQueryRequest, services: List<String>, auditEventType: AuditEventType): String {
@@ -112,19 +122,38 @@ class AuditAthenaClient(
     conditions.add("(${partitionConditions.joinToString(" OR ")})")
 
     // Timestamp-based filtering for precision
-    conditions.add("DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '${filter.startDate}' AND DATE '${filter.endDate}'")
-    filter.who?.let { conditions.add("user = '" + escapeSql(it) + "'") }
-    filter.subjectId?.let { conditions.add("subjectId = '" + escapeSql(it) + "'") }
-    filter.subjectType?.let { conditions.add("subjectType = '" + escapeSql(it) + "'") }
+    conditions.add("DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE :startDate AND DATE :endDate")
+    val parameters = mutableMapOf<String, String>(
+      ":startDate" to filter.startDate.toString(),
+      ":endDate" to filter.endDate.toString(),
+    )
+    filter.who?.let {
+      conditions.add("user = :who")
+      parameters[":who"] = it
+    }
+    filter.subjectId?.let {
+      conditions.add("subjectId = :subjectId")
+      parameters[":subjectId"] = it
+    }
+    filter.subjectType?.let {
+      conditions.add("subjectType = :subjectType")
+      parameters[":subjectType"] = it
+    }
 
     if (userDoesNotHaveAccessToAllServices(services)) {
-      val serviceList = services.joinToString(", ") { "'" + escapeSql(it) + "'" }
+      val servicePlaceholders = services.mapIndexed { idx, _ -> ":service$idx" }
+      val serviceList = servicePlaceholders.joinToString(", ")
       conditions.add("service IN ($serviceList)")
+      services.forEachIndexed { idx, service ->
+        parameters[":service$idx"] = service
+      }
     }
 
     val whereClause = "WHERE ${conditions.joinToString(" AND ")}"
+    val queryTemplate = "SELECT * FROM $databaseName.$tableName $whereClause;"
 
-    return "SELECT * FROM $databaseName.$tableName $whereClause;"
+    // Substitute parameters in the query template
+    return substituteParameters(queryTemplate, parameters)
   }
 
   private fun buildPartitionDateConditions(startDate: LocalDate, endDate: LocalDate): List<String> {
