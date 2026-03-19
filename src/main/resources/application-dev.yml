@@ -38,3 +38,9 @@ hmpps:
         queueName: prisonerQueue
         asyncQueueClient: true
         dlqName: prisonerDlq
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

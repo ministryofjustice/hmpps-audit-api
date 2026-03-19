@@ -54,3 +54,9 @@ hmpps:
     saveToS3Bucket: true
   audit:
     queriesStartDate: 2024-01-01
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
