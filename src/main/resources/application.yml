@@ -127,3 +127,10 @@ hmpps:
 
 oauth:
   token.url: ${oauth.endpoint.url}/oauth/token
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+    version: 5.32.1
