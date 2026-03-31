@@ -5,6 +5,7 @@ generic-service:
 
   ingress:
     host: audit-api-dev.hmpps.service.justice.gov.uk
+    className: modsec-non-prod
 
   scheduledDowntime:
     enabled: true
