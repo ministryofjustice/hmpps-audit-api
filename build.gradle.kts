@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.1.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.1.2"
   kotlin("plugin.spring") version "2.3.20"
   kotlin("plugin.jpa") version "2.3.20"
 }
@@ -28,15 +28,15 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webclient")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:7.2.0")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:7.3.0")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2")
 
   implementation("org.apache.commons:commons-lang3:3.20.0")
-  implementation("software.amazon.awssdk:s3:2.42.17")
-  implementation("software.amazon.awssdk:athena:2.42.17")
+  implementation("software.amazon.awssdk:s3:2.42.33")
+  implementation("software.amazon.awssdk:athena:2.42.33")
   implementation("org.apache.parquet:parquet-avro:1.17.0")
   implementation("org.apache.avro:avro:1.12.1")
-  implementation("org.apache.hadoop:hadoop-client:3.4.3") {
+  implementation("org.apache.hadoop:hadoop-client:3.5.0") {
     exclude(group = "com.google.protobuf", module = "protobuf-java")
     exclude(group = "org.apache.hadoop.thirdparty", module = "hadoop-shaded-protobuf_3_25")
     exclude(group = "dnsjava", module = "dnsjava")
