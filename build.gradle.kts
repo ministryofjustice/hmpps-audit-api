@@ -36,7 +36,7 @@ dependencies {
   implementation("software.amazon.awssdk:athena:2.42.33")
   implementation("org.apache.parquet:parquet-avro:1.17.0")
   implementation("org.apache.avro:avro:1.12.1")
-  implementation("org.apache.hadoop:hadoop-client:3.5.0") {
+  implementation("org.apache.hadoop:hadoop-client:3.4.3") {
     exclude(group = "com.google.protobuf", module = "protobuf-java")
     exclude(group = "org.apache.hadoop.thirdparty", module = "hadoop-shaded-protobuf_3_25")
     exclude(group = "dnsjava", module = "dnsjava")
