@@ -53,7 +53,6 @@ dependencies {
     exclude(group = "commons-beanutils", module = "commons-beanutils")
   }
   implementation("commons-beanutils:commons-beanutils:1.11.0")
-  implementation("org.glassfish.jaxb:jaxb-runtime:2.3.1")
 
   runtimeOnly("com.h2database:h2:2.4.240")
   runtimeOnly("org.flywaydb:flyway-core")
