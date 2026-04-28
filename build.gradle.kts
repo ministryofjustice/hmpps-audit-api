@@ -39,7 +39,7 @@ dependencies {
   implementation("software.amazon.awssdk:athena:2.43.0")
   implementation("org.apache.parquet:parquet-avro:1.17.0")
   implementation("org.apache.avro:avro:1.12.1")
-  implementation("org.apache.hadoop:hadoop-client:3.5.0") {
+  implementation("org.apache.hadoop:hadoop-client:3.4.3") {
     exclude(group = "com.google.protobuf", module = "protobuf-java")
     exclude(group = "org.apache.hadoop.thirdparty", module = "hadoop-shaded-protobuf_3_25")
     exclude(group = "dnsjava", module = "dnsjava")
@@ -53,6 +53,7 @@ dependencies {
     exclude(group = "commons-beanutils", module = "commons-beanutils")
   }
   implementation("commons-beanutils:commons-beanutils:1.11.0")
+  implementation("org.glassfish.jaxb:jaxb-runtime:2.3.1")
 
   runtimeOnly("com.h2database:h2:2.4.240")
   runtimeOnly("org.flywaydb:flyway-core")
@@ -70,7 +71,6 @@ dependencies {
   testImplementation("org.mockito:mockito-inline:5.2.0")
 
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
-  testImplementation("javax.xml.bind:jaxb-api:2.3.1")
 }
 
 kotlin {
