@@ -1,9 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.2.1"
-  kotlin("plugin.spring") version "2.3.20"
-  kotlin("plugin.jpa") version "2.3.20"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.2.3"
+  kotlin("plugin.spring") version "2.3.21"
+  kotlin("plugin.jpa") version "2.3.21"
 }
 
 configurations {
@@ -28,15 +28,15 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webclient")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:7.3.0")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:7.3.1")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2")
   constraints {
     implementation("org.webjars:swagger-ui:5.32.2")
   }
 
   implementation("org.apache.commons:commons-lang3:3.20.0")
-  implementation("software.amazon.awssdk:s3:2.42.35")
-  implementation("software.amazon.awssdk:athena:2.42.35")
+  implementation("software.amazon.awssdk:s3:2.43.0")
+  implementation("software.amazon.awssdk:athena:2.43.0")
   implementation("org.apache.parquet:parquet-avro:1.17.0")
   implementation("org.apache.avro:avro:1.12.1")
   implementation("org.apache.hadoop:hadoop-client:3.4.3") {
@@ -70,7 +70,6 @@ dependencies {
   testImplementation("org.mockito:mockito-inline:5.2.0")
 
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
-  testImplementation("javax.xml.bind:jaxb-api:2.3.1")
 }
 
 kotlin {
