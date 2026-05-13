@@ -5,7 +5,7 @@ spring:
     password: admin_password
   flyway:
     locations: classpath:/db/audit,/db/audit_postgres
-    schemas: staff,prisoner
+    schemas: staff,prisoner,person_on_probation
     default-schema: staff
 oauth:
   endpoint.url: http://localhost:9090/auth

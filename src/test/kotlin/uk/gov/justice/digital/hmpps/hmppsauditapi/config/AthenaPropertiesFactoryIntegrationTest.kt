@@ -35,4 +35,14 @@ class AthenaPropertiesFactoryIntegrationTest {
     assertThat(credentials.workGroupName).isEqualTo("the-prisoner-workgroup")
     assertThat(credentials.outputLocation).isEqualTo("the-prisoner-location")
   }
+
+  @Test
+  fun `should return correct persononprobation credentials`() {
+    val credentials = athenaPropertiesFactory.getProperties(AuditEventType.PERSON_ON_PROBATION)
+
+    assertThat(credentials.databaseName).isEqualTo("")
+    assertThat(credentials.tableName).isEqualTo("")
+    assertThat(credentials.workGroupName).isEqualTo("")
+    assertThat(credentials.outputLocation).isEqualTo("")
+  }
 }
