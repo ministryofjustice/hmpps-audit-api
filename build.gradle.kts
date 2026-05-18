@@ -39,12 +39,13 @@ dependencies {
   implementation("software.amazon.awssdk:athena:2.44.4")
   implementation("org.apache.parquet:parquet-avro:1.17.0")
   implementation("org.apache.avro:avro:1.12.1")
-  implementation("org.apache.hadoop:hadoop-client:3.4.3") {
+  implementation("org.apache.hadoop:hadoop-client:3.5.0") {
     exclude(group = "com.google.protobuf", module = "protobuf-java")
     exclude(group = "org.apache.hadoop.thirdparty", module = "hadoop-shaded-protobuf_3_25")
     exclude(group = "dnsjava", module = "dnsjava")
     exclude(group = "org.jline", module = "jline")
     exclude(group = "org.bouncycastle", module = "bcprov-jdk15on")
+    exclude(group = "org.bouncycastle", module = "bcprov-jdk18on")
     exclude(group = "com.google.guava", module = "guava")
     exclude(group = "org.eclipse.jetty", module = "jetty-servlet")
     exclude(group = "org.eclipse.jetty", module = "jetty-webapp")
@@ -53,6 +54,10 @@ dependencies {
     exclude(group = "commons-beanutils", module = "commons-beanutils")
   }
   implementation("commons-beanutils:commons-beanutils:1.11.0")
+  implementation("javax.xml.bind:jaxb-api:2.3.1")
+//  implementation("org.glassfish.jaxb:jaxb-runtime:2.3.1")
+//  implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.5")
+  implementation("org.glassfish.jaxb:jaxb-runtime:4.0.7")
 
   runtimeOnly("com.h2database:h2:2.4.240")
   runtimeOnly("org.flywaydb:flyway-core")
