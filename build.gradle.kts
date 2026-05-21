@@ -37,7 +37,7 @@ dependencies {
   implementation("org.apache.commons:commons-lang3:3.20.0")
   implementation("software.amazon.awssdk:s3:2.44.4")
   implementation("software.amazon.awssdk:athena:2.44.4")
-  implementation("org.apache.parquet:parquet-avro:1.17.0")
+  implementation("org.apache.parquet:parquet-avro:1.17.1")
   implementation("org.apache.avro:avro:1.12.1")
   implementation("org.apache.hadoop:hadoop-client:3.4.3") {
     exclude(group = "com.google.protobuf", module = "protobuf-java")
@@ -45,6 +45,7 @@ dependencies {
     exclude(group = "dnsjava", module = "dnsjava")
     exclude(group = "org.jline", module = "jline")
     exclude(group = "org.bouncycastle", module = "bcprov-jdk15on")
+    exclude(group = "org.bouncycastle", module = "bcprov-jdk18on")
     exclude(group = "com.google.guava", module = "guava")
     exclude(group = "org.eclipse.jetty", module = "jetty-servlet")
     exclude(group = "org.eclipse.jetty", module = "jetty-webapp")
