@@ -97,7 +97,7 @@ class AuditS3Client(
         }
       return Files.readAllBytes(tempFile.toPath())
     } finally {
-      tempFile.delete()
+      Files.deleteIfExists(tempFile.toPath())
     }
   }
 }
