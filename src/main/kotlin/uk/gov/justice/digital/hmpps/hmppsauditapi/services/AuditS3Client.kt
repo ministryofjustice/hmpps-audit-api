@@ -6,15 +6,13 @@ import org.apache.avro.generic.GenericRecord
 import org.apache.hadoop.conf.Configuration
 import org.apache.parquet.avro.AvroParquetWriter
 import org.apache.parquet.hadoop.metadata.CompressionCodecName
-import org.apache.parquet.io.OutputFile
-import org.apache.parquet.io.PositionOutputStream
+import org.apache.parquet.io.LocalOutputFile
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import java.io.File
-import java.io.FileOutputStream
 import java.nio.file.Files
 import java.security.MessageDigest
 import java.time.ZoneId
@@ -63,32 +61,7 @@ class AuditS3Client(
         put("details", auditEvent.details)
       }
 
-      val outputFile = object : OutputFile {
-        override fun create(blockSizeHint: Long): PositionOutputStream = object : PositionOutputStream() {
-          private val fos = FileOutputStream(tempFile)
-          private var position = 0L
-
-          override fun write(b: Int) {
-            fos.write(b)
-            position++
-          }
-
-          override fun write(b: ByteArray, off: Int, len: Int) {
-            fos.write(b, off, len)
-            position += len
-          }
-
-          override fun getPos(): Long = position
-
-          override fun close() = fos.close()
-        }
-
-        override fun createOrOverwrite(blockSizeHint: Long): PositionOutputStream = create(blockSizeHint)
-        override fun supportsBlockSize(): Boolean = false
-        override fun defaultBlockSize(): Long = 0
-      }
-
-      AvroParquetWriter.builder<GenericRecord>(outputFile)
+      AvroParquetWriter.builder<GenericRecord>(LocalOutputFile(tempFile.toPath()))
         .withSchema(schema)
         .withCompressionCodec(CompressionCodecName.SNAPPY)
         .withConf(Configuration())
