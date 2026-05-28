@@ -390,5 +390,128 @@ class AuditAthenaClientTest {
     }
   }
 
+  @Nested
+  inner class SubstituteParametersValidation {
+    private val queryTemplate = "SELECT * FROM table WHERE user = :who AND subjectId = :subjectId AND subjectType = :subjectType AND service = :serviceName;"
+
+    private fun assertThrowsIllegalArgumentException(block: () -> Unit): IllegalArgumentException {
+      val thrown = try {
+        block()
+        null
+      } catch (ex: Throwable) {
+        ex
+      }
+      var cause: Throwable? = thrown
+      while (cause is java.lang.reflect.InvocationTargetException && cause.cause != null) {
+        cause = cause.cause
+      }
+      if (cause is IllegalArgumentException) {
+        return cause
+      }
+      println("[DEBUG] Unexpected exception type: ${cause?.javaClass?.name}, message: ${cause?.message}")
+      throw AssertionError("Expected IllegalArgumentException but got: " + cause?.javaClass?.name, cause)
+    }
+
+    @Test
+    fun acceptsValidWhoWithApostrophe() {
+      val params = mapOf(
+        ":who" to "O'Reilly",
+        ":subjectId" to "subject123",
+        ":subjectType" to "typeA",
+        ":serviceName" to "service-name",
+      )
+      val result = invokeSubstituteParameters(queryTemplate, params)
+      assertThat(result).contains("'O''Reilly'")
+    }
+
+    @Test
+    fun rejectsWhoWithInvalidCharacters() {
+      val params = mapOf(
+        ":who" to "bad!user",
+        ":subjectId" to "subject123",
+        ":subjectType" to "typeA",
+        ":serviceName" to "service-name",
+      )
+      val exception = assertThrowsIllegalArgumentException {
+        invokeSubstituteParameters(queryTemplate, params)
+      }
+      assertThat(exception.message).contains("Invalid value for :who")
+    }
+
+    @Test
+    fun rejectsSubjectIdExceedingMaxLength() {
+      val params = mapOf(
+        ":who" to "someone",
+        ":subjectId" to "a".repeat(101),
+        ":subjectType" to "typeA",
+        ":serviceName" to "service-name",
+      )
+      val exception = assertThrowsIllegalArgumentException {
+        invokeSubstituteParameters(queryTemplate, params)
+      }
+      assertThat(exception.message).contains("Invalid value for :subjectId")
+    }
+
+    @Test
+    fun rejectsUnexpectedParameter() {
+      val params = mapOf(
+        ":who" to "someone",
+        ":subjectId" to "subject123",
+        ":subjectType" to "typeA",
+        ":serviceName" to "service-name",
+        ":notAllowed" to "bad",
+      )
+      val exception = assertThrowsIllegalArgumentException {
+        invokeSubstituteParameters(queryTemplate, params)
+      }
+      assertThat(exception.message).contains("Unexpected query parameter(s)")
+    }
+
+    @Test
+    fun acceptsValidServiceParameter() {
+      val params = mapOf(
+        ":who" to "someone",
+        ":subjectId" to "subject123",
+        ":subjectType" to "typeA",
+        ":serviceName" to "service-name",
+      )
+      val result = invokeSubstituteParameters(queryTemplate, params)
+      assertThat(result).contains("'service-name'")
+    }
+
+    @Test
+    fun rejectsServiceParameterWithInvalidCharacters() {
+      val params = mapOf(
+        ":who" to "someone",
+        ":subjectId" to "subject123",
+        ":subjectType" to "typeA",
+        ":serviceName" to "invalid!service",
+      )
+      val exception = assertThrowsIllegalArgumentException {
+        invokeSubstituteParameters(queryTemplate, params)
+      }
+      assertThat(exception.message).contains("Invalid service value")
+    }
+
+    @Test
+    fun rejectsInvalidDateFormat() {
+      val params = mapOf(
+        ":startDate" to "2025/01/01",
+        ":endDate" to "2025-01-02",
+      )
+      val template = "SELECT * FROM table WHERE date >= :startDate AND date <= :endDate;"
+      val exception = assertThrowsIllegalArgumentException {
+        invokeSubstituteParameters(template, params)
+      }
+      assertThat(exception.message).contains("Invalid date format for :startDate")
+    }
+
+    private fun invokeSubstituteParameters(template: String, params: Map<String, String>): String {
+      val method = AuditAthenaClient::class.java.getDeclaredMethod("substituteParameters", String::class.java, Map::class.java)
+      method.isAccessible = true
+      return method.invoke(auditAthenaClient, template, params) as String
+    }
+  }
+
   private fun columnInfo(name: String): ColumnInfo = ColumnInfo.builder().name(name).type("string").build()
 }

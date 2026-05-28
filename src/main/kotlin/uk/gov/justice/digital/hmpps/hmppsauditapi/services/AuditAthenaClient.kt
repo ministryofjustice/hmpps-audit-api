@@ -95,11 +95,32 @@ class AuditAthenaClient(
     athenaClient.startQueryExecution(request)
   }
 
-  // Helper to substitute parameters in a query template
+  // Helper to strictly substitute only known parameters in a query template, with validation
   private fun substituteParameters(queryTemplate: String, parameters: Map<String, String>): String {
+    // Only allow these placeholders to be substituted
+    val allowedPlaceholders = setOf(":startDate", ":endDate", ":who", ":subjectId", ":subjectType") +
+      parameters.keys.filter { it.startsWith(":service") }
+
+    // Check for unexpected placeholders
+    val unexpected = parameters.keys - allowedPlaceholders
+    require(unexpected.isEmpty()) { "Unexpected query parameter(s): $unexpected" }
+
+    // Validate parameter values
+    parameters.forEach { (placeholder, value) ->
+      when (placeholder) {
+        ":startDate", ":endDate" -> require(value.matches(Regex("""\d{4}-\d{2}-\d{2}"""))) { "Invalid date format for $placeholder: $value" }
+        ":who", ":subjectId", ":subjectType" -> require(value.matches(Regex("""^[\w@.\- '\u2019]{1,100}""", RegexOption.IGNORE_CASE))) { "Invalid value for $placeholder: $value" }
+        else -> if (placeholder.startsWith(":service")) {
+          require(value.matches(Regex("""^[a-z0-9\-]{1,50}$""", RegexOption.IGNORE_CASE))) { "Invalid service value: $value" }
+        } else {
+          error("Unknown placeholder: $placeholder")
+        }
+      }
+    }
+
     var query = queryTemplate
     parameters.forEach { (placeholder, value) ->
-      // For string values, wrap in single quotes
+      // For string values, wrap in single quotes (Athena does not support prepared statements)
       query = query.replace(placeholder, "'${escapeSql(value)}'")
     }
     return query
