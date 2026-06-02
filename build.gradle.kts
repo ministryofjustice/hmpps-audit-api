@@ -53,6 +53,11 @@ dependencies {
     exclude(group = "org.eclipse.jetty.websocket", module = "websocket-client")
     exclude(group = "commons-beanutils", module = "commons-beanutils")
   }
+//  used by hadoop but 2.0.2 has vulnerability remove when hadoop has been upgraded
+  implementation("io.airlift:aircompressor:2.0.3")
+//  used by hadoop but 2.11.0 has vulnerability remove when hadoop has been upgraded
+  implementation("org.apache.commons:commons-configuration2:2.15.0")
+
   implementation("commons-beanutils:commons-beanutils:1.11.0")
   implementation("javax.xml.bind:jaxb-api:2.3.1")
   implementation("org.glassfish.jaxb:jaxb-runtime:4.0.7")
