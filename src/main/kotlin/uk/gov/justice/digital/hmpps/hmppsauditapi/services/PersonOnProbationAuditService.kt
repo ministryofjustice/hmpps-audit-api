@@ -20,6 +20,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.model.AuditDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService.Companion.log
+import uk.gov.justice.digital.hmpps.hmppsauditapi.services.SafeLogSanitizer.sanitize
 
 @Service
 class PersonOnProbationAuditService(
@@ -33,6 +34,7 @@ class PersonOnProbationAuditService(
   override fun saveAuditEvent(
     auditEvent: AuditEvent,
   ) {
+// commented out as we won't be saving POP to S3 but kept when they demand it
 //    if (saveToS3Bucket) {
 //      val athenaProperties: AthenaProperties = athenaPropertiesFactory.getProperties(AuditEventType.PERSON_ON_PROBATION)
 //      auditEvent.id = UUID.randomUUID()
@@ -54,14 +56,14 @@ class PersonOnProbationAuditService(
     with(auditFilterDto) {
       log.info(
         "Searching audit events by startDate {} endDate {} service {} subjectId {} subjectType {} correlationId {} what {} who {}",
-        startDateTime,
-        endDateTime,
-        service,
-        subjectId,
-        subjectType,
-        correlationId,
-        what,
-        who,
+        sanitize(startDateTime),
+        sanitize(endDateTime),
+        sanitize(service),
+        sanitize(subjectId),
+        sanitize(subjectType),
+        sanitize(correlationId),
+        sanitize(what),
+        sanitize(who),
       )
       return probationAuditRepository.findPage(
         pageable,
