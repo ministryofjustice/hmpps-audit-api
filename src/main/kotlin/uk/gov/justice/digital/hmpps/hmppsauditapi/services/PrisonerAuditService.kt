@@ -21,6 +21,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryResponse
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.model.AuditDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService.Companion.log
+import uk.gov.justice.digital.hmpps.hmppsauditapi.services.SafeLogSanitizer.sanitize
 import java.util.UUID
 
 @Service
@@ -57,14 +58,14 @@ class PrisonerAuditService(
     with(auditFilterDto) {
       log.info(
         "Searching audit events by startDate {} endDate {} service {} subjectId {} subjectType {} correlationId {} what {} who {}",
-        startDateTime,
-        endDateTime,
-        service,
-        subjectId,
-        subjectType,
-        correlationId,
-        what,
-        who,
+        sanitize(startDateTime),
+        sanitize(endDateTime),
+        sanitize(service),
+        sanitize(subjectId),
+        sanitize(subjectType),
+        sanitize(correlationId),
+        sanitize(what),
+        sanitize(who),
       )
       return prisonerAuditRepository.findPage(
         pageable,

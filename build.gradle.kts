@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.2.4"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.3.1"
   kotlin("plugin.spring") version "2.3.21"
   kotlin("plugin.jpa") version "2.3.21"
 }
@@ -37,7 +37,7 @@ dependencies {
   implementation("org.apache.commons:commons-lang3:3.20.0")
   implementation("software.amazon.awssdk:s3:2.44.4")
   implementation("software.amazon.awssdk:athena:2.44.4")
-  implementation("org.apache.parquet:parquet-avro:1.17.0")
+  implementation("org.apache.parquet:parquet-avro:1.17.1")
   implementation("org.apache.avro:avro:1.12.1")
   implementation("org.apache.hadoop:hadoop-client:3.5.0") {
     exclude(group = "com.google.protobuf", module = "protobuf-java")
@@ -53,10 +53,13 @@ dependencies {
     exclude(group = "org.eclipse.jetty.websocket", module = "websocket-client")
     exclude(group = "commons-beanutils", module = "commons-beanutils")
   }
+//  used by hadoop but 2.0.2 has vulnerability remove when hadoop has been upgraded
+  implementation("io.airlift:aircompressor:2.0.3")
+//  used by hadoop but 2.11.0 has vulnerability remove when hadoop has been upgraded
+  implementation("org.apache.commons:commons-configuration2:2.15.0")
+
   implementation("commons-beanutils:commons-beanutils:1.11.0")
   implementation("javax.xml.bind:jaxb-api:2.3.1")
-//  implementation("org.glassfish.jaxb:jaxb-runtime:2.3.1")
-//  implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.5")
   implementation("org.glassfish.jaxb:jaxb-runtime:4.0.7")
 
   runtimeOnly("com.h2database:h2:2.4.240")
@@ -79,6 +82,9 @@ dependencies {
 
 kotlin {
   jvmToolchain(25)
+  compilerOptions {
+    freeCompilerArgs.addAll("-Xannotation-default-target=param-property")
+  }
 }
 
 tasks {
