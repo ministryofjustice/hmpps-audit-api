@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 
 class HealthCheckTest : QueueListenerIntegrationTest() {
@@ -25,7 +26,7 @@ class HealthCheckTest : QueueListenerIntegrationTest() {
 
   @Test
   fun `Queue health reports audit queue details`() {
-    await untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 0 }
+    await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 0 }
     webTestClient.get().uri("/health")
       .exchange()
       .expectStatus().isOk
@@ -40,7 +41,7 @@ class HealthCheckTest : QueueListenerIntegrationTest() {
 
   @Test
   fun `Queue health reports prisoner audit queue details`() {
-    await untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditDlq() } matches { it == 0 }
+    await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditDlq() } matches { it == 0 }
     webTestClient.get().uri("/health")
       .exchange()
       .expectStatus().isOk

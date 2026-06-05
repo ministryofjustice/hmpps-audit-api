@@ -34,7 +34,7 @@ class PersonOnProbationAuditService(
   override fun saveAuditEvent(
     auditEvent: AuditEvent,
   ) {
-// commented out as we won't be saving POP to S3 but kept when they demand it
+// commented out as we won't be saving POP to S3 but kept for when they demand it
 //    if (saveToS3Bucket) {
 //      val athenaProperties: AthenaProperties = athenaPropertiesFactory.getProperties(AuditEventType.PERSON_ON_PROBATION)
 //      auditEvent.id = UUID.randomUUID()

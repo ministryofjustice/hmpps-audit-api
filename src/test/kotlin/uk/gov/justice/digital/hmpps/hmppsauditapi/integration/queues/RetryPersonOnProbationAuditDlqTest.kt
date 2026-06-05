@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
+import java.util.concurrent.TimeUnit
 
 // @TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=true"])
 class RetryPersonOnProbationAuditDlqTest : QueueListenerIntegrationTest() {
@@ -65,12 +66,12 @@ class RetryPersonOnProbationAuditDlqTest : QueueListenerIntegrationTest() {
       "details": "{ \"offenderId\": \"99\"}"
     }
   """
-      await untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditQueue() } matches { it == 0 }
-      await untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditQueue() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 0 }
       awsSqsClient.sendMessage(
         SendMessageRequest.builder().queueUrl(awsSqsPersonOnProbationAuditDlqUrl).messageBody(message).build(),
       )
-      await untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 1 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 1 }
 
       webTestClient.put()
         .uri("/queue-admin/retry-dlq/${personOnProbationAuditQueueConfig.dlqName}")
@@ -78,8 +79,8 @@ class RetryPersonOnProbationAuditDlqTest : QueueListenerIntegrationTest() {
         .contentType(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus().isOk
-      await untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 0 }
-      await untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditQueue() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditQueue() } matches { it == 0 }
 
 //      verify(auditS3Client).save(any<AuditEvent>(), any())
     }
@@ -100,20 +101,20 @@ class RetryPersonOnProbationAuditDlqTest : QueueListenerIntegrationTest() {
       "details": "{ \"offenderId\": \"99\"}"
     }
   """
-      await untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditQueue() } matches { it == 0 }
-      await untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditQueue() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 0 }
       awsSqsPersonOnProbationAuditDlqClient.sendMessage(
         SendMessageRequest.builder().queueUrl(awsSqsPersonOnProbationAuditDlqUrl).messageBody(message).build(),
       )
-      await untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 1 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 1 }
 
       webTestClient.put()
         .uri("/queue-admin/retry-all-dlqs")
         .contentType(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus().isOk
-      await untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 0 }
-      await untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditQueue() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditQueue() } matches { it == 0 }
 
 //      verify(personOnProbationAuditRepository).save( any())
     }

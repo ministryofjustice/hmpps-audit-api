@@ -19,6 +19,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
+import java.util.concurrent.TimeUnit
 
 @TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=true"])
 @ActiveProfiles(resolver = CommandLineProfilesResolver::class, inheritProfiles = false)
@@ -38,7 +39,7 @@ class AuditTestS3Bucket @Autowired constructor(
       .exchange()
       .expectStatus().isAccepted
 
-    await untilCallTo { mockingDetails(auditS3Client).invocations.size } matches { it!! >= 1 }
+    await.atMost(5, TimeUnit.SECONDS) untilCallTo { mockingDetails(auditS3Client).invocations.size } matches { it!! >= 1 }
 
     verify(telemetryClient).trackEvent(eq("hmpps-audit"), any(), isNull())
     verify(auditS3Client).save(

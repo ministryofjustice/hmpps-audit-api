@@ -16,6 +16,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.PersonOnProbationAuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
+import java.util.concurrent.TimeUnit
 
 @TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=false"])
 class AuditTestPersonOnProbationDatabase @Autowired constructor(
@@ -37,13 +38,13 @@ class AuditTestPersonOnProbationDatabase @Autowired constructor(
     }
     """
 
-    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+    await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
 
     awsSqsClient.sendMessage(
       SendMessageRequest.builder().queueUrl(awsSqsPersonOnProbationAuditUrl).messageBody(message).build(),
     )
 
-    await untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditQueue() } matches { it == 0 }
+    await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditQueue() } matches { it == 0 }
 
     verify(telemetryClient).trackEvent(
       eq("hmpps-person-on-probation-audit"),

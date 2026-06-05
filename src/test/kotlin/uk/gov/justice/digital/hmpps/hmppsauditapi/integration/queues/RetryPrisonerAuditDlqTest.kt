@@ -12,6 +12,7 @@ import org.springframework.test.context.TestPropertySource
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
+import java.util.concurrent.TimeUnit
 
 @TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=true"])
 class RetryPrisonerAuditDlqTest : QueueListenerIntegrationTest() {
@@ -69,12 +70,12 @@ class RetryPrisonerAuditDlqTest : QueueListenerIntegrationTest() {
       "details": "{ \"offenderId\": \"99\"}"
     }
   """
-      await untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditQueue() } matches { it == 0 }
-      await untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditDlq() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditQueue() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditDlq() } matches { it == 0 }
       awsSqsClient.sendMessage(
         SendMessageRequest.builder().queueUrl(awsSqsPrisonerAuditDlqUrl).messageBody(message).build(),
       )
-      await untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditDlq() } matches { it == 1 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditDlq() } matches { it == 1 }
 
       webTestClient.put()
         .uri("/queue-admin/retry-dlq/${prisonerAuditQueueConfig.dlqName}")
@@ -82,8 +83,8 @@ class RetryPrisonerAuditDlqTest : QueueListenerIntegrationTest() {
         .contentType(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus().isOk
-      await untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditDlq() } matches { it == 0 }
-      await untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditQueue() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditDlq() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditQueue() } matches { it == 0 }
 
       verify(auditS3Client).save(any<AuditEvent>(), any())
     }
@@ -104,20 +105,20 @@ class RetryPrisonerAuditDlqTest : QueueListenerIntegrationTest() {
       "details": "{ \"offenderId\": \"99\"}"
     }
   """
-      await untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditQueue() } matches { it == 0 }
-      await untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditDlq() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditQueue() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditDlq() } matches { it == 0 }
       awsSqsPrisonerAuditDlqClient.sendMessage(
         SendMessageRequest.builder().queueUrl(awsSqsPrisonerAuditDlqUrl).messageBody(message).build(),
       )
-      await untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditDlq() } matches { it == 1 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditDlq() } matches { it == 1 }
 
       webTestClient.put()
         .uri("/queue-admin/retry-all-dlqs")
         .contentType(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus().isOk
-      await untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditDlq() } matches { it == 0 }
-      await untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditQueue() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditDlq() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditQueue() } matches { it == 0 }
 
       verify(auditS3Client).save(any<AuditEvent>(), any())
     }

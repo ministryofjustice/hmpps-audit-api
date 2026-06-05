@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
+import java.util.concurrent.TimeUnit
 
 class PurgePersonOnProbationAuditQueueTest : QueueListenerIntegrationTest() {
 
@@ -64,11 +65,11 @@ class PurgePersonOnProbationAuditQueueTest : QueueListenerIntegrationTest() {
       "details": "{ \"offenderId\": \"99\"}"
     }
   """
-      await untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 0 }
       awsSqsClient.sendMessage(
         SendMessageRequest.builder().queueUrl(personOnProbationAuditDlqUrl).messageBody(message).build(),
       )
-      await untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 1 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 1 }
 
       webTestClient.put()
         .uri("/queue-admin/purge-queue/${personOnProbationAuditQueueConfig.dlqName}")
@@ -76,7 +77,7 @@ class PurgePersonOnProbationAuditQueueTest : QueueListenerIntegrationTest() {
         .contentType(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus().isOk
-      await untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 0 }
     }
   }
 }

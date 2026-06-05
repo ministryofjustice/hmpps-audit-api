@@ -68,6 +68,8 @@ class PersonOnProbationAuditResource(
     auditQueueService.sendPersonOnProbationAuditEvent(cleansedAuditEvent)
   }
 
+// commented out as we won't be saving POP to S3 so wont need endpoint but kept for when they demand it
+
 //  @PreAuthorize("hasRole('ROLE_PERSON_ON_PROBATION_AUDIT') and hasAuthority('SCOPE_read')")
 //  @Operation(
 //    summary = "Trigger query to get audit events for Person On Probation",
