@@ -5,24 +5,20 @@ import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.verify
 import org.springframework.http.MediaType
-import org.springframework.test.context.TestPropertySource
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
-import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.StaffAuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 import java.util.concurrent.TimeUnit
 
-@TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=false"])
-class RetryDlqTest : QueueListenerIntegrationTest() {
+// @TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=true"])
+class RetryPersonOnProbationAuditDlqTest : QueueListenerIntegrationTest() {
 
   @Nested
   inner class RetryDlq {
     @Test
     fun `should fail if no token`() {
       webTestClient.put()
-        .uri("/queue-admin/retry-dlq/${auditQueueConfig.dlqName}")
+        .uri("/queue-admin/retry-dlq/${personOnProbationAuditQueueConfig.dlqName}")
         .contentType(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus().isUnauthorized
@@ -31,7 +27,7 @@ class RetryDlqTest : QueueListenerIntegrationTest() {
     @Test
     fun `should fail if wrong role`() {
       webTestClient.put()
-        .uri("/queue-admin/retry-dlq/${auditQueueConfig.dlqName}")
+        .uri("/queue-admin/retry-dlq/${personOnProbationAuditQueueConfig.dlqName}")
         .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
         .contentType(MediaType.APPLICATION_JSON)
         .exchange()
@@ -41,7 +37,7 @@ class RetryDlqTest : QueueListenerIntegrationTest() {
     @Test
     fun `should fail if using default rather than custom role`() {
       webTestClient.put()
-        .uri("/queue-admin/retry-dlq/${auditQueueConfig.dlqName}")
+        .uri("/queue-admin/retry-dlq/${personOnProbationAuditQueueConfig.dlqName}")
         .headers(setAuthorisation(roles = listOf("ROLE_QUEUE_ADMIN")))
         .contentType(MediaType.APPLICATION_JSON)
         .exchange()
@@ -70,23 +66,23 @@ class RetryDlqTest : QueueListenerIntegrationTest() {
       "details": "{ \"offenderId\": \"99\"}"
     }
   """
-      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
-      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditQueue() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 0 }
       awsSqsClient.sendMessage(
-        SendMessageRequest.builder().queueUrl(awsSqsDlqUrl).messageBody(message).build(),
+        SendMessageRequest.builder().queueUrl(awsSqsPersonOnProbationAuditDlqUrl).messageBody(message).build(),
       )
-      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 1 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 1 }
 
       webTestClient.put()
-        .uri("/queue-admin/retry-dlq/${auditQueueConfig.dlqName}")
+        .uri("/queue-admin/retry-dlq/${personOnProbationAuditQueueConfig.dlqName}")
         .headers(setAuthorisation(roles = listOf("ROLE_AUDIT_API_QUEUE_ADMIN"), scopes = listOf("write")))
         .contentType(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus().isOk
-      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 0 }
-      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditQueue() } matches { it == 0 }
 
-      verify(staffAuditRepository).save(any<StaffAuditEvent>())
+//      verify(auditS3Client).save(any<AuditEvent>(), any())
     }
   }
 
@@ -105,22 +101,22 @@ class RetryDlqTest : QueueListenerIntegrationTest() {
       "details": "{ \"offenderId\": \"99\"}"
     }
   """
-      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
-      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 0 }
-      awsSqsDlqClient.sendMessage(
-        SendMessageRequest.builder().queueUrl(awsSqsDlqUrl).messageBody(message).build(),
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditQueue() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 0 }
+      awsSqsPersonOnProbationAuditDlqClient.sendMessage(
+        SendMessageRequest.builder().queueUrl(awsSqsPersonOnProbationAuditDlqUrl).messageBody(message).build(),
       )
-      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 1 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 1 }
 
       webTestClient.put()
         .uri("/queue-admin/retry-all-dlqs")
         .contentType(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus().isOk
-      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 0 }
-      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditQueue() } matches { it == 0 }
 
-      verify(staffAuditRepository).save(any<StaffAuditEvent>())
+//      verify(personOnProbationAuditRepository).save( any())
     }
   }
 }

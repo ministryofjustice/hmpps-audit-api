@@ -41,7 +41,6 @@ generic-service:
   env:
     SERVER_PORT: "8080"
     SPRING_PROFILES_ACTIVE: "logstash"
-    HMPPS_SQS_USE_WEB_TOKEN: true
     SAVE_TO_S3_BUCKET: false
 
   # Pre-existing kubernetes secrets to load as environment variables in the deployment.
@@ -90,6 +89,11 @@ generic-service:
       HMPPS_PRISONER_AUDIT_ATHENA_WORKGROUP_NAME: "workgroup_name"
     prisoner-athena-output-location-secret:
       HMPPS_PRISONER_AUDIT_ATHENA_OUTPUT_LOCATION: "output_location"
+# PERSON ON PROBATION AUDIT
+    sqs-person-on-probation-audit-queue-secret:
+      HMPPS_SQS_QUEUES_PERSONONPROBATIONAUDITQUEUE_QUEUE_NAME: "sqs_queue_name"
+    sqs-person-on-probation-audit-queue-dl-secret:
+      HMPPS_SQS_QUEUES_PERSONONPROBATIONAUDITQUEUE_DLQ_NAME: "sqs_queue_name"
 
 
   allowlist:

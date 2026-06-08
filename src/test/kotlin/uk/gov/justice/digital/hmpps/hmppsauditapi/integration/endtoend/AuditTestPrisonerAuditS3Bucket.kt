@@ -18,6 +18,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 import java.time.Instant
+import java.util.concurrent.TimeUnit
 
 @TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=true"])
 @ActiveProfiles(resolver = CommandLineProfilesResolver::class, inheritProfiles = false)
@@ -41,7 +42,7 @@ class AuditTestPrisonerAuditS3Bucket @Autowired constructor(
   fun `save basic audit entry to S3 bucket`() {
     auditQueueService.sendPrisonerAuditEvent(prisonerAuditEvent)
 
-    await untilCallTo { mockingDetails(auditS3Client).invocations.size } matches { it!! >= 1 }
+    await.atMost(5, TimeUnit.SECONDS) untilCallTo { mockingDetails(auditS3Client).invocations.size } matches { it!! >= 1 }
 
     verify(telemetryClient).trackEvent(eq("hmpps-prisoner-audit"), any(), isNull())
     verify(auditS3Client).save(

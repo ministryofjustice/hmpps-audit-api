@@ -10,14 +10,14 @@ import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 import java.util.concurrent.TimeUnit
 
-class PurgeQueueTest : QueueListenerIntegrationTest() {
+class PurgePersonOnProbationAuditQueueTest : QueueListenerIntegrationTest() {
 
   @Nested
   inner class PurgeDlq {
     @Test
     fun `should fail if no token`() {
       webTestClient.put()
-        .uri("/queue-admin/purge-queue/${auditQueueConfig.dlqName}")
+        .uri("/queue-admin/purge-queue/${personOnProbationAuditQueueConfig.dlqName}")
         .contentType(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus().isUnauthorized
@@ -26,7 +26,7 @@ class PurgeQueueTest : QueueListenerIntegrationTest() {
     @Test
     fun `should fail if wrong role`() {
       webTestClient.put()
-        .uri("/queue-admin/purge-queue/${auditQueueConfig.dlqName}")
+        .uri("/queue-admin/purge-queue/${personOnProbationAuditQueueConfig.dlqName}")
         .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
         .contentType(MediaType.APPLICATION_JSON)
         .exchange()
@@ -36,7 +36,7 @@ class PurgeQueueTest : QueueListenerIntegrationTest() {
     @Test
     fun `should fail if using default rather than custom role`() {
       webTestClient.put()
-        .uri("/queue-admin/purge-queue/${auditQueueConfig.dlqName}")
+        .uri("/queue-admin/purge-queue/${personOnProbationAuditQueueConfig.dlqName}")
         .headers(setAuthorisation(roles = listOf("ROLE_QUEUE_ADMIN"), scopes = listOf("write")))
         .contentType(MediaType.APPLICATION_JSON)
         .exchange()
@@ -65,19 +65,19 @@ class PurgeQueueTest : QueueListenerIntegrationTest() {
       "details": "{ \"offenderId\": \"99\"}"
     }
   """
-      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 0 }
       awsSqsClient.sendMessage(
-        SendMessageRequest.builder().queueUrl(auditDlqUrl).messageBody(message).build(),
+        SendMessageRequest.builder().queueUrl(personOnProbationAuditDlqUrl).messageBody(message).build(),
       )
-      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 1 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 1 }
 
       webTestClient.put()
-        .uri("/queue-admin/purge-queue/${auditQueueConfig.dlqName}")
+        .uri("/queue-admin/purge-queue/${personOnProbationAuditQueueConfig.dlqName}")
         .headers(setAuthorisation(roles = listOf("ROLE_AUDIT_API_QUEUE_ADMIN"), scopes = listOf("write")))
         .contentType(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus().isOk
-      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnDlq() } matches { it == 0 }
+      await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditDlq() } matches { it == 0 }
     }
   }
 }

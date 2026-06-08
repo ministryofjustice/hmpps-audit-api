@@ -22,6 +22,9 @@ generic-prometheus-alerts:
     Prisoner:
       - "Digital-Prison-Services-prod-hmpps_prisoner_audit_queue"
       - "Digital-Prison-Services-prod-hmpps_prisoner_audit_dlq"
+    PersonOnProbation:
+      - "Digital-Prison-Services-prod-hmpps_person_on_probation_audit_queue"
+      - "Digital-Prison-Services-prod-hmpps_person_on_probation_audit_dlq"
     user:
       - "Digital-Prison-Services-prod-hmpps_audit_users_queue"
       - "Digital-Prison-Services-prod-hmpps_audit_users_dlq"

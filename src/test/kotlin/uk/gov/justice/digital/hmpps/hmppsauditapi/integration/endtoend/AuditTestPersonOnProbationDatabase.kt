@@ -14,12 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.reactive.server.WebTestClient
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
-import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.PrisonerAuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.PersonOnProbationAuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 import java.util.concurrent.TimeUnit
 
 @TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=false"])
-class AuditTestPrisonerDatabase @Autowired constructor(
+class AuditTestPersonOnProbationDatabase @Autowired constructor(
   override var webTestClient: WebTestClient,
 ) : QueueListenerIntegrationTest() {
 
@@ -27,37 +27,37 @@ class AuditTestPrisonerDatabase @Autowired constructor(
   fun `will consume an audit event message`() {
     val message = """
     {
-      "what": "VISITS_VIEWED",
+      "what": "POP_SCREEN_VIEWED",
       "when": "2021-01-25T12:30:00Z",
       "operationId": "badea6d876c62e2f5264c94c7b50875e",
       "subjectId": "y1dea6d876c62e2f5264c94c7b50875r",
       "subjectType": "PERSON",
       "who": "bobby.beans",
-      "service": "hmpps-Launchpad-ui",
-      "details": "{ \"VISITS\": \"9\"}"
+      "service": "hmpps-person-on-probation",
+      "details": "{ \"POP\": \"9\"}"
     }
     """
 
-    await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditQueue() } matches { it == 0 }
+    await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
 
     awsSqsClient.sendMessage(
-      SendMessageRequest.builder().queueUrl(awsSqsPrisonerAuditUrl).messageBody(message).build(),
+      SendMessageRequest.builder().queueUrl(awsSqsPersonOnProbationAuditUrl).messageBody(message).build(),
     )
 
-    await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPrisonerAuditQueue() } matches { it == 0 }
+    await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnPersonOnProbationAuditQueue() } matches { it == 0 }
 
     verify(telemetryClient).trackEvent(
-      eq("hmpps-prisoner-audit"),
+      eq("hmpps-person-on-probation-audit"),
       check {
-        assertThat(it["what"]).isEqualTo("VISITS_VIEWED")
+        assertThat(it["what"]).isEqualTo("POP_SCREEN_VIEWED")
         assertThat(it["when"]).isEqualTo("2021-01-25T12:30:00Z")
         assertThat(it["operationId"]).isEqualTo("badea6d876c62e2f5264c94c7b50875e")
         assertThat(it["who"]).isEqualTo("bobby.beans")
-        assertThat(it["service"]).isEqualTo("hmpps-Launchpad-ui")
+        assertThat(it["service"]).isEqualTo("hmpps-person-on-probation")
         assertThat(it.containsKey("details")).isEqualTo(false)
       },
       isNull(),
     )
-    verify(prisonerAuditRepository).save(any<PrisonerAuditEvent>())
+    verify(personOnProbationAuditRepository).save(any<PersonOnProbationAuditEvent>())
   }
 }

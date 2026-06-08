@@ -15,7 +15,7 @@ spring:
     show-sql: true
   flyway:
     locations: classpath:/db/audit,/db/audit_h2
-    schemas: staff,prisoner
+    schemas: staff,prisoner,person_on_probation
     default-schema: staff
 
 hmpps:
@@ -38,6 +38,10 @@ hmpps:
         queueName: prisonerQueue
         asyncQueueClient: true
         dlqName: prisonerDlq
+      persononprobationauditqueue:
+        queueName: persononprobationQueue
+        asyncQueueClient: true
+        dlqName: persononprobationDlq
 
 springdoc:
   api-docs:

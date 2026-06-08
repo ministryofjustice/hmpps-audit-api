@@ -23,6 +23,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.toStaffAuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.resource.QueueListenerIntegrationTest
 import java.time.Instant
+import java.util.concurrent.TimeUnit
 
 @TestPropertySource(properties = ["hmpps.repository.saveToS3Bucket=false"])
 class AuditTestDatabase @Autowired constructor(
@@ -46,13 +47,13 @@ class AuditTestDatabase @Autowired constructor(
     }
     """
 
-    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+    await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
 
     awsSqsClient.sendMessage(
       SendMessageRequest.builder().queueUrl(awsSqsUrl).messageBody(message).build(),
     )
 
-    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+    await.atMost(5, TimeUnit.SECONDS) untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
 
     verify(telemetryClient).trackEvent(
       eq("hmpps-audit"),
@@ -79,7 +80,7 @@ class AuditTestDatabase @Autowired constructor(
       .exchange()
       .expectStatus().isAccepted
 
-    await untilCallTo { mockingDetails(staffAuditRepository).invocations.size } matches { it == 1 }
+    await.atMost(5, TimeUnit.SECONDS) untilCallTo { mockingDetails(staffAuditRepository).invocations.size } matches { it == 1 }
 
     verify(telemetryClient).trackEvent(eq("hmpps-audit"), any(), isNull())
     verify(staffAuditRepository).save(any<StaffAuditEvent>())
@@ -105,7 +106,7 @@ class AuditTestDatabase @Autowired constructor(
       .exchange()
       .expectStatus().isAccepted
 
-    await untilCallTo { mockingDetails(staffAuditRepository).invocations.size } matches { it == 1 }
+    await.atMost(5, TimeUnit.SECONDS) untilCallTo { mockingDetails(staffAuditRepository).invocations.size } matches { it == 1 }
 
     verify(telemetryClient).trackEvent(eq("hmpps-audit"), any(), isNull())
     verify(staffAuditRepository).save(auditEvent.toStaffAuditEvent())
