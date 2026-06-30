@@ -111,11 +111,6 @@ class AuditAthenaClientTest {
   @TestInstance(TestInstance.Lifecycle.PER_CLASS)
   @Nested
   inner class TriggerQuery {
-    private val startQueryExecutionRequestBuilder: StartQueryExecutionRequest.Builder =
-      StartQueryExecutionRequest.builder()
-        .queryExecutionContext(QueryExecutionContext.builder().database(databaseName).build())
-        .resultConfiguration(ResultConfiguration.builder().outputLocation(outputLocation).build())
-        .workGroup(workGroupName)
 
     @ParameterizedTest
     @MethodSource("triggerQueryParameters")
@@ -123,13 +118,23 @@ class AuditAthenaClientTest {
       auditQueryRequest: AuditQueryRequest,
       roles: List<String>,
       expectedQuery: String,
+      expectedParams: List<String>,
       expectedServices: List<String>,
     ) {
       // Given
       SecurityContextHolder.getContext().authentication =
         TestingAuthenticationToken("user", "credentials", roles.map { SimpleGrantedAuthority(it) })
 
-      given(athenaClient.startQueryExecution(startQueryExecutionRequestBuilder.queryString(expectedQuery).build()))
+      val requestBuilder = StartQueryExecutionRequest.builder()
+        .queryExecutionContext(QueryExecutionContext.builder().database(databaseName).build())
+        .resultConfiguration(ResultConfiguration.builder().outputLocation(outputLocation).build())
+        .workGroup(workGroupName)
+        .queryString(expectedQuery)
+      if (expectedParams.isNotEmpty()) {
+        requestBuilder.executionParameters(expectedParams)
+      }
+
+      given(athenaClient.startQueryExecution(requestBuilder.build()))
         .willReturn(StartQueryExecutionResponse.builder().queryExecutionId(queryExecutionId).build())
 
       // When
@@ -157,7 +162,8 @@ class AuditAthenaClientTest {
           subjectType = "subjectType",
         ),
         listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS),
-        "SELECT * FROM databaseName.$tableName WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND user = 'someone' AND subjectId = 'subjectId' AND subjectType = 'subjectType' AND service IN ('hmpps-manage-users');",
+        "SELECT * FROM databaseName.$tableName WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND user = ? AND subjectId = ? AND subjectType = ? AND service IN (?);",
+        listOf("someone", "subjectId", "subjectType", HMPPS_MANAGE_USERS),
         listOf(HMPPS_MANAGE_USERS),
       ),
 
@@ -171,11 +177,12 @@ class AuditAthenaClientTest {
           subjectType = "subjectType",
         ),
         listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS, ROLE_QUERY_AUDIT__HMPPS_EXTERNAL_USERS),
-        "SELECT * FROM databaseName.$tableName WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND subjectId = 'subjectId' AND subjectType = 'subjectType' AND service IN ('hmpps-manage-users', 'hmpps-external-users');",
+        "SELECT * FROM databaseName.$tableName WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND subjectId = ? AND subjectType = ? AND service IN (?, ?);",
+        listOf("subjectId", "subjectType", HMPPS_MANAGE_USERS, HMPPS_EXTERNAL_USERS),
         listOf(HMPPS_MANAGE_USERS, HMPPS_EXTERNAL_USERS),
       ),
 
-      // Subject + endDate, no who, no startDate
+      // Subject + startDate, no who, no endDate
       Arguments.of(
         AuditQueryRequest(
           auditEventType = STAFF,
@@ -184,7 +191,8 @@ class AuditAthenaClientTest {
           subjectType = "subjectType",
         ),
         listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS),
-        "SELECT * FROM databaseName.$tableName WHERE ((year = '2025' AND month = '1' AND day = '25') OR (year = '2025' AND month = '1' AND day = '26') OR (year = '2025' AND month = '1' AND day = '27') OR (year = '2025' AND month = '1' AND day = '28') OR (year = '2025' AND month = '1' AND day = '29') OR (year = '2025' AND month = '1' AND day = '30') OR (year = '2025' AND month = '1' AND day = '31') OR (year = '2025' AND month = '2' AND day = '1') OR (year = '2025' AND month = '2' AND day = '2') OR (year = '2025' AND month = '2' AND day = '3') OR (year = '2025' AND month = '2' AND day = '4') OR (year = '2025' AND month = '2' AND day = '5') OR (year = '2025' AND month = '2' AND day = '6') OR (year = '2025' AND month = '2' AND day = '7') OR (year = '2025' AND month = '2' AND day = '8') OR (year = '2025' AND month = '2' AND day = '9') OR (year = '2025' AND month = '2' AND day = '10') OR (year = '2025' AND month = '2' AND day = '11') OR (year = '2025' AND month = '2' AND day = '12') OR (year = '2025' AND month = '2' AND day = '13') OR (year = '2025' AND month = '2' AND day = '14') OR (year = '2025' AND month = '2' AND day = '15') OR (year = '2025' AND month = '2' AND day = '16') OR (year = '2025' AND month = '2' AND day = '17') OR (year = '2025' AND month = '2' AND day = '18') OR (year = '2025' AND month = '2' AND day = '19') OR (year = '2025' AND month = '2' AND day = '20') OR (year = '2025' AND month = '2' AND day = '21') OR (year = '2025' AND month = '2' AND day = '22') OR (year = '2025' AND month = '2' AND day = '23') OR (year = '2025' AND month = '2' AND day = '24') OR (year = '2025' AND month = '2' AND day = '25') OR (year = '2025' AND month = '2' AND day = '26') OR (year = '2025' AND month = '2' AND day = '27') OR (year = '2025' AND month = '2' AND day = '28')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-25' AND DATE '2025-02-28' AND subjectId = 'subjectId' AND subjectType = 'subjectType' AND service IN ('hmpps-manage-users');",
+        "SELECT * FROM databaseName.$tableName WHERE ((year = '2025' AND month = '1' AND day = '25') OR (year = '2025' AND month = '1' AND day = '26') OR (year = '2025' AND month = '1' AND day = '27') OR (year = '2025' AND month = '1' AND day = '28') OR (year = '2025' AND month = '1' AND day = '29') OR (year = '2025' AND month = '1' AND day = '30') OR (year = '2025' AND month = '1' AND day = '31') OR (year = '2025' AND month = '2' AND day = '1') OR (year = '2025' AND month = '2' AND day = '2') OR (year = '2025' AND month = '2' AND day = '3') OR (year = '2025' AND month = '2' AND day = '4') OR (year = '2025' AND month = '2' AND day = '5') OR (year = '2025' AND month = '2' AND day = '6') OR (year = '2025' AND month = '2' AND day = '7') OR (year = '2025' AND month = '2' AND day = '8') OR (year = '2025' AND month = '2' AND day = '9') OR (year = '2025' AND month = '2' AND day = '10') OR (year = '2025' AND month = '2' AND day = '11') OR (year = '2025' AND month = '2' AND day = '12') OR (year = '2025' AND month = '2' AND day = '13') OR (year = '2025' AND month = '2' AND day = '14') OR (year = '2025' AND month = '2' AND day = '15') OR (year = '2025' AND month = '2' AND day = '16') OR (year = '2025' AND month = '2' AND day = '17') OR (year = '2025' AND month = '2' AND day = '18') OR (year = '2025' AND month = '2' AND day = '19') OR (year = '2025' AND month = '2' AND day = '20') OR (year = '2025' AND month = '2' AND day = '21') OR (year = '2025' AND month = '2' AND day = '22') OR (year = '2025' AND month = '2' AND day = '23') OR (year = '2025' AND month = '2' AND day = '24') OR (year = '2025' AND month = '2' AND day = '25') OR (year = '2025' AND month = '2' AND day = '26') OR (year = '2025' AND month = '2' AND day = '27') OR (year = '2025' AND month = '2' AND day = '28')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-25' AND DATE '2025-02-28' AND subjectId = ? AND subjectType = ? AND service IN (?);",
+        listOf("subjectId", "subjectType", HMPPS_MANAGE_USERS),
         listOf(HMPPS_MANAGE_USERS),
       ),
 
@@ -197,7 +205,8 @@ class AuditAthenaClientTest {
           subjectType = "subjectType",
         ),
         listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS),
-        "SELECT * FROM databaseName.$tableName WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5') OR (year = '2025' AND month = '1' AND day = '6') OR (year = '2025' AND month = '1' AND day = '7') OR (year = '2025' AND month = '1' AND day = '8') OR (year = '2025' AND month = '1' AND day = '9') OR (year = '2025' AND month = '1' AND day = '10')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-10' AND subjectId = 'subjectId' AND subjectType = 'subjectType' AND service IN ('hmpps-manage-users');",
+        "SELECT * FROM databaseName.$tableName WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5') OR (year = '2025' AND month = '1' AND day = '6') OR (year = '2025' AND month = '1' AND day = '7') OR (year = '2025' AND month = '1' AND day = '8') OR (year = '2025' AND month = '1' AND day = '9') OR (year = '2025' AND month = '1' AND day = '10')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-10' AND subjectId = ? AND subjectType = ? AND service IN (?);",
+        listOf("subjectId", "subjectType", HMPPS_MANAGE_USERS),
         listOf(HMPPS_MANAGE_USERS),
       ),
 
@@ -210,7 +219,8 @@ class AuditAthenaClientTest {
           who = "someone",
         ),
         listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS),
-        "SELECT * FROM databaseName.$tableName WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5') OR (year = '2025' AND month = '1' AND day = '6') OR (year = '2025' AND month = '1' AND day = '7') OR (year = '2025' AND month = '1' AND day = '8') OR (year = '2025' AND month = '1' AND day = '9') OR (year = '2025' AND month = '1' AND day = '10') OR (year = '2025' AND month = '1' AND day = '11') OR (year = '2025' AND month = '1' AND day = '12') OR (year = '2025' AND month = '1' AND day = '13') OR (year = '2025' AND month = '1' AND day = '14') OR (year = '2025' AND month = '1' AND day = '15')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-15' AND user = 'someone' AND service IN ('hmpps-manage-users');",
+        "SELECT * FROM databaseName.$tableName WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5') OR (year = '2025' AND month = '1' AND day = '6') OR (year = '2025' AND month = '1' AND day = '7') OR (year = '2025' AND month = '1' AND day = '8') OR (year = '2025' AND month = '1' AND day = '9') OR (year = '2025' AND month = '1' AND day = '10') OR (year = '2025' AND month = '1' AND day = '11') OR (year = '2025' AND month = '1' AND day = '12') OR (year = '2025' AND month = '1' AND day = '13') OR (year = '2025' AND month = '1' AND day = '14') OR (year = '2025' AND month = '1' AND day = '15')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-15' AND user = ? AND service IN (?);",
+        listOf("someone", HMPPS_MANAGE_USERS),
         listOf(HMPPS_MANAGE_USERS),
       ),
 
@@ -222,11 +232,12 @@ class AuditAthenaClientTest {
           who = "someone",
         ),
         listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS),
-        "SELECT * FROM databaseName.$tableName WHERE ((year = '2025' AND month = '1' AND day = '25') OR (year = '2025' AND month = '1' AND day = '26') OR (year = '2025' AND month = '1' AND day = '27') OR (year = '2025' AND month = '1' AND day = '28') OR (year = '2025' AND month = '1' AND day = '29') OR (year = '2025' AND month = '1' AND day = '30') OR (year = '2025' AND month = '1' AND day = '31') OR (year = '2025' AND month = '2' AND day = '1') OR (year = '2025' AND month = '2' AND day = '2') OR (year = '2025' AND month = '2' AND day = '3') OR (year = '2025' AND month = '2' AND day = '4') OR (year = '2025' AND month = '2' AND day = '5') OR (year = '2025' AND month = '2' AND day = '6') OR (year = '2025' AND month = '2' AND day = '7') OR (year = '2025' AND month = '2' AND day = '8') OR (year = '2025' AND month = '2' AND day = '9') OR (year = '2025' AND month = '2' AND day = '10') OR (year = '2025' AND month = '2' AND day = '11') OR (year = '2025' AND month = '2' AND day = '12') OR (year = '2025' AND month = '2' AND day = '13') OR (year = '2025' AND month = '2' AND day = '14') OR (year = '2025' AND month = '2' AND day = '15') OR (year = '2025' AND month = '2' AND day = '16') OR (year = '2025' AND month = '2' AND day = '17') OR (year = '2025' AND month = '2' AND day = '18') OR (year = '2025' AND month = '2' AND day = '19') OR (year = '2025' AND month = '2' AND day = '20') OR (year = '2025' AND month = '2' AND day = '21') OR (year = '2025' AND month = '2' AND day = '22') OR (year = '2025' AND month = '2' AND day = '23') OR (year = '2025' AND month = '2' AND day = '24') OR (year = '2025' AND month = '2' AND day = '25') OR (year = '2025' AND month = '2' AND day = '26') OR (year = '2025' AND month = '2' AND day = '27') OR (year = '2025' AND month = '2' AND day = '28')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-25' AND DATE '2025-02-28' AND user = 'someone' AND service IN ('hmpps-manage-users');",
+        "SELECT * FROM databaseName.$tableName WHERE ((year = '2025' AND month = '1' AND day = '25') OR (year = '2025' AND month = '1' AND day = '26') OR (year = '2025' AND month = '1' AND day = '27') OR (year = '2025' AND month = '1' AND day = '28') OR (year = '2025' AND month = '1' AND day = '29') OR (year = '2025' AND month = '1' AND day = '30') OR (year = '2025' AND month = '1' AND day = '31') OR (year = '2025' AND month = '2' AND day = '1') OR (year = '2025' AND month = '2' AND day = '2') OR (year = '2025' AND month = '2' AND day = '3') OR (year = '2025' AND month = '2' AND day = '4') OR (year = '2025' AND month = '2' AND day = '5') OR (year = '2025' AND month = '2' AND day = '6') OR (year = '2025' AND month = '2' AND day = '7') OR (year = '2025' AND month = '2' AND day = '8') OR (year = '2025' AND month = '2' AND day = '9') OR (year = '2025' AND month = '2' AND day = '10') OR (year = '2025' AND month = '2' AND day = '11') OR (year = '2025' AND month = '2' AND day = '12') OR (year = '2025' AND month = '2' AND day = '13') OR (year = '2025' AND month = '2' AND day = '14') OR (year = '2025' AND month = '2' AND day = '15') OR (year = '2025' AND month = '2' AND day = '16') OR (year = '2025' AND month = '2' AND day = '17') OR (year = '2025' AND month = '2' AND day = '18') OR (year = '2025' AND month = '2' AND day = '19') OR (year = '2025' AND month = '2' AND day = '20') OR (year = '2025' AND month = '2' AND day = '21') OR (year = '2025' AND month = '2' AND day = '22') OR (year = '2025' AND month = '2' AND day = '23') OR (year = '2025' AND month = '2' AND day = '24') OR (year = '2025' AND month = '2' AND day = '25') OR (year = '2025' AND month = '2' AND day = '26') OR (year = '2025' AND month = '2' AND day = '27') OR (year = '2025' AND month = '2' AND day = '28')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-25' AND DATE '2025-02-28' AND user = ? AND service IN (?);",
+        listOf("someone", HMPPS_MANAGE_USERS),
         listOf(HMPPS_MANAGE_USERS),
       ),
 
-      // Authorised to query all services
+      // Authorised to query all services — no service IN clause
       Arguments.of(
         AuditQueryRequest(
           auditEventType = STAFF,
@@ -235,7 +246,8 @@ class AuditAthenaClientTest {
           who = "someone",
         ),
         listOf(ROLE_QUERY_AUDIT__HMPPS_ALL_SERVICES),
-        "SELECT * FROM databaseName.$tableName WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND user = 'someone';",
+        "SELECT * FROM databaseName.$tableName WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND user = ?;",
+        listOf("someone"),
         listOf("all-services"),
       ),
 
@@ -249,9 +261,10 @@ class AuditAthenaClientTest {
         emptyList<String>(),
         "SELECT * FROM databaseName.$tableName WHERE 1 = 0;",
         emptyList<String>(),
+        emptyList<String>(),
       ),
 
-      // Single quote escaping in user input
+      // Values containing single quotes are passed as-is via parameterised execution — no escaping in the query string
       Arguments.of(
         AuditQueryRequest(
           auditEventType = STAFF,
@@ -262,7 +275,8 @@ class AuditAthenaClientTest {
           subjectType = "type'with'quote",
         ),
         listOf(ROLE_QUERY_AUDIT_HMPPS_MANAGE_USERS),
-        "SELECT * FROM databaseName.$tableName WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-02' AND user = 'O''Reilly' AND subjectId = 'sub''ject' AND subjectType = 'type''with''quote' AND service IN ('hmpps-manage-users');",
+        "SELECT * FROM databaseName.$tableName WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-02' AND user = ? AND subjectId = ? AND subjectType = ? AND service IN (?);",
+        listOf("O'Reilly", "sub'ject", "type'with'quote", HMPPS_MANAGE_USERS),
         listOf(HMPPS_MANAGE_USERS),
       ),
     )
@@ -388,128 +402,34 @@ class AuditAthenaClientTest {
           .build(),
       )
     }
-  }
-
-  @Nested
-  inner class SubstituteParametersValidation {
-    private val queryTemplate = "SELECT * FROM table WHERE user = :who AND subjectId = :subjectId AND subjectType = :subjectType AND service = :serviceName;"
-
-    private fun assertThrowsIllegalArgumentException(block: () -> Unit): IllegalArgumentException {
-      val thrown = try {
-        block()
-        null
-      } catch (ex: Throwable) {
-        ex
-      }
-      var cause: Throwable? = thrown
-      while (cause is java.lang.reflect.InvocationTargetException && cause.cause != null) {
-        cause = cause.cause
-      }
-      if (cause is IllegalArgumentException) {
-        return cause
-      }
-      println("[DEBUG] Unexpected exception type: ${cause?.javaClass?.name}, message: ${cause?.message}")
-      throw AssertionError("Expected IllegalArgumentException but got: " + cause?.javaClass?.name, cause)
-    }
 
     @Test
-    fun acceptsValidWhoWithApostrophe() {
-      val params = mapOf(
-        ":who" to "O'Reilly",
-        ":subjectId" to "subject123",
-        ":subjectType" to "typeA",
-        ":serviceName" to "service-name",
-      )
-      val result = invokeSubstituteParameters(queryTemplate, params)
-      assertThat(result).contains("'O''Reilly'")
-    }
+    fun `should escape single quotes in user value to prevent SQL injection`() {
+      val escapedUser = "O''Reilly"
+      val expectedS3Location = "s3://${athenaProperties.s3BucketName}/year=2025/month=7/day=29/user=$escapedUser/"
+      val expectedQuery = """
+      ALTER TABLE $databaseName.$tableName
+      ADD IF NOT EXISTS PARTITION (year=2025, month=7, day=29, user='$escapedUser')
+      LOCATION '$expectedS3Location'
+      """.trimIndent()
 
-    @Test
-    fun rejectsWhoWithInvalidCharacters() {
-      val params = mapOf(
-        ":who" to "bad!user",
-        ":subjectId" to "subject123",
-        ":subjectType" to "typeA",
-        ":serviceName" to "service-name",
+      auditAthenaClient.addPartitionForEvent(
+        AuditEvent(
+          what = "what",
+          `when` = LocalDateTime.of(LocalDate.of(2025, 7, 29), LocalTime.MIN).toInstant(ZoneOffset.UTC),
+          who = "O'Reilly",
+        ),
+        athenaProperties,
       )
-      val exception = assertThrowsIllegalArgumentException {
-        invokeSubstituteParameters(queryTemplate, params)
-      }
-      assertThat(exception.message).contains("Invalid value for :who")
-    }
 
-    @Test
-    fun rejectsSubjectIdExceedingMaxLength() {
-      val params = mapOf(
-        ":who" to "someone",
-        ":subjectId" to "a".repeat(101),
-        ":subjectType" to "typeA",
-        ":serviceName" to "service-name",
+      then(athenaClient).should().startQueryExecution(
+        StartQueryExecutionRequest.builder()
+          .queryString(expectedQuery)
+          .queryExecutionContext { it.database(athenaProperties.databaseName) }
+          .workGroup(athenaProperties.workGroupName)
+          .resultConfiguration { it.outputLocation(athenaProperties.outputLocation) }
+          .build(),
       )
-      val exception = assertThrowsIllegalArgumentException {
-        invokeSubstituteParameters(queryTemplate, params)
-      }
-      assertThat(exception.message).contains("Invalid value for :subjectId")
-    }
-
-    @Test
-    fun rejectsUnexpectedParameter() {
-      val params = mapOf(
-        ":who" to "someone",
-        ":subjectId" to "subject123",
-        ":subjectType" to "typeA",
-        ":serviceName" to "service-name",
-        ":notAllowed" to "bad",
-      )
-      val exception = assertThrowsIllegalArgumentException {
-        invokeSubstituteParameters(queryTemplate, params)
-      }
-      assertThat(exception.message).contains("Unexpected query parameter(s)")
-    }
-
-    @Test
-    fun acceptsValidServiceParameter() {
-      val params = mapOf(
-        ":who" to "someone",
-        ":subjectId" to "subject123",
-        ":subjectType" to "typeA",
-        ":serviceName" to "service-name",
-      )
-      val result = invokeSubstituteParameters(queryTemplate, params)
-      assertThat(result).contains("'service-name'")
-    }
-
-    @Test
-    fun rejectsServiceParameterWithInvalidCharacters() {
-      val params = mapOf(
-        ":who" to "someone",
-        ":subjectId" to "subject123",
-        ":subjectType" to "typeA",
-        ":serviceName" to "invalid!service",
-      )
-      val exception = assertThrowsIllegalArgumentException {
-        invokeSubstituteParameters(queryTemplate, params)
-      }
-      assertThat(exception.message).contains("Invalid service value")
-    }
-
-    @Test
-    fun rejectsInvalidDateFormat() {
-      val params = mapOf(
-        ":startDate" to "2025/01/01",
-        ":endDate" to "2025-01-02",
-      )
-      val template = "SELECT * FROM table WHERE date >= :startDate AND date <= :endDate;"
-      val exception = assertThrowsIllegalArgumentException {
-        invokeSubstituteParameters(template, params)
-      }
-      assertThat(exception.message).contains("Invalid date format for :startDate")
-    }
-
-    private fun invokeSubstituteParameters(template: String, params: Map<String, String>): String {
-      val method = AuditAthenaClient::class.java.getDeclaredMethod("substituteParameters", String::class.java, Map::class.java)
-      method.isAccessible = true
-      return method.invoke(auditAthenaClient, template, params) as String
     }
   }
 
