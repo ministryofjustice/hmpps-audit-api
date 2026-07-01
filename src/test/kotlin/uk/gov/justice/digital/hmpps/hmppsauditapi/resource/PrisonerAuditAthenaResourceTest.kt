@@ -97,7 +97,8 @@ class PrisonerAuditAthenaResourceTest : IntegrationTest() {
     ).build()
 
   private val startQueryExecutionRequest: StartQueryExecutionRequest = StartQueryExecutionRequest.builder()
-    .queryString("SELECT * FROM the-prisoner-database.the-prisoner-table WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND subjectId = 'test-subject' AND subjectType = 'USER_ID' AND service IN ('hmpps-launchpad-ui');")
+    .queryString("SELECT * FROM the-prisoner-database.the-prisoner-table WHERE ((year = '2025' AND month = '1' AND day = '1') OR (year = '2025' AND month = '1' AND day = '2') OR (year = '2025' AND month = '1' AND day = '3') OR (year = '2025' AND month = '1' AND day = '4') OR (year = '2025' AND month = '1' AND day = '5')) AND DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '2025-01-01' AND DATE '2025-01-05' AND subjectId = ? AND subjectType = ? AND service IN (?);")
+    .executionParameters("test-subject", "USER_ID", "hmpps-launchpad-ui")
     .queryExecutionContext(QueryExecutionContext.builder().database("the-prisoner-database").build())
     .workGroup("the-prisoner-workgroup")
     .resultConfiguration(ResultConfiguration.builder().outputLocation("the-prisoner-location").build())
