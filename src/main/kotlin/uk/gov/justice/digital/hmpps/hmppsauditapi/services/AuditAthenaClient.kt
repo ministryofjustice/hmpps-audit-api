@@ -75,7 +75,11 @@ class AuditAthenaClient(
     val year = whenDateTime.year
     val month = whenDateTime.monthValue
     val day = whenDateTime.dayOfMonth
+    // Escape SQL special characters to prevent injection in this DDL statement,
+    // which cannot use Athena parameterised queries.
     val user = escapeSql(auditEvent.who ?: "null")
+
+    val partitionS3Path = "s3://${athenaProperties.s3BucketName}/year=$year/month=$month/day=$day/user=$user/"
 
     val alterQuery = """
     ALTER TABLE ${athenaProperties.databaseName}.${athenaProperties.tableName}
