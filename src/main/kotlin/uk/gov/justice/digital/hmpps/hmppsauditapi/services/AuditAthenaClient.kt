@@ -40,8 +40,8 @@ class AuditAthenaClient(
       filter.endDate = LocalDate.now(clock)
     }
     val authorisedServices = getAuthorisedServices()
-    val query = buildAthenaQuery(filter, authorisedServices, auditEventType)
-    val queryExecutionId = startAthenaQuery(query, auditEventType)
+    val (query, executionParameters) = buildAthenaQuery(filter, authorisedServices, auditEventType)
+    val queryExecutionId = startAthenaQuery(query, executionParameters, auditEventType)
 
     return AuditQueryResponse(
       queryExecutionId = UUID.fromString(queryExecutionId),
@@ -75,7 +75,9 @@ class AuditAthenaClient(
     val year = whenDateTime.year
     val month = whenDateTime.monthValue
     val day = whenDateTime.dayOfMonth
-    val user = auditEvent.who
+    // Escape SQL special characters to prevent injection in this DDL statement,
+    // which cannot use Athena parameterised queries.
+    val user = escapeSql(auditEvent.who ?: "null")
 
     val partitionS3Path = "s3://${athenaProperties.s3BucketName}/year=$year/month=$month/day=$day/user=$user/"
 
@@ -95,86 +97,54 @@ class AuditAthenaClient(
     athenaClient.startQueryExecution(request)
   }
 
-  // Helper to strictly substitute only known parameters in a query template, with validation
-  private fun substituteParameters(queryTemplate: String, parameters: Map<String, String>): String {
-    // Only allow these placeholders to be substituted
-    val allowedPlaceholders = setOf(":startDate", ":endDate", ":who", ":subjectId", ":subjectType") +
-      parameters.keys.filter { it.startsWith(":service") }
-
-    // Check for unexpected placeholders
-    val unexpected = parameters.keys - allowedPlaceholders
-    require(unexpected.isEmpty()) { "Unexpected query parameter(s): $unexpected" }
-
-    // Validate parameter values
-    parameters.forEach { (placeholder, value) ->
-      when (placeholder) {
-        ":startDate", ":endDate" -> require(value.matches(Regex("""\d{4}-\d{2}-\d{2}"""))) { "Invalid date format for $placeholder: $value" }
-        ":who", ":subjectId", ":subjectType" -> require(value.matches(Regex("""^[\w@.\- '\u2019]{1,100}""", RegexOption.IGNORE_CASE))) { "Invalid value for $placeholder: $value" }
-        else -> if (placeholder.startsWith(":service")) {
-          require(value.matches(Regex("""^[a-z0-9\-]{1,50}$""", RegexOption.IGNORE_CASE))) { "Invalid service value: $value" }
-        } else {
-          error("Unknown placeholder: $placeholder")
-        }
-      }
-    }
-
-    var query = queryTemplate
-    parameters.forEach { (placeholder, value) ->
-      // For string values, wrap in single quotes (Athena does not support prepared statements)
-      query = query.replace(placeholder, "'${escapeSql(value)}'")
-    }
-    return query
-  }
-
   private fun escapeSql(value: String): String = value.replace("'", "''")
 
-  private fun buildAthenaQuery(filter: AuditQueryRequest, services: List<String>, auditEventType: AuditEventType): String {
+  private fun buildAthenaQuery(filter: AuditQueryRequest, services: List<String>, auditEventType: AuditEventType): Pair<String, List<String>> {
     val athenaProperties = athenaPropertiesFactory.getProperties(auditEventType)
     val conditions = mutableListOf<String>()
+    val executionParameters = mutableListOf<String>()
     val databaseName = athenaProperties.databaseName
     val tableName = athenaProperties.tableName
 
     if (services.isEmpty()) {
-      return "SELECT * FROM $databaseName.$tableName WHERE 1 = 0;"
+      return Pair("SELECT * FROM $databaseName.$tableName WHERE 1 = 0;", emptyList())
     }
 
-    // Partition filtering based on full year/month/day decomposition
+    // Partition filtering: safe — values are integer fields from a LocalDate, not user input.
     val partitionConditions = buildPartitionDateConditions(filter.startDate!!, filter.endDate!!)
     conditions.add("(${partitionConditions.joinToString(" OR ")})")
 
-    // Timestamp-based filtering for precision
-    conditions.add("DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE :startDate AND DATE :endDate")
-    val parameters = mutableMapOf<String, String>(
-      ":startDate" to filter.startDate.toString(),
-      ":endDate" to filter.endDate.toString(),
-    )
+    // Date range: safe — LocalDate.toString() always produces a fixed YYYY-MM-DD literal,
+    // and the values originate from validated LocalDate objects, not raw user strings.
+    val startDateStr = filter.startDate.toString()
+    val endDateStr = filter.endDate.toString()
+    conditions.add("DATE(from_iso8601_timestamp(\"when\")) BETWEEN DATE '$startDateStr' AND DATE '$endDateStr'")
+
+    // User-supplied string values use Athena parameterised ? placeholders so they are never
+    // interpolated into the query string, eliminating the SQL-injection risk.
     filter.who?.let {
-      conditions.add("user = :who")
-      parameters[":who"] = it
+      conditions.add("user = ?")
+      executionParameters.add(it)
     }
     filter.subjectId?.let {
-      conditions.add("subjectId = :subjectId")
-      parameters[":subjectId"] = it
+      conditions.add("subjectId = ?")
+      executionParameters.add(it)
     }
     filter.subjectType?.let {
-      conditions.add("subjectType = :subjectType")
-      parameters[":subjectType"] = it
+      conditions.add("subjectType = ?")
+      executionParameters.add(it)
     }
 
     if (userDoesNotHaveAccessToAllServices(services)) {
-      val servicePlaceholders = services.mapIndexed { idx, _ -> ":service$idx" }
-      val serviceList = servicePlaceholders.joinToString(", ")
-      conditions.add("service IN ($serviceList)")
-      services.forEachIndexed { idx, service ->
-        parameters[":service$idx"] = service
-      }
+      val placeholders = services.joinToString(", ") { "?" }
+      conditions.add("service IN ($placeholders)")
+      executionParameters.addAll(services)
     }
 
     val whereClause = "WHERE ${conditions.joinToString(" AND ")}"
-    val queryTemplate = "SELECT * FROM $databaseName.$tableName $whereClause;"
+    val query = "SELECT * FROM $databaseName.$tableName $whereClause;"
 
-    // Substitute parameters in the query template
-    return substituteParameters(queryTemplate, parameters)
+    return Pair(query, executionParameters)
   }
 
   private fun buildPartitionDateConditions(startDate: LocalDate, endDate: LocalDate): List<String> {
@@ -188,16 +158,19 @@ class AuditAthenaClient(
       .toList()
   }
 
-  private fun startAthenaQuery(query: String, auditEventType: AuditEventType): String {
+  private fun startAthenaQuery(query: String, executionParameters: List<String>, auditEventType: AuditEventType): String {
     val athenaProperties = athenaPropertiesFactory.getProperties(auditEventType)
-    val request = StartQueryExecutionRequest.builder()
+    val requestBuilder = StartQueryExecutionRequest.builder()
       .queryString(query)
       .queryExecutionContext { it.database(athenaProperties.databaseName) }
       .workGroup(athenaProperties.workGroupName)
       .resultConfiguration { it.outputLocation(athenaProperties.outputLocation) }
-      .build()
 
-    val response = athenaClient.startQueryExecution(request)
+    if (executionParameters.isNotEmpty()) {
+      requestBuilder.executionParameters(executionParameters)
+    }
+
+    val response = athenaClient.startQueryExecution(requestBuilder.build())
     return response.queryExecutionId()
   }
 
