@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.5.3"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.5.4"
   kotlin("plugin.spring") version "2.4.0"
   kotlin("plugin.jpa") version "2.4.0"
 }
@@ -30,15 +30,15 @@ dependencies {
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:7.4.0")
   // Temporarily pin spring doc at 3.0.2 whilst waiting for 3.0.4 upgrade
-  val springDocVersion = "3.0.2"
+  val springDocVersion = "3.0.3"
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocVersion")
   constraints {
     implementation("org.webjars:swagger-ui:5.32.2")
   }
 
   implementation("org.apache.commons:commons-lang3:3.20.0")
-  implementation("software.amazon.awssdk:s3:2.46.17")
-  implementation("software.amazon.awssdk:athena:2.46.17")
+  implementation("software.amazon.awssdk:s3:2.46.21")
+  implementation("software.amazon.awssdk:athena:2.46.21")
   implementation("org.apache.parquet:parquet-avro:1.17.1")
   implementation("org.apache.avro:avro:1.12.1")
   implementation("org.apache.hadoop:hadoop-client:3.5.0") {
@@ -67,7 +67,7 @@ dependencies {
   runtimeOnly("com.h2database:h2:2.4.240")
   runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
-  runtimeOnly("org.postgresql:postgresql:42.7.11")
+  runtimeOnly("org.postgresql:postgresql:42.7.12")
 
   testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
   testImplementation("org.springframework.boot:spring-boot-starter-webclient-test")
