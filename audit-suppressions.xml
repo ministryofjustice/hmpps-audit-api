@@ -26,4 +26,13 @@
         <packageUrl regex="true">^pkg:maven/io\.airlift/aircompressor@.*$</packageUrl>
         <vulnerabilityName>CVE-2025-67721</vulnerabilityName>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: httpcore-4.4.16.jar
+   hadoop-client 3.5.0 transitively pulls HttpComponents Core 4.x.
+   4.4.16 is the latest published 4.x release; CVE-2026-54399 affects Core 5.x parser logic.
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.httpcomponents/httpcore@4\.4\.16$</packageUrl>
+        <cve>CVE-2026-54399</cve>
+    </suppress>
 </suppressions>
