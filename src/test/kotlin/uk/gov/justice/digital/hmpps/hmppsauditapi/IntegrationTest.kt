@@ -13,7 +13,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.reactive.server.WebTestClient
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
-import uk.gov.justice.digital.hmpps.hmppsauditapi.helper.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.hmppsauditapi.integration.S3TestConfig
 import uk.gov.justice.digital.hmpps.hmppsauditapi.integration.endtoend.CommandLineProfilesResolver
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
@@ -25,11 +24,12 @@ import uk.gov.justice.hmpps.sqs.HmppsQueueFactory
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.HmppsSqsProperties
 import uk.gov.justice.hmpps.sqs.MissingQueueException
+import uk.gov.justice.hmpps.test.kotlin.auth.JwtAuthorisationHelper
 
 @AutoConfigureWebTestClient
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(IntegrationTest.SqsConfig::class, JwtAuthHelper::class, S3TestConfig::class)
+@Import(IntegrationTest.SqsConfig::class, JwtAuthorisationHelper::class, S3TestConfig::class)
 @ActiveProfiles(resolver = CommandLineProfilesResolver::class)
 abstract class IntegrationTest {
   @Autowired
@@ -48,13 +48,13 @@ abstract class IntegrationTest {
   protected lateinit var auditQueueService: AuditQueueService
 
   @Autowired
-  protected lateinit var jwtAuthHelper: JwtAuthHelper
+  protected lateinit var jwtAuthHelper: JwtAuthorisationHelper
 
   internal fun setAuthorisation(
     user: String = "hmpps-audit-client",
     roles: List<String> = listOf(),
     scopes: List<String> = listOf(),
-  ): (HttpHeaders) -> Unit = jwtAuthHelper.setAuthorisation(user, roles, scopes)
+  ): (HttpHeaders) -> Unit = jwtAuthHelper.setAuthorisationHeader(username = user, roles = roles, scope = scopes)
 
   @Autowired
   private lateinit var hmppsSqsProperties: HmppsSqsProperties

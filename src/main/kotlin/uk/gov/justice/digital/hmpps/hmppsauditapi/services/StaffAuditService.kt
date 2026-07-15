@@ -9,7 +9,6 @@ import org.springframework.data.domain.Sort.Direction.DESC
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
-import uk.gov.justice.digital.hmpps.hmppsauditapi.config.trackEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.StaffAuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.toAuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
@@ -46,7 +45,7 @@ class StaffAuditService(
 
     staffAuditRepository.save(auditEvent.toStaffAuditEvent())
 
-    telemetryClient.trackEvent(AuditEventType.STAFF.description, auditEvent.asMap())
+    telemetryClient.trackEvent(AuditEventType.STAFF.description, auditEvent.asMap(), null)
   }
 
   override fun findAll(): List<AuditDto> = staffAuditRepository.findAll(Sort.by(DESC, "when")).map { AuditDto(it.toAuditEvent()) }
