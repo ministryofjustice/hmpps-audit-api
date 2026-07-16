@@ -10,7 +10,6 @@ class ResourceServerConfiguration {
   fun resourceServerConfigurationCustomizer(): ResourceServerConfigurationCustomizer = ResourceServerConfigurationCustomizer {
     unauthorizedRequestPaths {
       addPaths = setOf(
-        "/ping",
         "/queue-admin/retry-all-dlqs",
       )
     }
