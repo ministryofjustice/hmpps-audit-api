@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.config
 
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
+import uk.gov.justice.hmpps.kotlin.auth.AuthAwareAuthenticationToken
 
 @Component
 class SecurityUserContext {

@@ -15,21 +15,25 @@ import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import uk.gov.justice.digital.hmpps.hmppsauditapi.helper.JwtAuthHelper
+import org.springframework.test.context.web.WebAppConfiguration
+import uk.gov.justice.hmpps.kotlin.clienttracking.HmppsClientTrackingConfiguration
+import uk.gov.justice.hmpps.kotlin.clienttracking.HmppsClientTrackingInterceptor
+import uk.gov.justice.hmpps.test.kotlin.auth.JwtAuthorisationHelper
 import java.time.Duration
 
-@Import(JwtAuthHelper::class, ClientTrackingInterceptor::class, ClientTrackingConfiguration::class)
+@Import(JwtAuthorisationHelper::class, HmppsClientTrackingConfiguration::class)
 @ContextConfiguration(initializers = [ConfigDataApplicationContextInitializer::class])
 @ActiveProfiles("test")
+@WebAppConfiguration
 @ExtendWith(SpringExtension::class)
 class ClientTrackingConfigurationTest {
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
-  private lateinit var clientTrackingInterceptor: ClientTrackingInterceptor
+  private lateinit var clientTrackingInterceptor: HmppsClientTrackingInterceptor
 
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
-  private lateinit var jwtAuthHelper: JwtAuthHelper
+  private lateinit var jwtAuthHelper: JwtAuthorisationHelper
   private val res = MockHttpServletResponse()
   private val req = MockHttpServletRequest()
 
@@ -37,7 +41,7 @@ class ClientTrackingConfigurationTest {
 
   @Test
   fun shouldAddClientIdAndUserNameToInsightTelemetry() {
-    val token = jwtAuthHelper.createJwt("bob")
+    val token = jwtAuthHelper.createJwtAccessToken("bob")
     req.addHeader(HttpHeaders.AUTHORIZATION, "Bearer $token")
 
     tracer.spanBuilder("span").startSpan().run {
@@ -48,8 +52,7 @@ class ClientTrackingConfigurationTest {
       { t ->
         t.hasSpansSatisfyingExactly(
           {
-            it.hasAttribute(AttributeKey.stringKey("username"), "bob")
-            it.hasAttribute(AttributeKey.stringKey("clientId"), "hmpps-audit-client")
+            it.hasAttribute(AttributeKey.stringKey("clientId"), "bob")
           },
         )
       },
@@ -58,7 +61,7 @@ class ClientTrackingConfigurationTest {
 
   @Test
   fun shouldAddClientIdAndUserNameToInsightTelemetryEvenIfTokenExpired() {
-    val token = jwtAuthHelper.createJwt("Fred", expiryTime = Duration.ofHours(-1L))
+    val token = jwtAuthHelper.createJwtAccessToken("Fred", expiryTime = Duration.ofHours(-1L))
     req.addHeader(HttpHeaders.AUTHORIZATION, "Bearer $token")
 
     tracer.spanBuilder("span").startSpan().run {
@@ -69,48 +72,7 @@ class ClientTrackingConfigurationTest {
       { t ->
         t.hasSpansSatisfyingExactly(
           {
-            it.hasAttribute(AttributeKey.stringKey("username"), "Fred")
-            it.hasAttribute(AttributeKey.stringKey("clientId"), "hmpps-audit-client")
-          },
-        )
-      },
-    )
-  }
-
-  @Test
-  fun shouldAddClientIpToInsightTelemetry() {
-    val someIpAddress = "12.13.14.15"
-    req.remoteAddr = someIpAddress
-
-    tracer.spanBuilder("span").startSpan().run {
-      makeCurrent().use { clientTrackingInterceptor.preHandle(req, res, "null") }
-      end()
-    }
-    otelTesting.assertTraces().hasTracesSatisfyingExactly(
-      { t ->
-        t.hasSpansSatisfyingExactly(
-          {
-            it.hasAttribute(AttributeKey.stringKey("clientIpAddress"), someIpAddress)
-          },
-        )
-      },
-    )
-  }
-
-  @Test
-  fun shouldAddClientIpToInsightTelemetryWithoutPortNumber() {
-    val someIpAddress = "12.13.14.15"
-    req.remoteAddr = "$someIpAddress:6789"
-
-    tracer.spanBuilder("span").startSpan().run {
-      makeCurrent().use { clientTrackingInterceptor.preHandle(req, res, "null") }
-      end()
-    }
-    otelTesting.assertTraces().hasTracesSatisfyingExactly(
-      { t ->
-        t.hasSpansSatisfyingExactly(
-          {
-            it.hasAttribute(AttributeKey.stringKey("clientIpAddress"), someIpAddress)
+            it.hasAttribute(AttributeKey.stringKey("clientId"), "Fred")
           },
         )
       },

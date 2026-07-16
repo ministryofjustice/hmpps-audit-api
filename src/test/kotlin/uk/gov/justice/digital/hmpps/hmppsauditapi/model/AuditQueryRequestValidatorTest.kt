@@ -13,15 +13,15 @@ import org.springframework.context.annotation.Import
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsauditapi.IntegrationTest
-import uk.gov.justice.digital.hmpps.hmppsauditapi.helper.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.hmppsauditapi.integration.S3TestConfig
 import uk.gov.justice.digital.hmpps.hmppsauditapi.integration.endtoend.CommandLineProfilesResolver
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType.STAFF
+import uk.gov.justice.hmpps.test.kotlin.auth.JwtAuthorisationHelper
 import java.time.LocalDate
 import java.util.stream.Stream
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(IntegrationTest.SqsConfig::class, JwtAuthHelper::class, S3TestConfig::class)
+@Import(IntegrationTest.SqsConfig::class, JwtAuthorisationHelper::class, S3TestConfig::class)
 @ActiveProfiles(resolver = CommandLineProfilesResolver::class)
 @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
 class AuditQueryRequestValidatorTest {
