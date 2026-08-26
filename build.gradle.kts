@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.5"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.6"
   kotlin("plugin.spring") version "2.4.10"
   kotlin("plugin.jpa") version "2.4.10"
 }
@@ -43,8 +43,8 @@ dependencies {
   }
 
   implementation("org.apache.commons:commons-lang3:3.20.0")
-  implementation("software.amazon.awssdk:s3:2.53.3")
-  implementation("software.amazon.awssdk:athena:2.53.3")
+  implementation("software.amazon.awssdk:s3:2.54.2")
+  implementation("software.amazon.awssdk:athena:2.54.2")
   implementation("org.apache.parquet:parquet-avro:1.18.0")
   implementation("org.apache.avro:avro:1.12.2")
   implementation("org.apache.hadoop:hadoop-client:3.5.0") {
