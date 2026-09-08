@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.7"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.8"
   kotlin("plugin.spring") version "2.4.10"
   kotlin("plugin.jpa") version "2.4.10"
 }
@@ -35,12 +35,12 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webflux")
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:7.4.1")
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.0")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1")
 
   implementation("org.apache.commons:commons-lang3:3.20.0")
-  implementation("software.amazon.awssdk:s3:2.54.10")
-  implementation("software.amazon.awssdk:athena:2.54.10")
-  implementation("org.apache.parquet:parquet-avro:1.18.0")
+  implementation("software.amazon.awssdk:s3:2.54.13")
+  implementation("software.amazon.awssdk:athena:2.54.13")
+  implementation("org.apache.parquet:parquet-avro:1.18.1")
   implementation("org.apache.avro:avro:1.12.2")
   implementation("org.apache.hadoop:hadoop-client:3.5.0") {
     exclude(group = "com.google.protobuf", module = "protobuf-java")
@@ -61,7 +61,7 @@ dependencies {
   implementation("javax.xml.bind:jaxb-api:2.3.1")
   implementation("org.glassfish.jaxb:jaxb-runtime:4.0.9")
 
-  runtimeOnly("com.h2database:h2:2.4.240")
+  runtimeOnly("com.h2database:h2:2.5.250")
   runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
   runtimeOnly("org.postgresql:postgresql:42.7.13")
