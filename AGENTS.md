@@ -12,6 +12,7 @@ estate and uses standard HMPPS Spring Boot tooling (`hmpps-kotlin-spring-boot-st
 
 ## Tech stack
 
+- JAVA 25
 - Kotlin (JVM toolchain 25), Spring Boot
 - Spring Data JPA + Flyway migrations (Postgres in prod, H2 in tests)
 - Spring Security with OAuth2 resource server
@@ -83,3 +84,24 @@ and `readme/queue_admin.md` for more detail.
 
 - Keep changes focused and avoid unrelated refactors.
 - Update relevant docs in `readme/` when behaviour, build, or run steps change.
+
+## Dependency injection
+
+Prefer constructor injection over field injection in Spring components, including test classes.
+
+- In production code, declare dependencies as constructor parameters (e.g. `private val fooRepository: FooRepository`) rather than using `@Autowired` on a field.
+- In integration test classes, pass `@Autowired` repositories/beans as primary constructor parameters instead of using `@Autowired` on a `lateinit var` field.
+
+## Tests
+
+Prefer `@BeforeAll`/`@AfterAll` over `@BeforeEach`/`@AfterEach` where possible in nested integration test classes.
+
+- Use `@TestInstance(TestInstance.Lifecycle.PER_CLASS)` on the nested test class so that `@BeforeAll`/`@AfterAll` can be non-static (instance) methods.
+- Build shared fixture data once in `@BeforeAll` and clean it up once in `@AfterAll`, rather than rebuilding it before every test, when the fixture is not mutated in a way that would leak between tests.
+- When copying or adapting an integration test, preserve the full nested test structure, including `Security`, `Validation`, and `HappyPath` scenarios for each endpoint.
+- Place each `@AfterAll` method immediately after the corresponding `@BeforeAll` setup method.
+- OAuth2 propagation tests must verify the exact WireMock header value with `equalTo("Bearer ABCDE")`; do not weaken this assertion to a regex or non-empty-header matcher.
+
+## Linting
+
+Do not run `ktlintCheck` (or any ktlint gradle task) in this repository. Skip ktlint validation entirely.
