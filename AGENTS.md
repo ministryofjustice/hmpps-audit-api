@@ -55,11 +55,8 @@ Run a single test class/method:
 ./gradlew test --tests "uk.gov.justice.digital.hmpps.hmppsauditapi.SomeClassTest"
 ```
 
-Lint / formatting (ktlint):
-```bash
-./gradlew ktlintCheck
-./gradlew ktlintFormat
-```
+Ktlint Gradle tasks are available, but do not run them in this repository.
+Skip ktlint validation and formatting entirely.
 
 Run the app locally (dependencies via docker compose, app via Gradle):
 ```bash
@@ -74,7 +71,7 @@ and `readme/queue_admin.md` for more detail.
 
 - Follow existing package structure and naming conventions (`hmppsauditapi` under
   `uk.gov.justice.digital.hmpps`).
-- Keep Kotlin code ktlint-clean; run `./gradlew ktlintFormat` before committing if unsure.
+- Follow the existing Kotlin formatting conventions; do not run ktlint Gradle tasks.
 - Add Flyway migrations under `src/main/resources/db/` rather than editing existing ones.
 - Mirror new test files under `src/test/kotlin/...` matching the main package path.
 - Prefer the smallest Gradle command that validates a change (e.g. a targeted `--tests`
