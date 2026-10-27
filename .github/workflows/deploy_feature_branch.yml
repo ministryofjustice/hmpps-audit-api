@@ -3,14 +3,9 @@ name: Deploy feature branch
 on:
   workflow_dispatch:
     inputs:
-      deploy-to-stage:
-        description: Deploy the branch to stage?
-        default: true
-        required: false
-        type: boolean
       deploy-to-dev:
         description: Deploy the branch to dev?
-        default: false
+        default: true
         required: false
         type: boolean
 
@@ -28,7 +23,7 @@ jobs:
         name: Application version creators
         uses: ministryofjustice/hmpps-github-shared-actions/.github/actions/build-test-and-deploy/create_app_version@1061afed0f02c82850314e2fc29711523139e574 # v1.1.2
   create-artifact:
-    name: Build the artifact for deployment to stage for testing
+    name: Build the artifact for deployment to dev from branch for testing
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/gradle_verify.yml@v2 # WORKFLOW_VERSION
     needs: app_version
     with:
@@ -48,15 +43,6 @@ jobs:
       docker_multiplatform: true
       tag_latest: false
       download_build_artifacts: true
-  deploy_stage:
-    if: ${{ inputs.deploy-to-stage == true }}
-    name: Deploy to stage
-    needs: build_image
-    uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2 # WORKFLOW_VERSION
-    secrets: inherit
-    with:
-      environment: dev
-      app_version: ${{ needs.build_image.outputs.app_version }}
   deploy_dev:
     if: ${{ inputs.deploy-to-dev == true }}
     name: Deploy to dev
