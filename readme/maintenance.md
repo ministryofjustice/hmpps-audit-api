@@ -53,17 +53,17 @@ To register pre-commit check to run Ktlint format:
 ./gradlew addKtlintCheckGitPreCommitHook
 ```
 
-### Daily audit export (experimental)
+### Temporary Parquet test endpoints
 
-Exports one UTC day of staff audit events from Postgres into a single Parquet
-file in the existing S3 bucket. It is a manual, synchronous trigger used to test daily
-consolidation against real infrastructure; it does not change how events are ingested or queried.
+Both endpoints require `ROLE_AUDIT_INTEGRATION_TEST`. They bypass SQS and make
+no S3 writes; existing ingestion is unchanged.
 
-```
-POST /audit/STAFF/daily-export/{yyyy-MM-dd}   (requires ROLE_AUDIT)
-```
+1. `POST /internal/integration-test/STAFF/parquet-batches` saves 10 synthetic STAFF
+   events directly to Postgres and returns `{"batchId":"<uuid>"}`.
+2. `GET /internal/integration-test/STAFF/parquet-batches/{batchId}` returns those
+   events as a single downloadable Snappy Parquet file using the existing schema.
 
-- The file is written to `daily/year=Y/month=M/day=D/audit.parquet`. Re-running a day overwrites it.
-- Only staff audit events are supported for now. Only past UTC days are accepted. Days with no events do not produce a file.
-- The response includes the event count, S3 key and file size. Each run is also logged and
-  sent to Application Insights as `hmpps-audit-daily-export` with the duration.
+Each creation request produces a separate batch. Downloads exclude ordinary audit
+events and other batches. An unknown batch returns 404; an incomplete or oversized
+batch returns 409. Test records remain in Postgres for repeat downloads.
+These endpoints are temporary and should be removed after validating aggregation.
