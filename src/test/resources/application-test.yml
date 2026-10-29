@@ -62,7 +62,7 @@ hmpps:
   audit:
     queriesStartDate: 2024-01-01
   applicationinsights:
-    auditEventDetails: True
+    auditEventDetails: false
 
 springdoc:
   api-docs:
