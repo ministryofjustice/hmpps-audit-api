@@ -41,11 +41,7 @@ data class AuditEvent(
   val details: String? = null,
 )
 
-fun AuditEvent.asMap(): Map<String, String> = toMap(includeDetails = false)
-
-fun AuditEvent.asMapIncDetails(): Map<String, String> = toMap(includeDetails = true)
-
-private fun AuditEvent.toMap(includeDetails: Boolean): Map<String, String> {
+fun AuditEvent.toMap(includeDetails: Boolean): Map<String, String> {
   val items = mutableMapOf("what" to what, "when" to `when`.toString())
   items.addIfNotNull("who", who)
   items.addIfNotNull("operationId", operationId)

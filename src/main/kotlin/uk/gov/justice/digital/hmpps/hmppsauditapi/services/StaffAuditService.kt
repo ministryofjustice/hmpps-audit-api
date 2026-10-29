@@ -14,8 +14,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.StaffAuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.toAuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
-import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.asMap
-import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.asMapIncDetails
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.toMap
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.toStaffAuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditFilterDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryRequest
@@ -49,9 +48,9 @@ class StaffAuditService(
     staffAuditRepository.save(auditEvent.toStaffAuditEvent())
 
     if (auditEventDetails) {
-      telemetryClient.trackEvent(AuditEventType.STAFF.description, auditEvent.asMapIncDetails())
+      telemetryClient.trackEvent(AuditEventType.STAFF.description, auditEvent.toMap(includeDetails = true))
     } else {
-      telemetryClient.trackEvent(AuditEventType.STAFF.description, auditEvent.asMap())
+      telemetryClient.trackEvent(AuditEventType.STAFF.description, auditEvent.toMap(includeDetails = false))
     }
   }
 

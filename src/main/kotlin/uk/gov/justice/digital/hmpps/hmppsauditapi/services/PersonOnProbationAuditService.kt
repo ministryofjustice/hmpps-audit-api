@@ -13,8 +13,7 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.PersonOnProbationAuditRepo
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.toAuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
-import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.asMap
-import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.asMapIncDetails
+import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.toMap
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.toPersonOnProbationAuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditFilterDto
 import uk.gov.justice.digital.hmpps.hmppsauditapi.model.AuditQueryRequest
@@ -47,9 +46,9 @@ class PersonOnProbationAuditService(
     probationAuditRepository.save(auditEvent.toPersonOnProbationAuditEvent())
 
     if (auditEventDetails) {
-      telemetryClient.trackEvent(AuditEventType.PERSON_ON_PROBATION.description, auditEvent.asMapIncDetails())
+      telemetryClient.trackEvent(AuditEventType.PERSON_ON_PROBATION.description, auditEvent.toMap(includeDetails = true))
     } else {
-      telemetryClient.trackEvent(AuditEventType.PERSON_ON_PROBATION.description, auditEvent.asMap())
+      telemetryClient.trackEvent(AuditEventType.PERSON_ON_PROBATION.description, auditEvent.toMap(includeDetails = false))
     }
   }
 
