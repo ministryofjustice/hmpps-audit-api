@@ -52,6 +52,18 @@ fun AuditEvent.asMap(): Map<String, String> {
   return items.toMap()
 }
 
+fun AuditEvent.asMapIncDetails(): Map<String, String> {
+  val items = mutableMapOf("what" to what, "when" to `when`.toString())
+  items.addIfNotNull("who", who)
+  items.addIfNotNull("operationId", operationId)
+  items.addIfNotNull("subjectId", subjectId)
+  items.addIfNotNull("subjectType", subjectType)
+  items.addIfNotNull("correlationId", correlationId)
+  items.addIfNotNull("service", service)
+  items.addIfNotNull("details", details)
+  return items.toMap()
+}
+
 fun AuditEvent.toPrisonerAuditEvent(): PrisonerAuditEvent = PrisonerAuditEvent(
   id = id,
   what = what,
