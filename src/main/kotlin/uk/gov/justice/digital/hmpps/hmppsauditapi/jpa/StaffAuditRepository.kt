@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.StaffAuditEvent
 import java.time.Instant
 import java.util.UUID
-import java.util.stream.Stream
 
 @Repository
 interface StaffAuditRepository :
@@ -42,7 +41,4 @@ interface StaffAuditRepository :
     what: String?,
     who: String?,
   ): Page<StaffAuditEvent>
-
-  @Query("select ae from StaffAuditEvent ae where ae.when >= :start and ae.when < :end order by ae.when, ae.id")
-  fun streamByWhenFromInclusiveToExclusive(start: Instant, end: Instant): Stream<StaffAuditEvent>
 }

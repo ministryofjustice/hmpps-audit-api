@@ -16,7 +16,7 @@ import java.util.UUID
 @Service
 class TestAuditExportService(
   private val staffAuditRepository: StaffAuditRepository,
-  private val auditS3Client: AuditS3Client,
+  private val auditParquetWriter: AuditParquetWriter,
   private val clock: Clock,
 ) {
   @Transactional
@@ -61,7 +61,7 @@ class TestAuditExportService(
     }
     val file = Files.createTempFile("test-audit-$batchId-", ".parquet")
     try {
-      auditS3Client.writeParquetFile(events.content.asSequence().map { it.toAuditEvent() }, file)
+      auditParquetWriter.write(events.content.asSequence().map { it.toAuditEvent() }, file)
       return Files.readAllBytes(file)
     } finally {
       Files.deleteIfExists(file)
