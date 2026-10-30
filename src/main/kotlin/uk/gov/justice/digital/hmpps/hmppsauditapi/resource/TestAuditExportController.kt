@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 
+import org.springframework.context.annotation.Profile
 import org.springframework.http.CacheControl
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpHeaders
@@ -17,6 +18,7 @@ import java.util.UUID
 @RestController
 @RequestMapping("/internal/integration-test/STAFF/parquet-batches")
 @PreAuthorize("hasRole('ROLE_AUDIT_INTEGRATION_TEST')")
+@Profile("dev")
 class TestAuditExportController(
   private val testAuditExportService: TestAuditExportService,
 ) {
