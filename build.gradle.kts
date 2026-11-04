@@ -36,10 +36,14 @@ dependencies {
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:7.4.1")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.0")
+  // Temporarily pin swagger-ui for dompurify issues CVE-2026-11680(2-4)
+  constraints {
+    implementation("org.webjars:swagger-ui:5.34.1")
+  }
 
   implementation("org.apache.commons:commons-lang3:3.21.0")
-  implementation("software.amazon.awssdk:s3:2.57.6")
-  implementation("software.amazon.awssdk:athena:2.57.6")
+  implementation("software.amazon.awssdk:s3:2.57.8")
+  implementation("software.amazon.awssdk:athena:2.57.8")
   implementation("org.apache.parquet:parquet-avro:1.18.1")
   implementation("org.apache.avro:avro:1.12.2")
   implementation("org.apache.hadoop:hadoop-client:3.5.0") {
