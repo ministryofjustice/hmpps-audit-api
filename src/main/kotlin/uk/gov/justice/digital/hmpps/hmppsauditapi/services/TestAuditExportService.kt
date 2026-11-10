@@ -28,6 +28,9 @@ class TestAuditExportService(
         StaffAuditEvent(
           what = "INTEGRATION_TEST",
           `when` = timestamp,
+          operationId = batchId.toString(),
+          subjectId = "TEST_$batchId",
+          subjectType = "USER_ID",
           correlationId = batchId.toString(),
           who = "TEST_$batchId",
           service = TEST_SERVICE,

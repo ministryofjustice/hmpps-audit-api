@@ -75,6 +75,18 @@ class TestAuditExportControllerTest(
       val file = Files.createTempFile("audit-download-test-", ".parquet")
       try {
         assertThat(events).hasSize(10)
+        assertThat(events.map { it.id }).doesNotContainNull().doesNotHaveDuplicates()
+        assertThat(events.map { it.what }).containsOnly("INTEGRATION_TEST")
+        assertThat(events.map { it.`when` }.distinct()).hasSize(1)
+        assertThat(events.map { it.operationId }).containsOnly(batchId)
+        assertThat(events.map { it.subjectId }).containsOnly("TEST_$batchId")
+        assertThat(events.map { it.subjectType }).containsOnly("USER_ID")
+        assertThat(events.map { it.correlationId }).containsOnly(batchId)
+        assertThat(events.map { it.who }).containsOnly("TEST_$batchId")
+        assertThat(events.map { it.service }).containsOnly("hmpps-audit-api-parquet-test")
+        assertThat(events.map { it.details }).containsExactlyInAnyOrderElementsOf(
+          (1..10).map { """{"eventNumber":$it}""" },
+        )
         val bytes = webTestClient.get().uri("$path/$batchId").headers(setAuthorisation(roles = role))
           .exchange().expectStatus().isOk
           .expectHeader().contentType(MediaType.APPLICATION_OCTET_STREAM)
@@ -85,10 +97,19 @@ class TestAuditExportControllerTest(
           val records = generateSequence { reader.read() }.toList()
           assertThat(records).hasSize(10)
           assertThat(records.map { it.get("id").toString() }).containsExactlyInAnyOrderElementsOf(events.map { it.id.toString() })
-          assertThat(records.map { it.get("correlationId").toString() }).containsOnly(batchId)
-          assertThat(records.map { it.get("details").toString() }).containsExactlyInAnyOrderElementsOf(
-            (1..10).map { """{"eventNumber":$it}""" },
-          )
+          val eventsById = events.associateBy { it.id.toString() }
+          records.forEach { record ->
+            val event = eventsById.getValue(record.get("id").toString())
+            assertThat(record.get("what").toString()).isEqualTo(event.what)
+            assertThat(record.get("when").toString()).isEqualTo(event.`when`.toString())
+            assertThat(record.get("operationId").toString()).isEqualTo(event.operationId)
+            assertThat(record.get("subjectId").toString()).isEqualTo(event.subjectId)
+            assertThat(record.get("subjectType").toString()).isEqualTo(event.subjectType)
+            assertThat(record.get("correlationId").toString()).isEqualTo(event.correlationId)
+            assertThat(record.get("who").toString()).isEqualTo(event.who)
+            assertThat(record.get("service").toString()).isEqualTo(event.service)
+            assertThat(record.get("details").toString()).isEqualTo(event.details)
+          }
         }
         repository.delete(events.first())
         webTestClient.get().uri("$path/$batchId").headers(setAuthorisation(roles = role))
