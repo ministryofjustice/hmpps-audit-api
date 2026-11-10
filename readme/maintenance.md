@@ -66,4 +66,7 @@ no S3 writes; existing ingestion is unchanged.
 Each creation request produces a separate batch. Downloads exclude ordinary audit
 events and other batches. An unknown batch returns 404; an incomplete or oversized
 batch returns 409. Test records remain in Postgres for repeat downloads.
+New events share a batch-scoped operation ID (the batch UUID including hyphens) and
+subject ID (`TEST_<batchId>`, matching `who`), with subject type `USER_ID`.
+Previously created batches are not changed.
 These endpoints are temporary and should be removed after validating aggregation.
