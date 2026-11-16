@@ -1,8 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -18,9 +18,9 @@ import org.mockito.kotlin.whenever
 import org.springframework.core.task.TaskExecutor
 import org.springframework.core.task.TaskRejectedException
 import org.springframework.web.server.ResponseStatusException
-import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AuditConsolidationConfig
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaProperties
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AuditConsolidationConfig
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import java.nio.file.Files
 import java.nio.file.Path

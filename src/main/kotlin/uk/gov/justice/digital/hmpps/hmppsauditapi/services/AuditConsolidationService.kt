@@ -49,8 +49,7 @@ class AuditConsolidationService(
     }
   }
 
-  private fun generateFilename(eventType: AuditEventType, date: LocalDate) =
-    "${eventType.name.lowercase()}/year=${date.year}/month=${date.monthValue}/day=${date.dayOfMonth}/audit-events.parquet"
+  private fun generateFilename(eventType: AuditEventType, date: LocalDate) = "${eventType.name.lowercase()}/year=${date.year}/month=${date.monthValue}/day=${date.dayOfMonth}/audit-events.parquet"
 
   private fun checkFeatureFlagEnabled(type: AuditEventType) {
     if (!config.enabled) {

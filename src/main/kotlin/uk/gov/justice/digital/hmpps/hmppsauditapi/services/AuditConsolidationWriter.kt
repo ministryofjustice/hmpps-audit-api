@@ -45,13 +45,12 @@ class AuditConsolidationWriter(
     }
   }
 
-  private fun <T> writeEvents(auditEvents: Stream<T>, file: Path, toEvent: (T) -> AuditEvent): Long =
-    auditEvents.use {
-      parquetWriter.write(
-        auditEvents.iterator().asSequence().map { auditEvent ->
-          toEvent(auditEvent).also { entityManager.detach(auditEvent) }
-        },
-        file,
-      )
-    }
+  private fun <T> writeEvents(auditEvents: Stream<T>, file: Path, toEvent: (T) -> AuditEvent): Long = auditEvents.use {
+    parquetWriter.write(
+      auditEvents.iterator().asSequence().map { auditEvent ->
+        toEvent(auditEvent).also { entityManager.detach(auditEvent) }
+      },
+      file,
+    )
+  }
 }
