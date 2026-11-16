@@ -6,7 +6,10 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import java.io.File
+import java.io.OutputStream
 import java.nio.file.Files
+import java.nio.file.Path
+import java.security.DigestInputStream
 import java.security.MessageDigest
 import java.time.ZoneId
 import java.util.Base64
@@ -30,6 +33,19 @@ class AuditS3Client(
       .build()
 
     s3Client.putObject(putObjectRequest, RequestBody.fromBytes(parquetBytes))
+  }
+
+  fun saveConsolidatedAuditEvents(file: Path, bucketName: String, filename: String) {
+    val md5Digest = MessageDigest.getInstance("MD5")
+    DigestInputStream(Files.newInputStream(file), md5Digest).use {
+      it.transferTo(OutputStream.nullOutputStream())
+    }
+    val request = PutObjectRequest.builder()
+      .bucket(bucketName)
+      .key(filename)
+      .contentMD5(Base64.getEncoder().encodeToString(md5Digest.digest()))
+      .build()
+    s3Client.putObject(request, RequestBody.fromFile(file))
   }
 
   private fun generateFilename(auditEvent: AuditEvent): String {
