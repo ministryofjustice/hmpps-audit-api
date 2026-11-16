@@ -101,7 +101,7 @@ class AuditConsolidationServiceTest {
 
     val file = argumentCaptor<Path>()
     verify(consolidationWriter).write(eq(eventType), eq(queryDate), file.capture())
-    verify(auditS3Client).save(file.firstValue, "consolidations", key(eventType))
+    verify(auditS3Client).saveConsolidatedAuditEvents(file.firstValue, "consolidations", key(eventType))
     assertThat(Files.exists(file.firstValue)).isFalse()
   }
 
@@ -120,7 +120,7 @@ class AuditConsolidationServiceTest {
 
   @Test
   fun `background upload failure is handled and the temporary file is removed`() {
-    doThrow(IllegalStateException("Upload failed")).whenever(auditS3Client).save(any<Path>(), any(), any())
+    doThrow(IllegalStateException("Upload failed")).whenever(auditS3Client).saveConsolidatedAuditEvents(any<Path>(), any(), any())
 
     service.startConsolidationJob(eventType, queryDate)
 
@@ -128,7 +128,7 @@ class AuditConsolidationServiceTest {
     verify(executor).execute(task.capture())
     task.firstValue.run()
     val file = argumentCaptor<Path>()
-    verify(auditS3Client).save(file.capture(), eq("consolidations"), eq(key(eventType)))
+    verify(auditS3Client).saveConsolidatedAuditEvents(file.capture(), eq("consolidations"), eq(key(eventType)))
     assertThat(Files.exists(file.firstValue)).isFalse()
   }
 
@@ -152,7 +152,7 @@ class AuditConsolidationServiceTest {
     AuditEventType.entries.forEach { enabledType ->
       allTypes.startConsolidationJob(enabledType, queryDate)
       verify(consolidationWriter).write(eq(enabledType), eq(queryDate), any())
-      verify(auditS3Client).save(any<Path>(), eq("consolidations"), eq(key(enabledType)))
+      verify(auditS3Client).saveConsolidatedAuditEvents(any<Path>(), eq("consolidations"), eq(key(enabledType)))
     }
   }
 

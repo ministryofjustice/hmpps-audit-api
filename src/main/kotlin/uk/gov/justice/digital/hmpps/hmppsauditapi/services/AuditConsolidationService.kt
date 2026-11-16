@@ -42,7 +42,7 @@ class AuditConsolidationService(
     val file = Files.createTempFile("${eventType.name.lowercase()}-audit-consolidation-$queryDate-", ".parquet")
     try {
       val numberOfEvents = consolidationWriter.write(eventType, queryDate, file)
-      auditS3Client.save(file, config.bucketName, generateFilename(eventType, queryDate))
+      auditS3Client.saveConsolidatedAuditEvents(file, config.bucketName, generateFilename(eventType, queryDate))
       log.info("Completed {} audit consolidation for {} with {} events", eventType, queryDate, numberOfEvents)
     } finally {
       Files.deleteIfExists(file)
