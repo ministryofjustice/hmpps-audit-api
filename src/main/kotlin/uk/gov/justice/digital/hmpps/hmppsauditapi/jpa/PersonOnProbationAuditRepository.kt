@@ -1,19 +1,31 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.jpa
 
+import jakarta.persistence.QueryHint
+import org.hibernate.jpa.HibernateHints
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.jpa.repository.QueryHints
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.stereotype.Repository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.PersonOnProbationAuditEvent
 import java.time.Instant
 import java.util.UUID
+import java.util.stream.Stream
 
 @Repository
 interface PersonOnProbationAuditRepository :
   PagingAndSortingRepository<PersonOnProbationAuditEvent, UUID>,
   CrudRepository<PersonOnProbationAuditEvent, UUID> {
+
+  @QueryHints(
+    value = [
+      QueryHint(name = HibernateHints.HINT_FETCH_SIZE, value = "1000"),
+      QueryHint(name = HibernateHints.HINT_READ_ONLY, value = "true"),
+    ],
+  )
+  fun findAllByWhenGreaterThanEqualAndWhenLessThanOrderByWhenAscIdAsc(start: Instant, end: Instant): Stream<PersonOnProbationAuditEvent>
 
   @Query(
     """

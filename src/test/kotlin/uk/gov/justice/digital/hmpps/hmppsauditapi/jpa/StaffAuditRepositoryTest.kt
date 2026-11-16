@@ -23,6 +23,42 @@ class StaffAuditRepositoryTest {
     staffAuditRepository.deleteAll()
   }
 
+  @Nested
+  inner class ConsolidationEvents {
+    @Test
+    fun `streams events within inclusive start and exclusive end ordered by timestamp and id`() {
+      val start = Instant.parse("2025-06-01T00:00:00Z")
+      val end = start.plus(1, ChronoUnit.DAYS)
+      val saved = staffAuditRepository.saveAll(
+        listOf(
+          StaffAuditEvent(what = "LATER", `when` = end.minus(1, ChronoUnit.MICROS)),
+          StaffAuditEvent(what = "FIRST", `when` = start),
+          StaffAuditEvent(what = "SAME_TIME", `when` = start),
+          StaffAuditEvent(what = "BEFORE", `when` = start.minus(1, ChronoUnit.MICROS)),
+          StaffAuditEvent(what = "NEXT_DAY", `when` = end),
+        ),
+      ).toList()
+      val expected = saved.filter { it.`when` >= start && it.`when` < end }
+        .sortedWith(compareBy({ it.`when` }, { it.id.toString() }))
+
+      staffAuditRepository.findAllByWhenGreaterThanEqualAndWhenLessThanOrderByWhenAscIdAsc(start, end).use { events ->
+        assertThat(events.map { it.id }.toList()).containsExactlyElementsOf(expected.map { it.id })
+      }
+    }
+
+    @Test
+    fun `streams no events for an empty day`() {
+      val start = Instant.parse("2025-06-01T00:00:00Z")
+
+      staffAuditRepository.findAllByWhenGreaterThanEqualAndWhenLessThanOrderByWhenAscIdAsc(
+        start,
+        start.plus(1, ChronoUnit.DAYS),
+      ).use { events ->
+        assertThat(events.count()).isZero()
+      }
+    }
+  }
+
   @Suppress("ClassName")
   @Nested
   inner class saveAuditEvents {
