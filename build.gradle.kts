@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.14"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.15"
   kotlin("plugin.spring") version "2.4.21"
   kotlin("plugin.jpa") version "2.4.21"
 }
@@ -26,7 +26,7 @@ dependencyCheck {
 }
 
 dependencies {
-  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:3.0.3")
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:3.1.0")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-flyway")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
@@ -41,10 +41,10 @@ dependencies {
     implementation("org.webjars:swagger-ui:5.34.1")
   }
 
-  implementation("org.apache.commons:commons-lang3:3.21.0")
-  implementation("software.amazon.awssdk:s3:2.57.8")
-  implementation("software.amazon.awssdk:athena:2.57.8")
-  implementation("org.apache.parquet:parquet-avro:1.18.1")
+  implementation("org.apache.commons:commons-lang3:3.22.0")
+  implementation("software.amazon.awssdk:s3:2.58.0")
+  implementation("software.amazon.awssdk:athena:2.58.0")
+  implementation("org.apache.parquet:parquet-avro:1.18.2")
   implementation("org.apache.avro:avro:1.12.2")
   implementation("org.apache.hadoop:hadoop-client:3.5.0") {
     exclude(group = "com.google.protobuf", module = "protobuf-java")
@@ -70,7 +70,7 @@ dependencies {
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
   runtimeOnly("org.postgresql:postgresql:42.7.14")
 
-  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:3.0.3")
+  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:3.1.0")
   testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
   testImplementation("org.springframework.boot:spring-boot-starter-webclient-test")
   testImplementation("org.springframework.boot:spring-boot-starter-webflux-test")
