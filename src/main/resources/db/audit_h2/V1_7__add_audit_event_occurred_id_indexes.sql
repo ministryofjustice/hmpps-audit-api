@@ -1,8 +1,8 @@
-CREATE INDEX staff_occurred_id_idx
-    ON staff.audit_event (occurred, id);
+create index if not exists staff_occurred_id_idx
+    on staff.audit_event (occurred, id);
 
-CREATE INDEX prisoner_occurred_id_idx
-    ON prisoner.audit_event (occurred, id);
+create index if not exists prisoner_occurred_id_idx
+    on prisoner.audit_event (occurred, id);
 
-CREATE INDEX person_on_probation_occurred_id_idx
-    ON person_on_probation.audit_event (occurred, id);
+create index if not exists person_on_probation_occurred_id_idx
+    on person_on_probation.audit_event (occurred, id);
