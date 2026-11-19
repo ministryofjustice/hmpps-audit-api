@@ -21,6 +21,9 @@ spring:
     locations: classpath:db/audit,db/audit_{vendor}
     schemas: staff,prisoner,person_on_probation
     default-schema: staff
+    # Session-level lock so CREATE INDEX CONCURRENTLY migrations don't wait on Flyway's own lock transaction
+    postgresql:
+      transactional-lock: false
 
   security:
     oauth2:
