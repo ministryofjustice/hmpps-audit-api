@@ -156,6 +156,30 @@ class AuditS3ClientTest {
     }
   }
 
+  @Test
+  fun `save uploads consolidated events as an existing Parquet file with its MD5 checksum`() {
+    val file = Files.createTempFile("audit-s3-file-test-", ".parquet")
+    try {
+      AuditParquetWriter(schema).write(sequenceOf(AuditEvent(id = auditEventId, what = "BATCH_EVENT")), file)
+      val bytes = Files.readAllBytes(file)
+
+      auditS3Client.saveConsolidatedAuditEvents(file, "consolidations", "staff/test.parquet")
+
+      verify(s3Client).putObject(putObjectRequestCaptor.capture(), requestBodyCaptor.capture())
+      assertThat(putObjectRequestCaptor.value.bucket()).isEqualTo("consolidations")
+      assertThat(putObjectRequestCaptor.value.key()).isEqualTo("staff/test.parquet")
+      assertThat(putObjectRequestCaptor.value.contentMD5()).isEqualTo(
+        Base64.getEncoder().encodeToString(MessageDigest.getInstance("MD5").digest(bytes)),
+      )
+      requestBodyCaptor.value.contentStreamProvider().newStream().use {
+        assertThat(it.readAllBytes()).isEqualTo(bytes)
+      }
+      assertThat(Files.exists(file)).isTrue()
+    } finally {
+      Files.deleteIfExists(file)
+    }
+  }
+
   private fun verifyUploadedFileContents(
     auditEvent: AuditEvent,
     putObjectRequest: PutObjectRequest,

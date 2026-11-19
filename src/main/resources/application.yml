@@ -18,9 +18,12 @@ spring:
 
   flyway:
     enabled: true
-    locations: classpath:db/audit,db/audit_postgres
+    locations: classpath:db/audit,db/audit_{vendor}
     schemas: staff,prisoner,person_on_probation
     default-schema: staff
+    # Session-level lock so CREATE INDEX CONCURRENTLY migrations don't wait on Flyway's own lock transaction
+    postgresql:
+      transactional-lock: false
 
   security:
     oauth2:
@@ -125,6 +128,10 @@ hmpps:
     saveToS3Bucket: ${SAVE_TO_S3_BUCKET}
   audit:
     queriesStartDate: 2024-01-01
+    consolidation:
+      enabled: ${AUDIT_CONSOLIDATION_ENABLED:false}
+      bucket-name: ${HMPPS_S3_AUDIT_CONSOLIDATION_BUCKET_NAME:}
+      enabled-types: ${AUDIT_CONSOLIDATION_ENABLED_TYPES:STAFF}
   applicationinsights:
     auditEventDetails: ${APPLICATIONINSIGHTS_AUDIT_EVENT_DETAILS}
 

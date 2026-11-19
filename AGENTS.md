@@ -31,7 +31,7 @@ estate and uses standard HMPPS Spring Boot tooling (`hmpps-kotlin-spring-boot-st
   - `exception/` — exception handling
   - `listeners/` + `listeners/model/` — SQS message listeners
   - `services/` — business logic
-- `src/main/resources/db/` — Flyway migrations (`audit`, `audit_h2`, `audit_postgres`)
+- `src/main/resources/db/` — Flyway migrations (`audit`, `audit_h2`, `audit_postgresql`)
 - `src/test/kotlin/...` — tests mirroring the main package structure
 - `readme/` — detailed docs (build/test/run, maintenance, inserting data, queue admin)
 - `helm_deploy/` — Helm chart for deployment
