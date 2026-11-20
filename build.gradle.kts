@@ -17,6 +17,12 @@ configurations {
       force("commons-beanutils:commons-beanutils:1.11.0")
       // Mitigate CVE-2026-54399 until upstream BOMs/plugins converge on a fixed baseline.
       force("org.apache.httpcomponents.client5:httpclient5:5.6.1")
+      // used by hadoop-auth but 2.0.3 has CVE-2026-57914 remove when hadoop has been upgraded
+      eachDependency {
+        if (requested.group == "org.apache.kerby") useVersion("2.1.2")
+      }
+      // used by hadoop but 1.5.0 shades guava with CVE-2026-102554 (1.6.0 shades 33.7.2-jre) remove when hadoop has been upgraded
+      force("org.apache.hadoop.thirdparty:hadoop-shaded-guava:1.6.0")
     }
   }
 }
