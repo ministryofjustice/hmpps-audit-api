@@ -13,6 +13,7 @@ generic-service:
     shutdown: '35 21 * * 1-5' # Stop at 9:35pm UTC Monday-Friday
 
   env:
+    SPRING_PROFILES_ACTIVE: "logstash,aws-testing"
     OAUTH_ENDPOINT_URL: "http://hmpps-auth.hmpps-auth-dev.svc.cluster.local/auth"
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
     APPLICATIONINSIGHTS_AUDIT_EVENT_DETAILS: "true"

@@ -52,3 +52,11 @@ The service can be run similarly within IntelliJ by running the main class with 
 -Dspring.profiles.active=dev,localstack
 ```
 
+
+### Spring profiles
+
+- `dev` – local development only (H2, LocalStack, port 8081), configured in `application-dev.yml`.
+  Not used in any deployed environment.
+- `aws-testing` – active only in the deployed dev environment (set via `SPRING_PROFILES_ACTIVE` in
+  `helm_deploy/values-dev.yaml`). Use `@Profile("aws-testing")` for beans that should only exist there
+  (e.g. `DevTestingController`), and `application-aws-testing.yaml` for property overrides.
