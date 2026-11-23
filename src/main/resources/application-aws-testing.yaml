@@ -1,0 +1,2 @@
+# Overrides for the deployed dev environment (activated via SPRING_PROFILES_ACTIVE in helm_deploy/values-dev.yaml).
+# Not to be confused with application-dev.yml, which is for running the app locally.

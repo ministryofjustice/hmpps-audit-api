@@ -61,7 +61,7 @@ Skip ktlint validation and formatting entirely.
 Run the app locally (dependencies via docker compose, app via Gradle):
 ```bash
 TMPDIR=/private$TMPDIR docker compose up --scale hmpps-audit-api=0
-./gradlew bootRun --args='--spring.profiles.active=local,localstack'
+./gradlew bootRun --args='--spring.profiles.active=dev,localstack'
 ```
 
 See `readme/build_test_run.md`, `readme/maintenance.md`, `readme/inserting_data.md`,

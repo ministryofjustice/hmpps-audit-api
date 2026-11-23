@@ -21,7 +21,7 @@ services:
     environment:
       - JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=50.0 -XX:+ExitOnOutOfMemoryError
       - SERVER_PORT=8080
-      - SPRING_PROFILES_ACTIVE=local,localstack
+      - SPRING_PROFILES_ACTIVE=dev,localstack
 
   audit-db:
     image: postgres:18
