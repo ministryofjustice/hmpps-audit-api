@@ -44,11 +44,19 @@ TMPDIR=/private$TMPDIR  docker compose up --scale hmpps-audit-api=0
 
 And then using gradle:
 ```
-./gradlew bootRun --args='--spring.profiles.active=dev,localstack'
+./gradlew bootRun --args='--spring.profiles.active=local,localstack'
 ```
 
 The service can be run similarly within IntelliJ by running the main class with the following VM options:
 ```
--Dspring.profiles.active=dev,localstack
+-Dspring.profiles.active=local,localstack
 ```
 
+
+### Spring profiles
+
+- `local` – local development only (H2, LocalStack, port 8081), configured in `application-local.yml`.
+  Not used in any deployed environment.
+- `dev` – active only in the deployed dev environment (set via `SPRING_PROFILES_ACTIVE` in
+  `helm_deploy/values-dev.yaml`). Use `@Profile("dev")` for beans that should only exist there
+  (e.g. `DevTestingController`), and `application-dev.yml` for dev-environment property overrides.

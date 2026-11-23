@@ -1,0 +1,52 @@
+server:
+  shutdown: immediate
+  port: 8081
+
+oauth:
+  endpoint.url: http://localhost:9090/auth
+
+spring:
+  datasource:
+    url: 'jdbc:h2:mem:audit-db;MODE=PostgreSQL'
+  h2:
+    console:
+      enabled: false
+  jpa:
+    show-sql: true
+  flyway:
+    locations: classpath:/db/audit,/db/audit_h2
+    schemas: staff,prisoner,person_on_probation
+    default-schema: staff
+
+hmpps:
+  repository:
+    saveToS3Bucket: true
+  audit:
+    queriesStartDate: 2024-01-01
+  applicationinsights:
+    auditEventDetails: True
+  sqs:
+    provider: localstack
+    queues:
+      auditqueue:
+        queueName: mainQueue
+        asyncQueueClient: true
+        dlqName: mainDlq
+      auditusersqueue:
+        queueName: auditUsersQueue
+        asyncQueueClient: true
+        dlqName: auditUsersDlq
+      prisonerauditqueue:
+        queueName: prisonerQueue
+        asyncQueueClient: true
+        dlqName: prisonerDlq
+      persononprobationauditqueue:
+        queueName: persononprobationQueue
+        asyncQueueClient: true
+        dlqName: persononprobationDlq
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
