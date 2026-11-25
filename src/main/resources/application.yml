@@ -130,7 +130,6 @@ hmpps:
     queriesStartDate: 2024-01-01
     consolidation:
       enabled: ${AUDIT_CONSOLIDATION_ENABLED:false}
-      bucket-name: ${HMPPS_S3_AUDIT_CONSOLIDATION_BUCKET_NAME:}
       enabled-types: ${AUDIT_CONSOLIDATION_ENABLED_TYPES:STAFF}
   applicationinsights:
     auditEventDetails: ${APPLICATIONINSIGHTS_AUDIT_EVENT_DETAILS}
