@@ -52,8 +52,6 @@ class AuditConsolidationService(
     }
   }
 
-  private fun generateFilename(eventType: AuditEventType, date: LocalDate) = "${eventType.name.lowercase()}/year=${date.year}/month=${date.monthValue}/day=${date.dayOfMonth}/audit-events.parquet"
-
   private fun checkFeatureFlagEnabled(type: AuditEventType) {
     if (!config.featureFlagEnabled) {
       log.warn("{} audit consolidation requested while consolidations are disabled", type)
@@ -69,3 +67,5 @@ class AuditConsolidationService(
     val log: Logger = LoggerFactory.getLogger(AuditConsolidationService::class.java)
   }
 }
+
+fun generateFilename(eventType: AuditEventType, date: LocalDate) = "${eventType.name.lowercase()}/year=${date.year}/month=${date.monthValue}/day=${date.dayOfMonth}/audit-events.parquet"

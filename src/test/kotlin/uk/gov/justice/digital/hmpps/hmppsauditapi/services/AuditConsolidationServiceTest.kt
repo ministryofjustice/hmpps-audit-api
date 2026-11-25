@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
+import org.mockito.Mockito.lenient
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
@@ -48,14 +49,15 @@ class AuditConsolidationServiceTest {
   @BeforeEach
   fun setUp() {
     AuditEventType.entries.forEach { eventType ->
-      whenever(propertiesFactory.getProperties(eventType)).thenReturn(
+      lenient().`when`(propertiesFactory.getProperties(eventType)).thenReturn(
         AthenaProperties(eventType, "${eventType.name.lowercase()}-audit", "", "", "", ""),
       )
     }
     service = AuditConsolidationService(
-      AuditConsolidationConfig(true, "consolidations", setOf(eventType), propertiesFactory),
+      AuditConsolidationConfig(true, setOf(eventType), propertiesFactory),
       consolidationWriter,
       auditS3Client,
+      propertiesFactory,
       executor,
     )
   }
@@ -63,9 +65,10 @@ class AuditConsolidationServiceTest {
   @Test
   fun `disabled consolidations reject submission without starting work`() {
     val disabled = AuditConsolidationService(
-      AuditConsolidationConfig(false, "", setOf(eventType), propertiesFactory),
+      AuditConsolidationConfig(false, setOf(eventType), propertiesFactory),
       consolidationWriter,
       auditS3Client,
+      propertiesFactory,
       executor,
     )
 
@@ -94,14 +97,14 @@ class AuditConsolidationServiceTest {
   }
 
   @Test
-  fun `consolidation uploads the generated file then removes it`() {
+  fun `consolidation uploads the generated file to the event type's audit bucket then removes it`() {
     runTasksImmediately()
 
     service.startConsolidationJob(eventType, queryDate)
 
     val file = argumentCaptor<Path>()
     verify(consolidationWriter).write(eq(eventType), eq(queryDate), file.capture())
-    verify(auditS3Client).saveConsolidatedAuditEvents(file.firstValue, "consolidations", key(eventType))
+    verify(auditS3Client).saveConsolidatedAuditEvents(file.firstValue, bucket(eventType), key(eventType))
     assertThat(Files.exists(file.firstValue)).isFalse()
   }
 
@@ -128,7 +131,7 @@ class AuditConsolidationServiceTest {
     verify(executor).execute(task.capture())
     task.firstValue.run()
     val file = argumentCaptor<Path>()
-    verify(auditS3Client).saveConsolidatedAuditEvents(file.capture(), eq("consolidations"), eq(key(eventType)))
+    verify(auditS3Client).saveConsolidatedAuditEvents(file.capture(), eq(bucket(eventType)), eq(key(eventType)))
     assertThat(Files.exists(file.firstValue)).isFalse()
   }
 
@@ -144,17 +147,20 @@ class AuditConsolidationServiceTest {
   fun `enabled event types flow through the same consolidation pipeline`() {
     runTasksImmediately()
     val allTypes = AuditConsolidationService(
-      AuditConsolidationConfig(true, "consolidations", AuditEventType.entries.toSet(), propertiesFactory),
+      AuditConsolidationConfig(true, AuditEventType.entries.toSet(), propertiesFactory),
       consolidationWriter,
       auditS3Client,
+      propertiesFactory,
       executor,
     )
     AuditEventType.entries.forEach { enabledType ->
       allTypes.startConsolidationJob(enabledType, queryDate)
       verify(consolidationWriter).write(eq(enabledType), eq(queryDate), any())
-      verify(auditS3Client).saveConsolidatedAuditEvents(any<Path>(), eq("consolidations"), eq(key(enabledType)))
+      verify(auditS3Client).saveConsolidatedAuditEvents(any<Path>(), eq(bucket(enabledType)), eq(key(enabledType)))
     }
   }
+
+  private fun bucket(type: AuditEventType) = "${type.name.lowercase()}-audit"
 
   private fun key(type: AuditEventType) = "${type.name.lowercase()}/year=2025/month=1/day=1/audit-events.parquet"
 
