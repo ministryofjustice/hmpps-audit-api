@@ -45,7 +45,7 @@ class AuditConsolidationService(
     try {
       val numberOfEvents = consolidationWriter.write(eventType, queryDate, file)
       val s3BucketName = athenaPropertiesFactory.getProperties(eventType).s3BucketName
-      auditS3Client.saveConsolidatedAuditEvents(file, s3BucketName, generateFilename(eventType, queryDate),)
+      auditS3Client.saveConsolidatedAuditEvents(file, s3BucketName, generateFilename(eventType, queryDate))
       log.info("Completed {} audit consolidation for {} with {} events", eventType, queryDate, numberOfEvents)
     } finally {
       Files.deleteIfExists(file)
