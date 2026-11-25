@@ -8,6 +8,7 @@ import org.springframework.core.task.TaskRejectedException
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AuditConsolidationConfig
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import java.nio.file.Files
@@ -18,12 +19,13 @@ class AuditConsolidationService(
   private val config: AuditConsolidationConfig,
   private val consolidationWriter: AuditConsolidationWriter,
   private val auditS3Client: AuditS3Client,
-  @Qualifier("auditConsolidationExecutor") private val executor: TaskExecutor,
+  private val athenaPropertiesFactory: AthenaPropertiesFactory,
+  @Qualifier("auditConsolidationExecutor") private val taskExecutor: TaskExecutor,
 ) {
   fun startConsolidationJob(eventType: AuditEventType, queryDate: LocalDate) {
     checkFeatureFlagEnabled(eventType)
     try {
-      executor.execute {
+      taskExecutor.execute {
         try {
           consolidateAuditEventsOnDate(eventType, queryDate)
         } catch (e: Exception) {
@@ -42,7 +44,8 @@ class AuditConsolidationService(
     val file = Files.createTempFile("${eventType.name.lowercase()}-audit-consolidation-$queryDate-", ".parquet")
     try {
       val numberOfEvents = consolidationWriter.write(eventType, queryDate, file)
-      auditS3Client.saveConsolidatedAuditEvents(file, config.bucketName, generateFilename(eventType, queryDate))
+      val s3BucketName = athenaPropertiesFactory.getProperties(eventType).s3BucketName
+      auditS3Client.saveConsolidatedAuditEvents(file, s3BucketName, generateFilename(eventType, queryDate),)
       log.info("Completed {} audit consolidation for {} with {} events", eventType, queryDate, numberOfEvents)
     } finally {
       Files.deleteIfExists(file)
@@ -52,11 +55,11 @@ class AuditConsolidationService(
   private fun generateFilename(eventType: AuditEventType, date: LocalDate) = "${eventType.name.lowercase()}/year=${date.year}/month=${date.monthValue}/day=${date.dayOfMonth}/audit-events.parquet"
 
   private fun checkFeatureFlagEnabled(type: AuditEventType) {
-    if (!config.enabled) {
+    if (!config.featureFlagEnabled) {
       log.warn("{} audit consolidation requested while consolidations are disabled", type)
       throw ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Audit consolidations are disabled")
     }
-    if (type !in config.enabledTypes) {
+    if (type !in config.enabledAuditEventTypes) {
       log.info("Audit consolidations are not enabled for {}", type)
       throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Audit consolidations are not enabled for $type")
     }
