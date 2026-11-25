@@ -5,6 +5,7 @@ import org.apache.avro.generic.GenericRecord
 import org.apache.hadoop.fs.Path
 import org.apache.parquet.avro.AvroParquetReader
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -15,10 +16,20 @@ import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.then
+import org.mockito.kotlin.whenever
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest
+import software.amazon.awssdk.services.s3.model.GetObjectRequest
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import software.amazon.awssdk.services.s3.model.S3Exception
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import java.nio.file.Files
 import java.security.MessageDigest
@@ -178,6 +189,59 @@ class AuditS3ClientTest {
     } finally {
       Files.deleteIfExists(file)
     }
+  }
+
+  @Nested
+  inner class Download {
+    private val file: java.nio.file.Path = Files.createTempFile("audit-s3-download-test-", ".parquet")
+
+    @AfterEach
+    fun tearDown() {
+      Files.deleteIfExists(file)
+    }
+
+    @Test
+    fun `download removes any existing local file then fetches the object to it`() {
+      doAnswer {
+        assertThat(Files.exists(file)).isFalse()
+        null
+      }.whenever(s3Client).getObject(any<GetObjectRequest>(), any<java.nio.file.Path>())
+
+      val downloaded = auditS3Client.download("staff-audit", "staff/year=1990/month=1/day=1/audit-events.parquet", file)
+
+      assertThat(downloaded).isTrue()
+      val request = argumentCaptor<GetObjectRequest>()
+      verify(s3Client).getObject(request.capture(), eq(file))
+      assertThat(request.firstValue.bucket()).isEqualTo("staff-audit")
+      assertThat(request.firstValue.key()).isEqualTo("staff/year=1990/month=1/day=1/audit-events.parquet")
+    }
+
+    @Test
+    fun `download returns false when the object does not exist`() {
+      doThrow(NoSuchKeyException.builder().message("Not found").build())
+        .whenever(s3Client).getObject(any<GetObjectRequest>(), any<java.nio.file.Path>())
+
+      assertThat(auditS3Client.download("staff-audit", "missing.parquet", file)).isFalse()
+    }
+
+    @Test
+    fun `download rethrows other S3 errors`() {
+      doThrow(S3Exception.builder().message("Access denied").statusCode(403).build())
+        .whenever(s3Client).getObject(any<GetObjectRequest>(), any<java.nio.file.Path>())
+
+      assertThrows<S3Exception> { auditS3Client.download("staff-audit", "forbidden.parquet", file) }
+    }
+  }
+
+  @Test
+  fun `delete removes the object from the bucket`() {
+    auditS3Client.delete("prisoner-audit", "prisoner/year=1990/month=1/day=1/audit-events.parquet")
+
+    val request = argumentCaptor<DeleteObjectRequest>()
+
+    verify(s3Client).deleteObject(request.capture())
+    assertThat(request.firstValue.bucket()).isEqualTo("prisoner-audit")
+    assertThat(request.firstValue.key()).isEqualTo("prisoner/year=1990/month=1/day=1/audit-events.parquet")
   }
 
   private fun verifyUploadedFileContents(
