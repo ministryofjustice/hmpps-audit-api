@@ -46,8 +46,14 @@ class DevTestingController(
 ) {
 
   data class ConsolidationTestEvents(
+    val runId: String,
     val date: LocalDate,
     val events: List<AuditEvent>,
+  )
+
+  data class ConsolidationTestRun(
+    val runId: String,
+    val date: LocalDate,
   )
 
   data class ConsolidationTestResult(
@@ -75,54 +81,56 @@ class DevTestingController(
     ).sortedBy { it.`when` }
 
     log.info("Created {} {} consolidation test events for {}", savedEvents.size, auditEventType, targetTestDate)
-    return ConsolidationTestEvents(targetTestDate, savedEvents)
+    return ConsolidationTestEvents(runId, targetTestDate, savedEvents)
   }
 
   @PostMapping("/consolidation/{auditEventType}/assertion")
   fun assertConsolidatedFile(
     @PathVariable auditEventType: AuditEventType,
-    @RequestBody expected: ConsolidationTestEvents,
+    @RequestBody testRun: ConsolidationTestRun,
   ): ResponseEntity<ConsolidationTestResult> {
     checkSupported(auditEventType)
-    if (expected.events.isEmpty() || expected.events.any { it.id == null }) {
-      throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Expected events must be non-empty and have IDs")
-    }
+    val testRunEvents = findRequiredTestRunEvents(auditEventType, testRun)
+    val testRunEventIds = testRunEvents.mapNotNull { it.id }.toSet()
     val bucketName = athenaPropertiesFactory.getProperties(auditEventType).s3BucketName
-    val key = generateFilename(auditEventType, expected.date)
-    val expectedEvents = expected.events.sortedBy { it.`when` }
-    val file = Files.createTempFile("${auditEventType.name.lowercase()}-consolidation-test-${expected.date}-", ".parquet")
+    val key = generateFilename(auditEventType, testRun.date)
+    val file = Files.createTempFile("${auditEventType.name.lowercase()}-consolidation-test-${testRun.date}-", ".parquet")
 
     try {
       if (!auditS3Client.download(bucketName, key, file)) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-          ConsolidationTestResult(false, "Consolidated file s3://$bucketName/$key not found yet", null, expectedEvents),
+          ConsolidationTestResult(false, "Consolidated file s3://$bucketName/$key not found yet", null, testRunEvents),
         )
       }
-
-      return try {
-        // The file may also contain other events for the same day, so only compare the generated test events
-        val expectedIds = expectedEvents.map { it.id }.toSet()
-        val actualEvents = readAuditEvents(file).filter { it.id in expectedIds }
-        if (actualEvents == expectedEvents) {
-          ResponseEntity.ok(
-            ConsolidationTestResult(true, "Test successful. Consolidated file contains the test events", actualEvents, expectedEvents),
-          )
-        } else {
-          ResponseEntity.internalServerError().body(
-            ConsolidationTestResult(false, "Test failed. Consolidated file does not contain the expected test events", actualEvents, expectedEvents),
-          )
-        }
-      } catch (ex: Exception) {
-        log.error("Failed to read consolidated file s3://{}/{}", bucketName, key, ex)
-        ResponseEntity.internalServerError().body(
-          ConsolidationTestResult(false, "Exception during test: ${ex.message}", null, expectedEvents),
-        )
-      } finally {
-        cleanUp(auditEventType, expected, bucketName, key)
-      }
+      val fileContents = tryReadAuditEvents(file, testRunEventIds, bucketName, key)
+      cleanUp(auditEventType, testRun, testRunEventIds, bucketName, key, fileContents.getOrNull()?.containsOnly(testRunEventIds) == true)
+      return fileContents.fold(
+        onSuccess = { assertionResult(it.matchingEvents, testRunEvents) },
+        onFailure = { ResponseEntity.internalServerError().body(ConsolidationTestResult(false, "Exception during test: ${it.message}", null, testRunEvents)) },
+      )
     } finally {
       Files.deleteIfExists(file)
     }
+  }
+
+  // Only events persisted by this test run are asserted on or deleted, so other audit data is never touched
+  private fun findRequiredTestRunEvents(auditEventType: AuditEventType, testRun: ConsolidationTestRun): List<AuditEvent> = findTestRunEvents(auditEventType, testRun.runId, testRun.date).ifEmpty {
+    throw ResponseStatusException(HttpStatus.BAD_REQUEST, "No events found for consolidation test run ${testRun.runId} on ${testRun.date}")
+  }
+
+  private fun tryReadAuditEvents(file: Path, ids: Set<UUID>, bucketName: String, key: String): Result<ConsolidatedFileContents> = try {
+    Result.success(readAuditEvents(file, ids))
+  } catch (ex: Exception) {
+    log.error("Failed to read consolidated file s3://{}/{}", bucketName, key, ex)
+    Result.failure(ex)
+  }
+
+  private fun assertionResult(actualEvents: List<AuditEvent>, expectedEvents: List<AuditEvent>): ResponseEntity<ConsolidationTestResult> = if (actualEvents == expectedEvents) {
+    ResponseEntity.ok(ConsolidationTestResult(true, "Test successful. Consolidated file contains the test events", actualEvents, expectedEvents))
+  } else {
+    ResponseEntity.internalServerError().body(
+      ConsolidationTestResult(false, "Test failed. Consolidated file does not contain the expected test events", actualEvents, expectedEvents),
+    )
   }
 
   private fun checkSupported(auditEventType: AuditEventType) {
@@ -137,26 +145,53 @@ class DevTestingController(
     else -> throw IllegalArgumentException("Unsupported audit event type $auditEventType")
   }
 
-  private fun deleteTestEvents(auditEventType: AuditEventType, ids: List<UUID>) = when (auditEventType) {
+  private fun findTestRunEvents(auditEventType: AuditEventType, runId: String, date: LocalDate): List<AuditEvent> {
+    val start = date.atStartOfDay().toInstant(ZoneOffset.UTC)
+    val end = start.plusMillis(MILLIS_PER_DAY)
+    return when (auditEventType) {
+      AuditEventType.STAFF -> staffAuditRepository
+        .findAllByWhatAndCorrelationIdAndWhenGreaterThanEqualAndWhenLessThanOrderByWhenAscIdAsc(TEST_EVENT_WHAT, runId, start, end)
+        .map { it.toAuditEvent() }
+      AuditEventType.PRISONER -> prisonerAuditRepository
+        .findAllByWhatAndCorrelationIdAndWhenGreaterThanEqualAndWhenLessThanOrderByWhenAscIdAsc(TEST_EVENT_WHAT, runId, start, end)
+        .map { it.toAuditEvent() }
+      else -> throw IllegalArgumentException("Unsupported audit event type $auditEventType")
+    }
+  }
+
+  private fun deleteTestEvents(auditEventType: AuditEventType, ids: Collection<UUID>) = when (auditEventType) {
     AuditEventType.STAFF -> staffAuditRepository.deleteAllById(ids)
     AuditEventType.PRISONER -> prisonerAuditRepository.deleteAllById(ids)
     else -> throw IllegalArgumentException("Unsupported audit event type $auditEventType")
   }
 
   private fun createTestEvent(time: Instant, runId: String, index: Int) = AuditEvent(
-    what = "CONSOLIDATION_INTEGRATION_TEST",
+    what = TEST_EVENT_WHAT,
     `when` = time,
     operationId = UUID.randomUUID().toString(),
     subjectId = "subject-$index",
     subjectType = "CONSOLIDATION_TEST",
     correlationId = runId,
-    who = "CONSOLIDATION_TEST",
+    who = TEST_EVENT_WHO,
     service = "hmpps-audit-api",
     details = "{\"index\": $index}",
   )
 
-  private fun readAuditEvents(file: Path): List<AuditEvent> = AvroParquetReader.builder<GenericRecord>(LocalInputFile(file)).build().use { reader ->
-    generateSequence { reader.read() }.map { it.toAuditEvent() }.toList()
+  private data class ConsolidatedFileContents(val matchingEvents: List<AuditEvent>, val totalEvents: Long) {
+    // The file may also contain other events for the same day; it only belongs to the test run if it holds nothing else
+    fun containsOnly(ids: Set<UUID>) = totalEvents == ids.size.toLong() &&
+      matchingEvents.size == ids.size &&
+      matchingEvents.mapNotNull { it.id }.toSet() == ids
+  }
+
+  private fun readAuditEvents(file: Path, ids: Set<UUID>): ConsolidatedFileContents = AvroParquetReader.builder<GenericRecord>(LocalInputFile(file)).build().use { reader ->
+    var totalEvents = 0L
+    val matchingEvents = generateSequence { reader.read() }
+      .onEach { totalEvents++ }
+      .filter { UUID.fromString(it.get("id").toString()) in ids }
+      .map { it.toAuditEvent() }
+      .toList()
+    ConsolidatedFileContents(matchingEvents, totalEvents)
   }
 
   private fun GenericRecord.toAuditEvent() = AuditEvent(
@@ -172,13 +207,24 @@ class DevTestingController(
     details = get("details")?.toString(),
   )
 
-  private fun cleanUp(auditEventType: AuditEventType, expected: ConsolidationTestEvents, bucketName: String, key: String) {
+  private fun cleanUp(
+    auditEventType: AuditEventType,
+    testRun: ConsolidationTestRun,
+    testRunEventIds: Set<UUID>,
+    bucketName: String,
+    key: String,
+    deleteFile: Boolean,
+  ) {
     try {
-      deleteTestEvents(auditEventType, expected.events.mapNotNull { it.id })
-      auditS3Client.delete(bucketName, key)
-      log.info("Cleaned up {} consolidation test events and file for {}", auditEventType, expected.date)
+      deleteTestEvents(auditEventType, testRunEventIds)
+      if (deleteFile) {
+        auditS3Client.delete(bucketName, key)
+      } else {
+        log.warn("Leaving s3://{}/{} in place as it does not contain only test run {} events", bucketName, key, testRun.runId)
+      }
+      log.info("Cleaned up {} consolidation test run {} for {}", auditEventType, testRun.runId, testRun.date)
     } catch (ex: Exception) {
-      log.error("Failed to clean up {} consolidation test data for {}", auditEventType, expected.date, ex)
+      log.error("Failed to clean up {} consolidation test run {} for {}", auditEventType, testRun.runId, testRun.date, ex)
     }
   }
 
@@ -186,6 +232,8 @@ class DevTestingController(
     val log: Logger = LoggerFactory.getLogger(DevTestingController::class.java)
     val SUPPORTED_TYPES = setOf(AuditEventType.STAFF, AuditEventType.PRISONER)
     const val NUMBER_OF_TEST_EVENTS = 10
+    const val TEST_EVENT_WHAT = "CONSOLIDATION_INTEGRATION_TEST"
+    const val TEST_EVENT_WHO = "CONSOLIDATION_TEST"
     const val MILLIS_PER_DAY = 24L * 60 * 60 * 1000
     val TEST_DATE_RANGE_START: LocalDate = LocalDate.of(1900, 1, 1)
     val TEST_DATE_RANGE_END_EXCLUSIVE: LocalDate = LocalDate.of(2023, 1, 1)
