@@ -149,12 +149,14 @@ class DevTestingController(
     val start = date.atStartOfDay().toInstant(ZoneOffset.UTC)
     val end = start.plusMillis(MILLIS_PER_DAY)
     return when (auditEventType) {
-      AuditEventType.STAFF -> staffAuditRepository
-        .findAllByWhatAndCorrelationIdAndWhenGreaterThanEqualAndWhenLessThanOrderByWhenAscIdAsc(TEST_EVENT_WHAT, runId, start, end)
-        .map { it.toAuditEvent() }
-      AuditEventType.PRISONER -> prisonerAuditRepository
-        .findAllByWhatAndCorrelationIdAndWhenGreaterThanEqualAndWhenLessThanOrderByWhenAscIdAsc(TEST_EVENT_WHAT, runId, start, end)
-        .map { it.toAuditEvent() }
+      AuditEventType.STAFF ->
+        staffAuditRepository
+          .findAllByWhatAndCorrelationIdAndWhenGreaterThanEqualAndWhenLessThanOrderByWhenAscIdAsc(TEST_EVENT_WHAT, runId, start, end)
+          .map { it.toAuditEvent() }
+      AuditEventType.PRISONER ->
+        prisonerAuditRepository
+          .findAllByWhatAndCorrelationIdAndWhenGreaterThanEqualAndWhenLessThanOrderByWhenAscIdAsc(TEST_EVENT_WHAT, runId, start, end)
+          .map { it.toAuditEvent() }
       else -> throw IllegalArgumentException("Unsupported audit event type $auditEventType")
     }
   }
