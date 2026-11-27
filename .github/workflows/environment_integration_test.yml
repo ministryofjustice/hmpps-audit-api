@@ -86,3 +86,25 @@ jobs:
           echo "Generated $NUMBER_OF_EVENTS $AUDIT_EVENT_TYPE consolidation test events for $TEST_DATE (run $RUN_ID)"
           echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
           echo "test_date=$TEST_DATE" >> $GITHUB_OUTPUT
+
+      - name: Step 2 - Trigger consolidation for the test date
+        env:
+          TOKEN: ${{ steps.get_token.outputs.token }}
+          RUN_ID: ${{ steps.generate_events.outputs.run_id }}
+          TEST_DATE: ${{ steps.generate_events.outputs.test_date }}
+        run: |
+          RESPONSE=$(curl -sS --fail-with-body -w "\nHTTP status: %{http_code}" \
+            -X POST "$ENV_TEST_URL/internal/dev-testing/consolidation/$AUDIT_EVENT_TYPE/consolidations" \
+            -H "Content-Type: application/json" \
+            --data "{\"runId\": \"$RUN_ID\", \"date\": \"$TEST_DATE\"}" \
+            -H "Authorization: Bearer $TOKEN") || {
+            echo "::error::Trigger consolidation request failed. Response body:"
+            echo "$RESPONSE"
+            exit 1
+          }
+
+          echo "$RESPONSE"
+          echo "Consolidation of $AUDIT_EVENT_TYPE audit events for $TEST_DATE accepted"
+
+      - name: Wait for consolidation job to complete
+        run: sleep 5
