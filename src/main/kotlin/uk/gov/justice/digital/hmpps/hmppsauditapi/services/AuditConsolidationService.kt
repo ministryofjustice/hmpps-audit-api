@@ -63,9 +63,9 @@ class AuditConsolidationService(
     }
   }
 
-  private fun generateFilename(eventType: AuditEventType, date: LocalDate) = "${eventType.name.lowercase()}/year=${date.year}/month=${date.monthValue}/day=${date.dayOfMonth}/audit-events.parquet"
-
   private companion object {
     val log: Logger = LoggerFactory.getLogger(AuditConsolidationService::class.java)
   }
 }
+
+fun generateFilename(eventType: AuditEventType, date: LocalDate) = "${eventType.name.lowercase()}/year=${date.year}/month=${date.monthValue}/day=${date.dayOfMonth}/audit-events.parquet"
