@@ -59,86 +59,30 @@ jobs:
           echo "::add-mask::$TOKEN"
           echo "token=$TOKEN" >> $GITHUB_OUTPUT
 
-      - name: Step 1 - Create audit event and register partition
-        id: create_event
+      - name: Step 1 - Generate consolidation test events
+        id: generate_events
+        env:
+          TOKEN: ${{ steps.get_token.outputs.token }}
         run: |
           RESPONSE=$(curl -sS --fail-with-body \
-            -X POST "$ENV_TEST_URL/internal/integration-test/audit-event/$AUDIT_EVENT_TYPE" \
-            -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
-            -H "Content-Type: application/json") || {
-            echo "::error::Create audit event request failed. Response body:"
+            -X POST "$ENV_TEST_URL/internal/dev-testing/consolidation/$AUDIT_EVENT_TYPE/test-events" \
+            -H "Authorization: Bearer $TOKEN") || {
+            echo "::error::Generate consolidation test events request failed. Response body:"
             echo "$RESPONSE" | jq . 2>/dev/null || echo "$RESPONSE"
             exit 1
           }
 
-          echo "Audit event response: $RESPONSE"
-          echo "$RESPONSE" > audit_event.json
+          echo "Generate consolidation test events response:"
+          echo "$RESPONSE" | jq .
+          echo "$RESPONSE" > consolidation_test_events.json
 
-      - name: Step 2 - Query Athena and assert audit event exists
-        env:
-          TOKEN: ${{ steps.get_token.outputs.token }}
-        run: |
-          WHO=$(jq -r '.who' audit_event.json)
-          echo "Using 'who' value for query: $WHO"
-
-          # S3 write and Athena partition registration happen asynchronously after the event is consumed,
-          # so retry the whole query/assert cycle a few times before failing.
-          MAX_ATTEMPTS=5
-          for attempt in $(seq 1 $MAX_ATTEMPTS); do
-            sleep 10
-            echo "::group::Attempt $attempt of $MAX_ATTEMPTS"
-
-            RESPONSE=$(curl -sS --fail-with-body \
-              -X POST "$ENV_TEST_URL/internal/integration-test/query/$AUDIT_EVENT_TYPE/$WHO" \
-              -H "Authorization: Bearer $TOKEN") || {
-              echo "::error::Trigger audit query request failed. Response body:"
-              echo "$RESPONSE" | jq . 2>/dev/null || echo "$RESPONSE"
-              exit 1
-            }
-            QUERY_ID=$(echo "$RESPONSE" | jq -r '.queryExecutionId')
-            echo "Triggered audit query: $QUERY_ID"
-
-            QUERY_STATE=""
-            for poll in {1..36}; do
-              RESPONSE=$(curl -sS --fail-with-body \
-                "$ENV_TEST_URL/internal/integration-test/query/$AUDIT_EVENT_TYPE/$QUERY_ID" \
-                -H "Authorization: Bearer $TOKEN") || {
-                echo "::error::Poll audit query request failed. Response body:"
-                echo "$RESPONSE" | jq . 2>/dev/null || echo "$RESPONSE"
-                exit 1
-              }
-              QUERY_STATE=$(echo "$RESPONSE" | jq -r '.queryState')
-              if [[ "$QUERY_STATE" == "SUCCEEDED" ]]; then
-                break
-              elif [[ "$QUERY_STATE" == "FAILED" || "$QUERY_STATE" == "CANCELLED" ]]; then
-                echo "::error::Audit query finished with state $QUERY_STATE. Response body:"
-                echo "$RESPONSE" | jq . 2>/dev/null || echo "$RESPONSE"
-                exit 1
-              fi
-              sleep 5
-            done
-            if [[ "$QUERY_STATE" != "SUCCEEDED" ]]; then
-              echo "::error::Timed out waiting for audit query $QUERY_ID to succeed after 3 minutes."
-              exit 1
-            fi
-            echo "Audit query $QUERY_ID succeeded."
-
-            if RESPONSE=$(curl -sS --fail-with-body \
-              -X POST "$ENV_TEST_URL/internal/integration-test/assertion/$QUERY_ID" \
-              -H "Authorization: Bearer $TOKEN" \
-              -H "Content-Type: application/json" \
-              --data @audit_event.json); then
-              echo "::endgroup::"
-              echo "Assertion passed on attempt $attempt:"
-              echo "$RESPONSE" | jq . 2>/dev/null || echo "$RESPONSE"
-              exit 0
-            fi
-
-            echo "Assertion failed on attempt $attempt. Response body:"
-            echo "$RESPONSE" | jq . 2>/dev/null || echo "$RESPONSE"
-            echo "::endgroup::"
-          done
-
-          echo "::error::Audit event not found in Athena after $MAX_ATTEMPTS attempts. Last response body:"
-          echo "$RESPONSE" | jq . 2>/dev/null || echo "$RESPONSE"
-          exit 1
+          RUN_ID=$(jq -r '.runId' consolidation_test_events.json)
+          TEST_DATE=$(jq -r '.date' consolidation_test_events.json)
+          NUMBER_OF_EVENTS=$(jq '.events | length' consolidation_test_events.json)
+          if [ -z "$RUN_ID" ] || [ "$RUN_ID" = "null" ] || [ -z "$TEST_DATE" ] || [ "$TEST_DATE" = "null" ] || [ "$NUMBER_OF_EVENTS" -eq 0 ]; then
+            echo "::error::Generate consolidation test events response is missing runId, date or events."
+            exit 1
+          fi
+          echo "Generated $NUMBER_OF_EVENTS $AUDIT_EVENT_TYPE consolidation test events for $TEST_DATE (run $RUN_ID)"
+          echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+          echo "test_date=$TEST_DATE" >> $GITHUB_OUTPUT
