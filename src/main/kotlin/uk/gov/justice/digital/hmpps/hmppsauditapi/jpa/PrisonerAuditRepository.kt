@@ -27,14 +27,6 @@ interface PrisonerAuditRepository :
   )
   fun findAllByWhenGreaterThanEqualAndWhenLessThanOrderByWhenAscIdAsc(start: Instant, end: Instant): Stream<PrisonerAuditEvent>
 
-  /** For dev integration tests only (DevTestingController); not for use in application code. */
-  fun findAllByWhatAndCorrelationIdAndWhenGreaterThanEqualAndWhenLessThanOrderByWhenAscIdAsc(
-    what: String,
-    correlationId: String,
-    start: Instant,
-    end: Instant,
-  ): List<PrisonerAuditEvent>
-
   @Query(
     """
     select

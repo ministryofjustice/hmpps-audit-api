@@ -3,9 +3,6 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest
-import software.amazon.awssdk.services.s3.model.GetObjectRequest
-import software.amazon.awssdk.services.s3.model.NoSuchKeyException
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import java.io.File
@@ -49,18 +46,6 @@ class AuditS3Client(
       .contentMD5(Base64.getEncoder().encodeToString(md5Digest.digest()))
       .build()
     s3Client.putObject(request, RequestBody.fromFile(file))
-  }
-
-  fun download(bucketName: String, key: String, file: Path): Boolean = try {
-    Files.deleteIfExists(file)
-    s3Client.getObject(GetObjectRequest.builder().bucket(bucketName).key(key).build(), file)
-    true
-  } catch (_: NoSuchKeyException) {
-    false
-  }
-
-  fun delete(bucketName: String, key: String) {
-    s3Client.deleteObject(DeleteObjectRequest.builder().bucket(bucketName).key(key).build())
   }
 
   private fun generateFilename(auditEvent: AuditEvent): String {
