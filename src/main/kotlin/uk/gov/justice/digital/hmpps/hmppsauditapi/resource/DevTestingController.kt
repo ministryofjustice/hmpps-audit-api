@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
@@ -21,12 +22,13 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.StaffAuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.toAuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
-import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.toPrisonerAuditEvent
-import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.toStaffAuditEvent
+import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditConsolidationService
+import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditS3Client
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.generateFilename
 import java.nio.file.Files
 import java.nio.file.Path
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -41,6 +43,8 @@ import kotlin.random.Random
 class DevTestingController(
   private val staffAuditRepository: StaffAuditRepository,
   private val prisonerAuditRepository: PrisonerAuditRepository,
+  private val auditQueueService: AuditQueueService,
+  private val auditConsolidationService: AuditConsolidationService,
   private val auditS3Client: AuditS3Client,
   private val athenaPropertiesFactory: AthenaPropertiesFactory,
 ) {
@@ -75,13 +79,23 @@ class DevTestingController(
       .toList()
     val runId = UUID.randomUUID().toString()
 
-    val savedEvents = saveTestEvents(
-      auditEventType,
-      times.mapIndexed { index, time -> createTestEvent(time, runId, index) },
-    ).sortedBy { it.`when` }
+    times.mapIndexed { index, time -> createTestEvent(time, runId, index) }.forEach { sendTestEvent(auditEventType, it) }
+    val savedEvents = waitForTestEventsToBeSaved(auditEventType, runId, targetTestDate)
 
     log.info("Created {} {} consolidation test events for {}", savedEvents.size, auditEventType, targetTestDate)
     return ConsolidationTestEvents(runId, targetTestDate, savedEvents)
+  }
+
+  @PostMapping("/consolidation/{auditEventType}/consolidations")
+  @ResponseStatus(HttpStatus.ACCEPTED)
+  fun startConsolidation(
+    @PathVariable auditEventType: AuditEventType,
+    @RequestBody testRun: ConsolidationTestRun,
+  ) {
+    checkSupported(auditEventType)
+    findRequiredTestRunEvents(auditEventType, testRun)
+    auditConsolidationService.startConsolidationJob(auditEventType, testRun.date)
+    log.info("Started {} consolidation for test run {} on {}", auditEventType, testRun.runId, testRun.date)
   }
 
   @PostMapping("/consolidation/{auditEventType}/assertion")
@@ -93,19 +107,22 @@ class DevTestingController(
     val testRunEvents = findRequiredTestRunEvents(auditEventType, testRun)
     val testRunEventIds = testRunEvents.mapNotNull { it.id }.toSet()
     val bucketName = athenaPropertiesFactory.getProperties(auditEventType).s3BucketName
-    val key = generateFilename(auditEventType, testRun.date)
+    val parquetFilename = generateFilename(auditEventType, testRun.date)
     val file = Files.createTempFile("${auditEventType.name.lowercase()}-consolidation-test-${testRun.date}-", ".parquet")
 
     try {
-      if (!auditS3Client.download(bucketName, key, file)) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-          ConsolidationTestResult(false, "Consolidated file s3://$bucketName/$key not found yet", null, testRunEvents),
-        )
+      if (!auditS3Client.download(bucketName, parquetFilename, file)) {
+        return notReady("Consolidated file s3://$bucketName/$parquetFilename not found yet", testRunEvents)
       }
-      val fileContents = tryReadAuditEvents(file, testRunEventIds, bucketName, key)
-      cleanUp(auditEventType, testRun, testRunEventIds, bucketName, key, fileContents.getOrNull()?.containsOnly(testRunEventIds) == true)
-      return fileContents.fold(
-        onSuccess = { assertionResult(it.matchingEvents, testRunEvents) },
+      return tryReadAuditEvents(file, testRunEventIds, bucketName, parquetFilename).fold(
+        onSuccess = { actualEvents ->
+          // A file without any of this run's events is from an earlier run, so this run's consolidation hasn't finished yet
+          if (actualEvents.isEmpty()) {
+            notReady("Consolidated file s3://$bucketName/$parquetFilename does not contain test run ${testRun.runId} events yet", testRunEvents)
+          } else {
+            assertionResult(actualEvents, testRunEvents)
+          }
+        },
         onFailure = { ResponseEntity.internalServerError().body(ConsolidationTestResult(false, "Exception during test: ${it.message}", null, testRunEvents)) },
       )
     } finally {
@@ -113,12 +130,13 @@ class DevTestingController(
     }
   }
 
-  // Only events persisted by this test run are asserted on or deleted, so other audit data is never touched
   private fun findRequiredTestRunEvents(auditEventType: AuditEventType, testRun: ConsolidationTestRun): List<AuditEvent> = findTestRunEvents(auditEventType, testRun.runId, testRun.date).ifEmpty {
     throw ResponseStatusException(HttpStatus.BAD_REQUEST, "No events found for consolidation test run ${testRun.runId} on ${testRun.date}")
   }
 
-  private fun tryReadAuditEvents(file: Path, ids: Set<UUID>, bucketName: String, key: String): Result<ConsolidatedFileContents> = try {
+  private fun notReady(message: String, expectedEvents: List<AuditEvent>) = ResponseEntity.status(HttpStatus.NOT_FOUND).body(ConsolidationTestResult(false, message, null, expectedEvents))
+
+  private fun tryReadAuditEvents(file: Path, ids: Set<UUID>, bucketName: String, key: String): Result<List<AuditEvent>> = try {
     Result.success(readAuditEvents(file, ids))
   } catch (ex: Exception) {
     log.error("Failed to read consolidated file s3://{}/{}", bucketName, key, ex)
@@ -139,10 +157,27 @@ class DevTestingController(
     }
   }
 
-  private fun saveTestEvents(auditEventType: AuditEventType, events: List<AuditEvent>): List<AuditEvent> = when (auditEventType) {
-    AuditEventType.STAFF -> staffAuditRepository.saveAll(events.map { it.toStaffAuditEvent() }).map { it.toAuditEvent() }
-    AuditEventType.PRISONER -> prisonerAuditRepository.saveAll(events.map { it.toPrisonerAuditEvent() }).map { it.toAuditEvent() }
+  private fun sendTestEvent(auditEventType: AuditEventType, event: AuditEvent) = when (auditEventType) {
+    AuditEventType.STAFF -> auditQueueService.sendAuditEvent(event)
+    AuditEventType.PRISONER -> auditQueueService.sendPrisonerAuditEvent(event)
     else -> throw IllegalArgumentException("Unsupported audit event type $auditEventType")
+  }
+
+  // Events are saved asynchronously by the queue listener, so wait for all of them before consolidation is triggered
+  private fun waitForTestEventsToBeSaved(auditEventType: AuditEventType, runId: String, date: LocalDate): List<AuditEvent> {
+    val deadline = Instant.now().plus(SAVE_TIMEOUT)
+    var savedEvents = findTestRunEvents(auditEventType, runId, date)
+    while (savedEvents.size < NUMBER_OF_TEST_EVENTS && Instant.now().isBefore(deadline)) {
+      Thread.sleep(SAVE_POLL_INTERVAL)
+      savedEvents = findTestRunEvents(auditEventType, runId, date)
+    }
+    if (savedEvents.size < NUMBER_OF_TEST_EVENTS) {
+      throw ResponseStatusException(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Only ${savedEvents.size} of $NUMBER_OF_TEST_EVENTS $auditEventType test events for run $runId were saved within $SAVE_TIMEOUT",
+      )
+    }
+    return savedEvents
   }
 
   private fun findTestRunEvents(auditEventType: AuditEventType, runId: String, date: LocalDate): List<AuditEvent> {
@@ -161,12 +196,6 @@ class DevTestingController(
     }
   }
 
-  private fun deleteTestEvents(auditEventType: AuditEventType, ids: Collection<UUID>) = when (auditEventType) {
-    AuditEventType.STAFF -> staffAuditRepository.deleteAllById(ids)
-    AuditEventType.PRISONER -> prisonerAuditRepository.deleteAllById(ids)
-    else -> throw IllegalArgumentException("Unsupported audit event type $auditEventType")
-  }
-
   private fun createTestEvent(time: Instant, runId: String, index: Int) = AuditEvent(
     what = TEST_EVENT_WHAT,
     `when` = time,
@@ -179,21 +208,12 @@ class DevTestingController(
     details = "{\"index\": $index}",
   )
 
-  private data class ConsolidatedFileContents(val matchingEvents: List<AuditEvent>, val totalEvents: Long) {
-    // The file may also contain other events for the same day; it only belongs to the test run if it holds nothing else
-    fun containsOnly(ids: Set<UUID>) = totalEvents == ids.size.toLong() &&
-      matchingEvents.size == ids.size &&
-      matchingEvents.mapNotNull { it.id }.toSet() == ids
-  }
-
-  private fun readAuditEvents(file: Path, ids: Set<UUID>): ConsolidatedFileContents = AvroParquetReader.builder<GenericRecord>(LocalInputFile(file)).build().use { reader ->
-    var totalEvents = 0L
-    val matchingEvents = generateSequence { reader.read() }
-      .onEach { totalEvents++ }
+  // Streams the file so only this run's events are held in memory, however many other events the day has
+  private fun readAuditEvents(file: Path, ids: Set<UUID>): List<AuditEvent> = AvroParquetReader.builder<GenericRecord>(LocalInputFile(file)).build().use { reader ->
+    generateSequence { reader.read() }
       .filter { UUID.fromString(it.get("id").toString()) in ids }
       .map { it.toAuditEvent() }
       .toList()
-    ConsolidatedFileContents(matchingEvents, totalEvents)
   }
 
   private fun GenericRecord.toAuditEvent() = AuditEvent(
@@ -209,31 +229,12 @@ class DevTestingController(
     details = get("details")?.toString(),
   )
 
-  private fun cleanUp(
-    auditEventType: AuditEventType,
-    testRun: ConsolidationTestRun,
-    testRunEventIds: Set<UUID>,
-    bucketName: String,
-    key: String,
-    deleteFile: Boolean,
-  ) {
-    try {
-      deleteTestEvents(auditEventType, testRunEventIds)
-      if (deleteFile) {
-        auditS3Client.delete(bucketName, key)
-      } else {
-        log.warn("Leaving s3://{}/{} in place as it does not contain only test run {} events", bucketName, key, testRun.runId)
-      }
-      log.info("Cleaned up {} consolidation test run {} for {}", auditEventType, testRun.runId, testRun.date)
-    } catch (ex: Exception) {
-      log.error("Failed to clean up {} consolidation test run {} for {}", auditEventType, testRun.runId, testRun.date, ex)
-    }
-  }
-
   private companion object {
     val log: Logger = LoggerFactory.getLogger(DevTestingController::class.java)
     val SUPPORTED_TYPES = setOf(AuditEventType.STAFF, AuditEventType.PRISONER)
-    const val NUMBER_OF_TEST_EVENTS = 10
+    const val NUMBER_OF_TEST_EVENTS = 5
+    val SAVE_TIMEOUT: Duration = Duration.ofSeconds(15)
+    val SAVE_POLL_INTERVAL: Duration = Duration.ofMillis(500)
     const val TEST_EVENT_WHAT = "CONSOLIDATION_INTEGRATION_TEST"
     const val TEST_EVENT_WHO = "CONSOLIDATION_TEST"
     const val MILLIS_PER_DAY = 24L * 60 * 60 * 1000

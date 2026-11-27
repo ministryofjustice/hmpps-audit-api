@@ -25,7 +25,6 @@ import org.mockito.kotlin.then
 import org.mockito.kotlin.whenever
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
@@ -231,17 +230,6 @@ class AuditS3ClientTest {
 
       assertThrows<S3Exception> { auditS3Client.download("staff-audit", "forbidden.parquet", file) }
     }
-  }
-
-  @Test
-  fun `delete removes the object from the bucket`() {
-    auditS3Client.delete("prisoner-audit", "prisoner/year=1990/month=1/day=1/audit-events.parquet")
-
-    val request = argumentCaptor<DeleteObjectRequest>()
-
-    verify(s3Client).deleteObject(request.capture())
-    assertThat(request.firstValue.bucket()).isEqualTo("prisoner-audit")
-    assertThat(request.firstValue.key()).isEqualTo("prisoner/year=1990/month=1/day=1/audit-events.parquet")
   }
 
   private fun verifyUploadedFileContents(

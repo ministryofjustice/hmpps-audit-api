@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.hmppsauditapi.services
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
@@ -57,10 +56,6 @@ class AuditS3Client(
     true
   } catch (_: NoSuchKeyException) {
     false
-  }
-
-  fun delete(bucketName: String, key: String) {
-    s3Client.deleteObject(DeleteObjectRequest.builder().bucket(bucketName).key(key).build())
   }
 
   private fun generateFilename(auditEvent: AuditEvent): String {
