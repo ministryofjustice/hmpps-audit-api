@@ -1,9 +1,13 @@
 package uk.gov.justice.digital.hmpps.hmppsauditapi.resource
 
+import org.apache.avro.generic.GenericRecord
+import org.apache.parquet.avro.AvroParquetReader
+import org.apache.parquet.io.LocalInputFile
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -12,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.justice.digital.hmpps.hmppsauditapi.config.AthenaPropertiesFactory
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.PrisonerAuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.StaffAuditRepository
 import uk.gov.justice.digital.hmpps.hmppsauditapi.jpa.model.toAuditEvent
@@ -19,6 +24,10 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEvent
 import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditConsolidationService
 import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditQueueService
+import uk.gov.justice.digital.hmpps.hmppsauditapi.services.AuditS3Client
+import uk.gov.justice.digital.hmpps.hmppsauditapi.services.generateFilename
+import java.nio.file.Files
+import java.nio.file.Path
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
@@ -36,6 +45,8 @@ class DevTestingController(
   private val prisonerAuditRepository: PrisonerAuditRepository,
   private val auditQueueService: AuditQueueService,
   private val auditConsolidationService: AuditConsolidationService,
+  private val auditS3Client: AuditS3Client,
+  private val athenaPropertiesFactory: AthenaPropertiesFactory,
 ) {
 
   data class ConsolidationTestEvents(
@@ -47,6 +58,13 @@ class DevTestingController(
   data class ConsolidationTestRun(
     val runId: String,
     val date: LocalDate,
+  )
+
+  data class ConsolidationTestResult(
+    val passed: Boolean,
+    val message: String,
+    val actualResult: List<AuditEvent>?,
+    val expectedResult: List<AuditEvent>,
   )
 
   @PostMapping("/consolidation/{auditEventType}/test-events")
@@ -80,8 +98,57 @@ class DevTestingController(
     log.info("Started {} consolidation for test run {} on {}", auditEventType, testRun.runId, testRun.date)
   }
 
+  @PostMapping("/consolidation/{auditEventType}/assertion")
+  fun assertConsolidatedFile(
+    @PathVariable auditEventType: AuditEventType,
+    @RequestBody testRun: ConsolidationTestRun,
+  ): ResponseEntity<ConsolidationTestResult> {
+    checkSupported(auditEventType)
+    val testRunEvents = findRequiredTestRunEvents(auditEventType, testRun)
+    val testRunEventIds = testRunEvents.mapNotNull { it.id }.toSet()
+    val bucketName = athenaPropertiesFactory.getProperties(auditEventType).s3BucketName
+    val parquetFilename = generateFilename(auditEventType, testRun.date)
+    val file = Files.createTempFile("${auditEventType.name.lowercase()}-consolidation-test-${testRun.date}-", ".parquet")
+
+    try {
+      if (!auditS3Client.download(bucketName, parquetFilename, file)) {
+        return notReady("Consolidated file s3://$bucketName/$parquetFilename not found yet", testRunEvents)
+      }
+      return tryReadAuditEvents(file, testRunEventIds, bucketName, parquetFilename).fold(
+        onSuccess = { actualEvents ->
+          // A file without any of this run's events is from an earlier run, so this run's consolidation hasn't finished yet
+          if (actualEvents.isEmpty()) {
+            notReady("Consolidated file s3://$bucketName/$parquetFilename does not contain test run ${testRun.runId} events yet", testRunEvents)
+          } else {
+            assertionResult(actualEvents, testRunEvents)
+          }
+        },
+        onFailure = { ResponseEntity.internalServerError().body(ConsolidationTestResult(false, "Exception during test: ${it.message}", null, testRunEvents)) },
+      )
+    } finally {
+      Files.deleteIfExists(file)
+    }
+  }
+
   private fun findRequiredTestRunEvents(auditEventType: AuditEventType, testRun: ConsolidationTestRun): List<AuditEvent> = findTestRunEvents(auditEventType, testRun.runId, testRun.date).ifEmpty {
     throw ResponseStatusException(HttpStatus.BAD_REQUEST, "No events found for consolidation test run ${testRun.runId} on ${testRun.date}")
+  }
+
+  private fun notReady(message: String, expectedEvents: List<AuditEvent>) = ResponseEntity.status(HttpStatus.NOT_FOUND).body(ConsolidationTestResult(false, message, null, expectedEvents))
+
+  private fun tryReadAuditEvents(file: Path, ids: Set<UUID>, bucketName: String, key: String): Result<List<AuditEvent>> = try {
+    Result.success(readAuditEvents(file, ids))
+  } catch (ex: Exception) {
+    log.error("Failed to read consolidated file s3://{}/{}", bucketName, key, ex)
+    Result.failure(ex)
+  }
+
+  private fun assertionResult(actualEvents: List<AuditEvent>, expectedEvents: List<AuditEvent>): ResponseEntity<ConsolidationTestResult> = if (actualEvents == expectedEvents) {
+    ResponseEntity.ok(ConsolidationTestResult(true, "Test successful. Consolidated file contains the test events", actualEvents, expectedEvents))
+  } else {
+    ResponseEntity.internalServerError().body(
+      ConsolidationTestResult(false, "Test failed. Consolidated file does not contain the expected test events", actualEvents, expectedEvents),
+    )
   }
 
   private fun checkSupported(auditEventType: AuditEventType) {
@@ -139,6 +206,27 @@ class DevTestingController(
     who = TEST_EVENT_WHO,
     service = "hmpps-audit-api",
     details = "{\"index\": $index}",
+  )
+
+  // Streams the file so only this run's events are held in memory, however many other events the day has
+  private fun readAuditEvents(file: Path, ids: Set<UUID>): List<AuditEvent> = AvroParquetReader.builder<GenericRecord>(LocalInputFile(file)).build().use { reader ->
+    generateSequence { reader.read() }
+      .filter { UUID.fromString(it.get("id").toString()) in ids }
+      .map { it.toAuditEvent() }
+      .toList()
+  }
+
+  private fun GenericRecord.toAuditEvent() = AuditEvent(
+    id = UUID.fromString(get("id").toString()),
+    what = get("what").toString(),
+    `when` = Instant.parse(get("when").toString()),
+    operationId = get("operationId")?.toString(),
+    subjectId = get("subjectId")?.toString(),
+    subjectType = get("subjectType").toString(),
+    correlationId = get("correlationId")?.toString(),
+    who = get("who")?.toString(),
+    service = get("service")?.toString(),
+    details = get("details")?.toString(),
   )
 
   private companion object {
