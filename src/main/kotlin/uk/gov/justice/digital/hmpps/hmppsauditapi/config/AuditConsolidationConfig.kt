@@ -8,16 +8,16 @@ import uk.gov.justice.digital.hmpps.hmppsauditapi.listeners.model.AuditEventType
 
 @Configuration
 class AuditConsolidationConfig(
-  @Value("\${hmpps.audit.consolidation.enabled:false}") val enabled: Boolean,
-  @Value("\${hmpps.audit.consolidation.bucket-name:}") val bucketName: String,
-  @Value("\${hmpps.audit.consolidation.enabled-types:STAFF}") val enabledTypes: Set<AuditEventType>,
+  @Value("\${hmpps.audit.consolidation.enabled:false}") val featureFlagEnabled: Boolean,
+  @Value("\${hmpps.audit.consolidation.enabled-types:STAFF}") val enabledAuditEventTypes: Set<AuditEventType>,
   athenaPropertiesFactory: AthenaPropertiesFactory,
 ) {
   init {
-    if (enabled) {
-      require(bucketName.isNotBlank()) { "An audit consolidation bucket must be configured when consolidations are enabled" }
-      require(AuditEventType.entries.none { athenaPropertiesFactory.getProperties(it).s3BucketName == bucketName }) {
-        "Audit consolidations must use a separate bucket from existing audit ingestion"
+    if (featureFlagEnabled) {
+      enabledAuditEventTypes.forEach {
+        require(athenaPropertiesFactory.getProperties(it).s3BucketName.isNotBlank()) {
+          "Audit consolidations for $it require an audit bucket to be configured"
+        }
       }
     }
   }
